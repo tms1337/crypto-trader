@@ -2,7 +2,7 @@ import krakenex
 
 
 class ProviderBase:
-    def __init__(self, currency="USD", crypto="ETH", api=krakenex.API()):
+    def __init__(self, currency, crypto, api=krakenex.API()):
         self._check_currency(currency)
         self._check_crypto(crypto)
 
@@ -30,3 +30,9 @@ class ProviderBase:
 
         if len(server_response["error"]) != 0:
             raise RuntimeError("Server responded with error")
+
+
+class PrivateProviderBase(ProviderBase):
+    def __init__(self, key_uri, currency, crypto, api=krakenex.API()):
+        super(PrivateProviderBase, self).__init__(currency, crypto, api)
+        self.k.load_key(key_uri)

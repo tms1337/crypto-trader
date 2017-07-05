@@ -3,7 +3,7 @@ from .providerbase import ProviderBase
 
 
 class StatsProvider(ProviderBase):
-    def __init__(self, currency="USD", crypto="ETH", api=krakenex.API()):
+    def __init__(self, currency, crypto, api=krakenex.API()):
         super(StatsProvider, self).__init__(currency, crypto, api)
 
     def average_price(self, period_seconds=None):
