@@ -1,4 +1,5 @@
 import krakenex
+
 from .providerbase import PrivateProviderBase
 
 
@@ -6,8 +7,12 @@ class TradeProvider(PrivateProviderBase):
     def __init__(self, api_key, currency, crypto, api=krakenex.API()):
         super(TradeProvider, self).__init__(api_key, currency, crypto, api)
 
-    def create_offer(self):
-        pass
+    def create_buy_offer(self, price, volume):
+        self.k.query_private('AddOrder', {'pair': self._form_pair(),
+                                          'type': 'buy',
+                                          'ordertype': 'market',
+                                          'price': str(price),
+                                          'volume': str(volume)})
 
     def total_balance(self):
         balance_response = self.k.query_private('Balance')
