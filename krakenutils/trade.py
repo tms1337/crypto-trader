@@ -4,8 +4,8 @@ from .providerbase import PrivateProviderBase
 
 
 class TradeProvider(PrivateProviderBase):
-    def __init__(self, api_key, currency, crypto, api=krakenex.API()):
-        super(TradeProvider, self).__init__(api_key, currency, crypto, api)
+    def __init__(self, key_uri, currency, crypto, api=krakenex.API()):
+        super(TradeProvider, self).__init__(key_uri, currency, crypto, api)
 
     def create_buy_offer(self, price, volume):
         self.k.query_private('AddOrder', {'pair': self._form_pair(),
