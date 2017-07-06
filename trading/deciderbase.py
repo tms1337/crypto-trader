@@ -1,2 +1,6 @@
 class Decider:
-    def __init__(self):
+    def decide(self):
+        pass
+
+    def confirm_decision(self):
+        pass

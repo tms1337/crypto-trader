@@ -43,4 +43,7 @@ class StatsProvider(ProviderBase):
 
         return prices[-1]
 
+    def last_OHLC(self):
+        pass
+
 
