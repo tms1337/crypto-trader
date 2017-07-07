@@ -19,8 +19,11 @@ class ProviderBase:
         assets_response = self.k.query_public("Assets")
         self._check_response(assets_response)
 
-        currencies = [ k for k in assets_response["result"] ]
-        alt_currencies = [ assets_response["result"][k]["altname"] for k in assets_response["result"] ]
+        results = assets_response["result"]
+        currencies = [k for k in results]
+        alt_currencies = [results[k]["altname"]
+                          for k in
+                          results]
 
         currencies.extend(alt_currencies)
 
@@ -37,13 +40,14 @@ class ProviderBase:
         if len(server_response["error"]) != 0:
             raise RuntimeError("Server responded with error")
 
-    def get_timestamp(self, period):
+    def _get_timestamp_period_before(self, period):
         time_response = self.k.query_public("Time")
         self._check_response(time_response)
 
         time_minus_period = int(time_response["result"]["unixtime"]) - period
 
         return time_minus_period
+
 
 class PrivateProviderBase(ProviderBase):
     def __init__(self, key_uri, base_currency, quote_currency, api=krakenex.API()):
