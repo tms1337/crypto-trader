@@ -1,7 +1,7 @@
 import krakenex
 
 
-class ProviderBase:
+class Provider:
     def __init__(self,
                  base_currency,
                  quote_currency,
@@ -49,7 +49,7 @@ class ProviderBase:
         return time_minus_period
 
 
-class PrivateProviderBase(ProviderBase):
+class PrivateProvider(Provider):
     def __init__(self, key_uri, base_currency, quote_currency, api=krakenex.API()):
-        super(PrivateProviderBase, self).__init__(base_currency, quote_currency, api)
+        super(PrivateProvider, self).__init__(base_currency, quote_currency, api)
         self.k.load_key(key_uri)

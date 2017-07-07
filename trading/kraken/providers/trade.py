@@ -1,9 +1,9 @@
 import krakenex
 
-from .providerbase import PrivateProviderBase
+from .base import PrivateProvider
 
 
-class TradeProvider(PrivateProviderBase):
+class TradeProvider(PrivateProvider):
     def __init__(self, key_uri, base_currency, quote_currency, api=krakenex.API()):
         super(TradeProvider, self).__init__(key_uri, base_currency, quote_currency, api)
 
@@ -25,8 +25,6 @@ class TradeProvider(PrivateProviderBase):
                                                                "price": str(price),
                                                                "volume": str(volume),
                                                                "trading_agreement": "agree"})
-            print(offer_response)
-
             self._check_response(offer_response)
 
     def create_sell_offer(self, volume, price=None):
@@ -40,7 +38,6 @@ class TradeProvider(PrivateProviderBase):
                                                                "volume": str(volume),
                                                                "trading_agreement": "agree"})
 
-            print(offer_response)
             self._check_response(offer_response)
 
     def _create_market_buy_offer(self, volume):
@@ -49,7 +46,6 @@ class TradeProvider(PrivateProviderBase):
                                                            "ordertype": "market",
                                                            "volume": str(volume),
                                                            "trading_agreement": "agree"})
-        print(offer_response)
         self._check_response(offer_response)
 
     def _create_market_sell_offer(self, volume):
@@ -58,5 +54,4 @@ class TradeProvider(PrivateProviderBase):
                                                            "ordertype": "market",
                                                            "volume": str(volume),
                                                            "trading_agreement": "agree"})
-        print(offer_response)
         self._check_response(offer_response)
