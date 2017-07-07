@@ -31,6 +31,13 @@ class ProviderBase:
         if len(server_response["error"]) != 0:
             raise RuntimeError("Server responded with error")
 
+    def get_timestamp(self, period):
+        time_response = self.k.query_public("Time")
+        self._check_response(time_response)
+
+        time_minus_period = int(time_response["result"]["unixtime"]) - period
+
+        return time_minus_period
 
 class PrivateProviderBase(ProviderBase):
     def __init__(self, key_uri, currency, crypto, api=krakenex.API()):
