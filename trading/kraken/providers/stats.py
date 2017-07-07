@@ -3,10 +3,10 @@ from .providerbase import ProviderBase
 
 
 class StatsProvider(ProviderBase):
-    def __init__(self, currency, crypto, api=krakenex.API()):
-        super(StatsProvider, self).__init__(currency, crypto, api)
+    def __init__(self, base_currency, quote_currency, api=krakenex.API()):
+        super(StatsProvider, self).__init__(base_currency, quote_currency, api)
 
-    def last_OHLC(self, period=10):
+    def last_ohlc(self, period=10):
         parameters = {"pair": self._form_pair(), "since": self.get_timestamp(period)}
         ohlc_response = self.k.query_public("OHLC", parameters)
 

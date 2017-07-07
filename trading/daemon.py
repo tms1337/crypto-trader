@@ -1,8 +1,6 @@
 class Daemon:
-    def __init__(self, trader):
+    def __init__(self, trader=None):
         self.trader = trader
 
     def start(self):
-        while True:
-            pass
-
+        pass
