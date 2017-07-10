@@ -11,6 +11,7 @@ class Decision:
     currency_pair = None
     transaction_type = None
     volume = None
+    price = None
 
     def is_valid(self):
         is_invalid = self.currency_pair is None or \

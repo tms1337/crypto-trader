@@ -22,15 +22,16 @@ class Daemon:
                 if self.verbose >= 1:
                     print("Making decision")
 
-                partial_decision = self.trade_decider.decide()
-                full_decision = self.volume_decider.decide(partial_decision)
+                partial_decisions = self.trade_decider.decide()
+                full_decisions = self.volume_decider.decide(partial_decisions)
 
                 if self.verbose >= 2:
-                    print("Decision made\n %s" % str(full_decision))
+                    print("Decision made\n %s" % str(full_decisions))
 
-                full_decision.check_validity()
+                for decision in full_decisions:
+                    decision.check_validity()
 
-                self.apply_decision(full_decision)
+                self.apply_decisions(full_decisions)
             except Exception as ex:
                 print("An error has occured, proceeding with next step"
                       "\n\tError: %s" % str(ex))
@@ -39,9 +40,9 @@ class Daemon:
 
             time.sleep(self.dt_seconds)
 
-    def apply_decision(self, decision):
+    def apply_decisions(self, decisions):
         if self.verbose >= 1:
-            print("Applying decision %s" % str(decision))
+            print("Applying decision %s" % str(decisions))
 
-        self.trader.create_bulk_offers(decision)
+        self.trader.create_bulk_offers(decisions)
         self.trade_decider.apply_last()

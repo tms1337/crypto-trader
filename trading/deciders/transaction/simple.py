@@ -11,7 +11,7 @@ class AlwaysBuyTransactionDecider(TransactionDecider):
         decision.currency_pair = self.currency_pair
         decision.transaction_type = TransactionType.BUY
 
-        return decision
+        return [ decision ]
 
     def apply_last(self):
         pass
@@ -26,7 +26,7 @@ class AlwaysSellTransactionDecider(TransactionDecider):
         decision.currency_pair = self.currency_pair
         decision.transaction_type = TransactionType.SELL
 
-        return decision
+        return [ decision ]
 
     def apply_last(self):
         pass
