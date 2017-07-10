@@ -1,8 +1,8 @@
 from trading.deciders.decision import Decision, TransactionType
-from trading.deciders.transaction.base import Decider
+from trading.deciders.transaction.base import TransactionDecider
 
 
-class AlwaysBuyDecider(Decider):
+class AlwaysBuyTransactionDecider(TransactionDecider):
     def __init__(self, currency_pair):
         self.currency_pair = currency_pair
 
@@ -17,7 +17,7 @@ class AlwaysBuyDecider(Decider):
         pass
 
 
-class AlwaysSellDecider(Decider):
+class AlwaysSellTransactionDecider(TransactionDecider):
     def __init__(self, currency_pair):
         self.currency_pair = currency_pair
 

@@ -1,7 +1,7 @@
 from abc import ABC, abstractclassmethod
 
 
-class Decider(ABC):
+class TransactionDecider(ABC):
     @abstractclassmethod
     def decide(self):
         pass

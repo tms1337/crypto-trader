@@ -1,7 +1,7 @@
-from trading.deciders.transaction.base import Decider
+from trading.deciders.transaction.base import TransactionDecider
 
 
-class PercentBasedDecider(Decider):
+class PercentBasedTransactionDecider(TransactionDecider):
     def __init__(self):
         pass
 
