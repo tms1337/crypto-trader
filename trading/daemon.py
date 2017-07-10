@@ -36,6 +36,5 @@ class Daemon:
             time.sleep(self.dt_seconds)
 
     def apply_decision(self, decision):
-        if self.verbose >= 1:
-            print("Making trade offer")
-        pass
+        if self.verbose >= 2:
+            print("Applying decision %s" % str(decision))
