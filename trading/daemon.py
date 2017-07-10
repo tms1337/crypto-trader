@@ -2,6 +2,7 @@ import time
 
 
 class Daemon:
+
     def __init__(self,
                  trader,
                  trade_decider,
@@ -29,12 +30,15 @@ class Daemon:
 
                 self.apply_decision(full_decision)
             except Exception as ex:
-                print("An error has occured %s" % str(ex))
+                print("An error has occured, proceeding with next step"
+                      "\n\tError: %s" % str(ex))
             else:
                 self.trade_decider.apply_last()
 
             time.sleep(self.dt_seconds)
 
     def apply_decision(self, decision):
-        if self.verbose >= 2:
+        if self.verbose >= 1:
             print("Applying decision %s" % str(decision))
+
+        self.trader.create_bulk_offers(decision)
