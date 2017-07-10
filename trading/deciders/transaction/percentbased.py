@@ -1,4 +1,4 @@
-from trading.deciders.base import Decider
+from trading.deciders.transaction.base import Decider
 
 
 class PercentBasedDecider(Decider):

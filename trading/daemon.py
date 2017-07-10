@@ -28,6 +28,8 @@ class Daemon:
                 if self.verbose >= 2:
                     print("Decision made\n %s" % str(full_decision))
 
+                full_decision.check_validity()
+
                 self.apply_decision(full_decision)
             except Exception as ex:
                 print("An error has occured, proceeding with next step"
@@ -42,3 +44,4 @@ class Daemon:
             print("Applying decision %s" % str(decision))
 
         self.trader.create_bulk_offers(decision)
+        self.trade_decider.apply_last()
