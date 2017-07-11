@@ -1,17 +1,25 @@
 import time
 
+from trading.deciders.transaction.base import TransactionDecider
+from trading.deciders.volume.base import VolumeDecider
+from trading.kraken.providers.base import PrivateProvider
+
 
 class Daemon:
-
     def __init__(self,
                  trader,
-                 trade_decider,
+                 transaction_decider,
                  volume_decider,
                  dt_seconds=60,
                  verbose=1):
 
+        self._check_trader(trader)
+        self._check_transaction_decider(transaction_decider)
+        self._check_volume_decider(volume_decider)
+        self._check_dt_seconds(dt_seconds)
+
         self.trader = trader
-        self.trade_decider = trade_decider
+        self.transaction_decider = transaction_decider
         self.volume_decider = volume_decider
         self.dt_seconds = dt_seconds
         self.verbose = verbose
@@ -22,7 +30,7 @@ class Daemon:
                 if self.verbose >= 1:
                     print("Making decision")
 
-                partial_decisions = self.trade_decider.decide()
+                partial_decisions = self.transaction_decider.decide()
                 full_decisions = self.volume_decider.decide(partial_decisions)
 
                 if self.verbose >= 2:
@@ -33,10 +41,14 @@ class Daemon:
 
                 self.apply_decisions(full_decisions)
             except Exception as ex:
-                print("033[91mAn error has occured, proceeding with next step"
+                print("033[91mAn error has occurred while creating decision, waiting for the next step"
                       "\n\tError: %s\033[0m" % str(ex))
             else:
-                self.trade_decider.apply_last()
+                try:
+                    self.transaction_decider.apply_last()
+                except Exception as ex_inner:
+                    print("033[91mAn error has occurred while applying decision, waiting for the next step"
+                          "\n\tError: %s\033[0m" % str(ex_inner))
 
             time.sleep(self.dt_seconds)
 
@@ -44,8 +56,32 @@ class Daemon:
         if self.verbose >= 1:
             print("Applying decision %s" % str(decisions))
 
-        self.trader.create_bulk_offers(decisions)
-        self.trade_decider.apply_last()
+        failed_decisions = self.trader.create_bulk_offers(decisions)
+        if len(failed_decisions) != 0:
+            raise RuntimeError("An error has occured during transaction execution, "
+                               "\n\tFailed decisions %s" % str(failed_decisions))
+
+        self.transaction_decider.apply_last()
 
         if self.verbose >= 1:
             print("'\033[92mDecision succesfully applied\033[0m")
+
+    @staticmethod
+    def _check_trader(trader):
+        if not isinstance(trader, PrivateProvider):
+            raise ValueError("Trade provider must be instance of PrivateProvider")
+
+    @staticmethod
+    def _check_transaction_decider(transaction_decider):
+        if not isinstance(transaction_decider, TransactionDecider):
+            raise ValueError("Transaction decider must be instance of TransactionDecider")
+
+    @staticmethod
+    def _check_volume_decider(volume_decider):
+        if not isinstance(volume_decider, VolumeDecider):
+            raise ValueError("Volume decider must be instance of VolumeDecider")
+
+    @staticmethod
+    def _check_dt_seconds(dt_seconds):
+        if dt_seconds < 1:
+            raise ValueError("dt must be larger or equal to 1")

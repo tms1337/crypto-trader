@@ -6,9 +6,10 @@ class StatsProvider(Provider):
     def __init__(self, base_currency, quote_currency, api=krakenex.API()):
         super(StatsProvider, self).__init__(base_currency, quote_currency, api)
 
-    def ohlc_history(self):
+    def ohlc_history(self, interval=1):
         period = None
-        parameters = {"pair": self._form_pair()}
+        parameters = {"pair": self._form_pair(),
+                      "interval": interval}
 
         if period is not None:
             parameters["since"] = self._get_timestamp_period_before(period)
@@ -21,21 +22,21 @@ class StatsProvider(Provider):
 
         return ohlcs
 
-    def last_ohlc(self):
-        history = self.ohlc_history()
+    def last_ohlc(self, interval=1):
+        history = self.ohlc_history(interval)
 
         last_ohlc = history[-1]
 
         return last_ohlc
 
-    def last_open(self):
-        return self.last_ohlc()[1]
+    def last_open(self, interval=1):
+        return float(self.last_ohlc(interval)[1])
 
-    def last_high(self):
-        return self.last_ohlc()[2]
+    def last_high(self, interval=1):
+        return float(self.last_ohlc(interval)[2])
 
-    def last_low(self):
-        return self.last_ohlc()[3]
+    def last_low(self, interval=1):
+        return float(self.last_ohlc(interval)[3])
 
-    def last_close(self):
-        return self.last_ohlc()[4]
+    def last_close(self, interval=1):
+        return float(self.last_ohlc(interval)[4])

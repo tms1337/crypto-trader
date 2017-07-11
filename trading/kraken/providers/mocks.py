@@ -1,41 +1,77 @@
 import krakenex
-from trading.kraken.providers.base import PrivateProvider
+
+from trading.deciders.decision import TransactionType
+from trading.kraken.providers.base import Provider
+from trading.kraken.providers.stats import StatsProvider
 
 
-class TradeProviderMock(PrivateProvider):
+class PrivateProviderMock(Provider):
+    def __init__(self, base_currency, quote_currency):
+        super(PrivateProviderMock, self).__init__(base_currency, quote_currency)
+
+
+class TradeProviderMock(PrivateProviderMock):
     def __init__(self,
-                 key_uri,
                  base_currency,
                  quote_currency,
-                 initial_balance=100):
+                 initial_balance=100,
+                 verbose=0):
 
-        api = krakenex.API()
-        super(TradeProviderMock, self).__init__(key_uri,
-                                                base_currency,
-                                                quote_currency,
-                                                api)
+        super(TradeProviderMock, self).__init__(base_currency,
+                                                quote_currency)
 
-        self.balance = []
-        self.init_balance()
+        self.verbose = verbose
 
-    def init_balance(self):
-        self.balance[self.base_currency] = 100
-        self.balance[self.quote_currency] = 100
+        self.balance = {self.base_currency: initial_balance,
+                        self.quote_currency: initial_balance}
+
+        self.stats = StatsProvider(base_currency=self.base_currency,
+                                   quote_currency=self.quote_currency)
 
     def total_balance(self):
-        pass
+        return self.balance
 
     def create_buy_offer(self, volume, price=None):
-        pass
+        if price is None:
+            self._create_market_buy_offer(volume)
+        else:
+            raise NotImplementedError("Mock does not support this "
+                                      "operation with price parameter")
 
     def create_sell_offer(self, volume, price=None):
-        pass
+        if price is None:
+            self._create_market_sell_offer(volume)
+        else:
+            raise NotImplementedError("Mock does not support this "
+                                      "operation with price parameter")
 
-    def create_bulk_offers(self, offers):
-        pass
+    def create_bulk_offers(self, decisions):
+        failed_decisions = []
+
+        for decision in decisions:
+            if decision.currency_pair == self._form_pair():
+                try:
+                    if decision.transaction_type == TransactionType.BUY:
+                        self.create_buy_offer(volume=decision.volume, price=decision.price)
+                    elif decision.transaction_type == TransactionType.SELL:
+                        pass
+                except Exception as ex:
+                    failed_decisions.append(decision)
+                    if self.verbose >= 1:
+                        print("An error has occured, %s" % str(ex))
+            else:
+                failed_decisions.append(decision)
+
+        return failed_decisions
 
     def _create_market_buy_offer(self, volume):
-        pass
+        last_closing_price = self.stats.last_close()
+
+        self.balance[self.base_currency] += volume
+        self.balance[self.quote_currency] -= volume * last_closing_price
 
     def _create_market_sell_offer(self, volume):
-        pass
+        last_closing_price = self.stats.last_close()
+
+        self.balance[self.base_currency] -= volume
+        self.balance[self.quote_currency] += volume * last_closing_price
