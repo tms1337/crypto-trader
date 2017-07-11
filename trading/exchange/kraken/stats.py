@@ -6,13 +6,12 @@ class StatsProvider(Provider):
     def __init__(self, base_currency, quote_currency, api=krakenex.API()):
         super(StatsProvider, self).__init__(base_currency, quote_currency, api)
 
-    def ohlc_history(self, interval=1):
-        period = None
+    def ohlc_history(self, interval=1, since=None):
         parameters = {"pair": self._form_pair(),
                       "interval": interval}
 
-        if period is not None:
-            parameters["since"] = self._get_timestamp_period_before(period)
+        if since is not None:
+            parameters["since"] = self._get_timestamp_period_before(since)
 
         ohlc_response = self.k.query_public("OHLC", parameters)
         self._check_response(ohlc_response)

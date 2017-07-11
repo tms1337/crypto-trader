@@ -1,12 +1,13 @@
 from trading.daemon import Daemon
 from trading.deciders.transaction.simple import AlwaysBuyTransactionDecider
 from trading.deciders.volume.simple import FixedValueVolumeDecider
-from trading.exchange.kraken.providers.mocks import TradeProviderMock
+from trading.exchange.kraken.mocks import TradeProviderMock
 
 daemon = None
 
 try:
-    always_buy_td = AlwaysBuyTransactionDecider(base_currency="XRP", quote_currency="XBT")
+    always_buy_td = AlwaysBuyTransactionDecider(base_currency="XRP",
+                                                quote_currency="XBT")
     fixed_value_vd = FixedValueVolumeDecider(value=100)
 
     trader = TradeProviderMock(base_currency="XRP",
@@ -19,6 +20,7 @@ try:
                     volume_decider=fixed_value_vd,
                     dt_seconds=10,
                     verbose=2)
+
 except Exception as ex:
     print("Error while initializing daemon and its parts"
           "\n\tError message: %s" % str(ex))
