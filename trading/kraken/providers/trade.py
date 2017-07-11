@@ -40,6 +40,9 @@ class TradeProvider(PrivateProvider):
 
             self._check_response(offer_response)
 
+    def create_bulk_offers(self, offers):
+        pass
+
     def _create_market_buy_offer(self, volume):
         offer_response = self.k.query_private("AddOrder", {"pair": self._form_pair(),
                                                            "type": "buy",

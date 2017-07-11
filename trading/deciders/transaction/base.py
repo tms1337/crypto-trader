@@ -9,3 +9,4 @@ class TransactionDecider(ABC):
     @abstractclassmethod
     def apply_last(self):
         pass
+

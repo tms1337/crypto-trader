@@ -33,8 +33,8 @@ class Daemon:
 
                 self.apply_decisions(full_decisions)
             except Exception as ex:
-                print("An error has occured, proceeding with next step"
-                      "\n\tError: %s" % str(ex))
+                print("033[91mAn error has occured, proceeding with next step"
+                      "\n\tError: %s\033[0m" % str(ex))
             else:
                 self.trade_decider.apply_last()
 
@@ -46,3 +46,6 @@ class Daemon:
 
         self.trader.create_bulk_offers(decisions)
         self.trade_decider.apply_last()
+
+        if self.verbose >= 1:
+            print("'\033[92mDecision succesfully applied\033[0m")
