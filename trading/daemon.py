@@ -1,5 +1,7 @@
 import time
 
+import datetime
+
 from trading.deciders.transaction.base import TransactionDecider
 from trading.deciders.volume.base import VolumeDecider
 from trading.kraken.providers.base import PrivateProvider
@@ -26,6 +28,8 @@ class Daemon:
 
     def run(self):
         while True:
+            if self.verbose >= 1:
+                print("Time: %s" % (datetime.datetime.now()))
             try:
                 if self.verbose >= 1:
                     print("Making decision")
@@ -34,21 +38,26 @@ class Daemon:
                 full_decisions = self.volume_decider.decide(partial_decisions)
 
                 if self.verbose >= 2:
-                    print("Decision made\n %s" % str(full_decisions))
+                    print("Decision made\n\t%s" % str(full_decisions))
 
                 for decision in full_decisions:
                     decision.check_validity()
 
                 self.apply_decisions(full_decisions)
             except Exception as ex:
-                print("033[91mAn error has occurred while creating decision, waiting for the next step"
+                print("\033[91mAn error has occurred while creating decision, waiting for the next step"
                       "\n\tError: %s\033[0m" % str(ex))
             else:
                 try:
                     self.transaction_decider.apply_last()
                 except Exception as ex_inner:
-                    print("033[91mAn error has occurred while applying decision, waiting for the next step"
+                    print("\033[91mAn error has occurred while applying decision, waiting for the next step"
                           "\n\tError: %s\033[0m" % str(ex_inner))
+
+            if self.verbose >= 1:
+                for _ in range(100):
+                    print("-", end="")
+                print("")
 
             time.sleep(self.dt_seconds)
 
@@ -64,12 +73,13 @@ class Daemon:
         self.transaction_decider.apply_last()
 
         if self.verbose >= 1:
-            print("'\033[92mDecision succesfully applied\033[0m")
+            print("\033[92mDecision succesfully applied"
+                  "\n\tTotal balance: %s\033[0m" % (self.trader.total_balance()))
 
     @staticmethod
     def _check_trader(trader):
-        if not isinstance(trader, PrivateProvider):
-            raise ValueError("Trade provider must be instance of PrivateProvider")
+        # TODO: check real class
+        pass
 
     @staticmethod
     def _check_transaction_decider(transaction_decider):
