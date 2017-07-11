@@ -1,10 +1,8 @@
-import time
-
 import datetime
+import time
 
 from trading.deciders.transaction.base import TransactionDecider
 from trading.deciders.volume.base import VolumeDecider
-from trading.kraken.providers.base import PrivateProvider
 
 
 class Daemon:
@@ -55,9 +53,10 @@ class Daemon:
                           "\n\tError: %s\033[0m" % str(ex_inner))
 
             if self.verbose >= 1:
+                print("\n")
                 for _ in range(100):
                     print("-", end="")
-                print("")
+                print("\n")
 
             time.sleep(self.dt_seconds)
 
