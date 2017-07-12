@@ -73,7 +73,13 @@ class Daemon:
 
         if self.verbose >= 1:
             print("\033[92mDecision succesfully applied"
-                  "\n\tTotal balance: %s\033[0m" % (self.trader.total_balance()))
+                  "\n\tTotal balance: ")
+
+            total_balance = self.trader.total_balance()
+            for currency in total_balance:
+                print("\t\t%s: %s" % (currency, total_balance[currency]))
+
+            print("\033[0m")
 
     @staticmethod
     def _check_trader(trader):

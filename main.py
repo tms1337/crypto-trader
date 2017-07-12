@@ -12,6 +12,8 @@ daemon = None
 try:
     base_currency = sys.argv[1]
     quote_currency = sys.argv[2]
+    dt = sys.argv[3]
+    mode = sys.argv[4] # 0 for testing, 1 for real
 
     print("Starting daemon with base_currency: %s and quote_currency: %s" % (base_currency,
                                                                              quote_currency))
@@ -20,14 +22,15 @@ try:
                                                 quote_currency=quote_currency)
     fixed_value_vd = FixedValueVolumeDecider(value=10)
 
-    trader = TradeProviderMock(base_currency=base_currency,
-                               quote_currency=quote_currency,
-                               initial_balance=1000,
+    if mode == 0:
+        trader = TradeProviderMock(base_currency=base_currency,
+                                   quote_currency=quote_currency,
+                                   initial_balance=1000,
                                verbose=2)
-
-    trader = KrakenTradeProvider(base_currency=base_currency,
-                                 quote_currency=quote_currency,
-                                 key_uri="/home/faruk/Desktop/key")
+    else:
+        trader = KrakenTradeProvider(base_currency=base_currency,
+                                     quote_currency=quote_currency,
+                                     key_uri="/home/faruk/Desktop/key")
 
     daemon = Daemon(trader=trader,
                     transaction_decider=always_buy_td,
