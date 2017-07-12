@@ -1,11 +1,20 @@
 import krakenex
 
-from .base import PrivateProvider
+from .base import PrivateKrakenProvider
+from ..base import CurrencyMixin, TradeProvider
 
+class KrakenTradeProvider(PrivateKrakenProvider,
+                          TradeProvider,
+                          CurrencyMixin):
 
-class TradeProvider(PrivateProvider):
     def __init__(self, key_uri, base_currency, quote_currency, api=krakenex.API()):
-        super(TradeProvider, self).__init__(key_uri, base_currency, quote_currency, api)
+        PrivateKrakenProvider.__init__(self,
+                                       key_uri=key_uri,
+                                       base_currency=base_currency,
+                                       quote_currency=quote_currency,
+                                       api=api)
+
+        CurrencyMixin.__init__(self, base_currency, quote_currency)
 
     def total_balance(self):
         balance_response = self.k.query_private("Balance")
@@ -19,7 +28,7 @@ class TradeProvider(PrivateProvider):
         if price is None:
             self._create_market_buy_offer(volume)
         else:
-            offer_response = self.k.query_private("AddOrder", {"pair": self._form_pair(),
+            offer_response = self.k.query_private("AddOrder", {"pair": self.form_pair(),
                                                                "type": "buy",
                                                                "ordertype": "limit",
                                                                "price": str(price),
@@ -31,7 +40,7 @@ class TradeProvider(PrivateProvider):
         if price is None:
             self._create_market_sell_offer(volume)
         else:
-            offer_response = self.k.query_private("AddOrder", {"pair": self._form_pair(),
+            offer_response = self.k.query_private("AddOrder", {"pair": self.form_pair(),
                                                                "type": "sell",
                                                                "ordertype": "limit",
                                                                "price": str(price),
@@ -40,11 +49,8 @@ class TradeProvider(PrivateProvider):
 
             self._check_response(offer_response)
 
-    def create_bulk_offers(self, offers):
-        pass
-
     def _create_market_buy_offer(self, volume):
-        offer_response = self.k.query_private("AddOrder", {"pair": self._form_pair(),
+        offer_response = self.k.query_private("AddOrder", {"pair": self.form_pair(),
                                                            "type": "buy",
                                                            "ordertype": "market",
                                                            "volume": str(volume),
@@ -52,7 +58,7 @@ class TradeProvider(PrivateProvider):
         self._check_response(offer_response)
 
     def _create_market_sell_offer(self, volume):
-        offer_response = self.k.query_private("AddOrder", {"pair": self._form_pair(),
+        offer_response = self.k.query_private("AddOrder", {"pair": self.form_pair(),
                                                            "type": "sell",
                                                            "ordertype": "market",
                                                            "volume": str(volume),

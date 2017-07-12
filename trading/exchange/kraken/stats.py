@@ -1,13 +1,18 @@
 import krakenex
-from .base import Provider
+from .base import KrakenProvider
+from ..base import CurrencyMixin, StatsProvider
 
 
-class StatsProvider(Provider):
+class KrakenStatsProvider(CurrencyMixin,
+                          StatsProvider,
+                          KrakenProvider):
+
     def __init__(self, base_currency, quote_currency, api=krakenex.API()):
-        super(StatsProvider, self).__init__(base_currency, quote_currency, api)
+        CurrencyMixin.__init__(self, base_currency, quote_currency)
+        KrakenProvider.__init__(self, base_currency, quote_currency, api)
 
     def ohlc_history(self, interval=1, since=None):
-        parameters = {"pair": self._form_pair(),
+        parameters = {"pair": self.form_pair(),
                       "interval": interval}
 
         if since is not None:

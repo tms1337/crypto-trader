@@ -1,7 +1,7 @@
 import krakenex
 
 
-class Provider:
+class KrakenProvider:
     def __init__(self,
                  base_currency,
                  quote_currency,
@@ -11,9 +11,6 @@ class Provider:
 
         self._check_currency(base_currency)
         self._check_currency(quote_currency)
-
-        self.base_currency = base_currency
-        self.quote_currency = quote_currency
 
     def _check_currency(self, currency):
         assets_response = self.k.query_public("Assets")
@@ -29,9 +26,6 @@ class Provider:
 
         if not currency in currencies:
             raise ValueError("Currency must be one of %s", str(currencies))
-
-    def _form_pair(self):
-        return "%s%s" % (self.base_currency, self.quote_currency)
 
     def _check_response(self, server_response):
         if "error" not in server_response:
@@ -49,7 +43,7 @@ class Provider:
         return time_minus_period
 
 
-class PrivateProvider(Provider):
+class PrivateKrakenProvider(KrakenProvider):
     def __init__(self, key_uri, base_currency, quote_currency, api=krakenex.API()):
-        super(PrivateProvider, self).__init__(base_currency, quote_currency, api)
+        super(PrivateKrakenProvider, self).__init__(base_currency, quote_currency, api)
         self.k.load_key(key_uri)
