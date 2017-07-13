@@ -37,6 +37,10 @@ class StatsProvider(ABC):
     def ohlc_history(self, interval=1, since=None):
         pass
 
+    @abstractmethod
+    def ticker_price(self):
+        pass
+
     def last_ohlc(self, interval=1):
         history = self.ohlc_history(interval)
 

@@ -33,7 +33,7 @@ class KrakenProvider:
             raise ValueError("Server responded with invalid response")
 
         if len(server_response["error"]) != 0:
-            raise RuntimeError("Server responded with error")
+            raise RuntimeError("Server responded with error %s" % server_response["error"])
 
     def _get_timestamp_period_before(self, period):
         time_response = self.k.query_public("Time")

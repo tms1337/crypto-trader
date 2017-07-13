@@ -26,21 +26,10 @@ class KrakenStatsProvider(CurrencyMixin,
 
         return ohlcs
 
-    def last_ohlc(self, interval=1):
-        history = self.ohlc_history(interval)
+    def ticker_price(self):
+        ticker_response = self.k.query_public("Ticker", {"pair": self.form_pair()})
+        self._check_response(ticker_response)
 
-        last_ohlc = history[-1]
+        return float(ticker_response["result"]["c"][0])
 
-        return last_ohlc
 
-    def last_open(self, interval=1):
-        return float(self.last_ohlc(interval)[1])
-
-    def last_high(self, interval=1):
-        return float(self.last_ohlc(interval)[2])
-
-    def last_low(self, interval=1):
-        return float(self.last_ohlc(interval)[3])
-
-    def last_close(self, interval=1):
-        return float(self.last_ohlc(interval)[4])
