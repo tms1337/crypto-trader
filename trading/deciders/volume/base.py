@@ -1,7 +1,8 @@
 from abc import ABC, abstractclassmethod
+from ..decider import Decider
 
 
-class VolumeDecider(ABC):
+class VolumeDecider(Decider, ABC):
     @abstractclassmethod
     def decide(self, partial_decision):
         pass

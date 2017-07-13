@@ -3,12 +3,14 @@ from trading.deciders.transaction.base import TransactionDecider
 
 
 class SingleCurrencyPairTransactionDecider(TransactionDecider):
-    def __init__(self, base_currency, quote_currency):
+    def __init__(self, base_currency, quote_currency, wrapper_container):
         self.base_currency = base_currency
         self.quote_currency = quote_currency
 
         self.currency_pair = "%s%s" % \
                              (self.base_currency, self.quote_currency)
+
+        TransactionDecider.__init__(self, wrapper_container)
 
     def decide(self):
         super().decide()

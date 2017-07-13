@@ -151,7 +151,7 @@ class ExchangeWrapperContainer:
 
     def print_balance(self):
         print("\033[92mDecision succesfully applied"
-              "\n\tTotal balance: ")
+              "\nTotal balance:\n\n")
 
         for exchange in self.wrappers:
             wrapper = self.wrappers[exchange]
@@ -159,6 +159,7 @@ class ExchangeWrapperContainer:
             total_balance = wrapper.trade_provider.total_balance()
             for currency in total_balance:
                 print("\t\t%s: %s" % (currency, total_balance[currency]))
+            print()
 
         print("\033[0m")
 

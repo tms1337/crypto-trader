@@ -20,10 +20,6 @@ try:
     print("Starting daemon with base_currency: %s and quote_currency: %s" % (base_currency,
                                                                              quote_currency))
 
-    always_buy_td = AlwaysBuyTransactionDecider(base_currency=base_currency,
-                                                quote_currency=quote_currency)
-    fixed_value_vd = FixedValueVolumeDecider(value=10)
-
     if mode == 0:
         trader = TradeProviderMock(base_currency=base_currency,
                                    quote_currency=quote_currency,
@@ -43,11 +39,19 @@ try:
     wrappers = {"kraken": kraken_wrapper}
     wrapper_container = ExchangeWrapperContainer(wrappers)
 
+    always_buy_td = AlwaysBuyTransactionDecider(base_currency=base_currency,
+                                                quote_currency=quote_currency,
+                                                wrapper_container=wrapper_container)
+    fixed_value_vd = FixedValueVolumeDecider(value=10,
+                                             wrapper_container=wrapper_container)
+
     daemon = Daemon(wrapper_container=wrapper_container,
                     transaction_decider=always_buy_td,
                     volume_decider=fixed_value_vd,
                     dt_seconds=10,
                     verbose=2)
+
+
 
 except Exception as ex:
     print("Error while initializing daemon and its parts"
