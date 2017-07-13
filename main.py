@@ -36,7 +36,8 @@ try:
     kraken_wrapper = ExchangeWrapper(stats_provider=stats,
                                      trade_provider=trader)
 
-    wrappers = {"kraken": kraken_wrapper}
+    wrappers = {"kraken": kraken_wrapper,
+                "kraken2": kraken_wrapper}
     wrapper_container = ExchangeWrapperContainer(wrappers)
 
     always_buy_td = AlwaysBuyTransactionDecider(base_currency=base_currency,
