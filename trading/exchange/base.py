@@ -96,7 +96,7 @@ class TradeProvider(ABC):
         return failed_decisions
 
 
-class ExchangeWrapper(ABC):
+class ExchangeWrapper():
     def __init__(self,
                  trade_provider,
                  stats_provider):
