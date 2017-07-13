@@ -1,2 +1,4 @@
 krakenex==0.1.4
 nose==1.3.7
+retrying==1.3.3
+six==1.10.0
