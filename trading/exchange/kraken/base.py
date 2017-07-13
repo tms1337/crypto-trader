@@ -27,7 +27,8 @@ class KrakenProvider:
         if not currency in currencies:
             raise ValueError("Currency must be one of %s", str(currencies))
 
-    def _check_response(self, server_response):
+    @staticmethod
+    def _check_response(server_response):
         if "error" not in server_response:
             raise ValueError("Server responded with invalid response")
 
