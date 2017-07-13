@@ -52,8 +52,6 @@ try:
                     dt_seconds=10,
                     verbose=2)
 
-
-
 except Exception as ex:
     print("Error while initializing daemon and its parts"
           "\n\tError message: %s" % str(ex))
