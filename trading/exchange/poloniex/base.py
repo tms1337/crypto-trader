@@ -6,8 +6,8 @@ class PoloniexProvider:
                  base_currency,
                  quote_currency,
                  api=Poloniex()):
-
         self.api = api
+
 
 class PrivatePoloniexProvider(PoloniexProvider):
     def __init__(self,
@@ -15,6 +15,5 @@ class PrivatePoloniexProvider(PoloniexProvider):
                  base_currency,
                  quote_currency,
                  api=Poloniex()):
-
         PoloniexProvider.__init__(self, base_currency, quote_currency, api)
         self.key_uri = key_uri
