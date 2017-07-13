@@ -95,3 +95,20 @@ class TradeProvider(ABC):
 
         return failed_decisions
 
+
+class ExchangeWrapper(ABC):
+    def __init__(self,
+                 trade_provider,
+                 stats_provider):
+        self.trade_provider = trade_provider
+        self.stats_provider = stats_provider
+
+    @staticmethod
+    def _check_trader(trader):
+        if not isinstance(trader, TradeProvider):
+            raise ValueError("Trade provider must be instance of TradeProvider")
+
+    @staticmethod
+    def _check_stats_provider(stats_provider):
+        if not isinstance(stats_provider, StatsProvider)
+            raise ValueError("Stats provider must be instance of StatsProvider")

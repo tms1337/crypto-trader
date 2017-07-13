@@ -3,10 +3,10 @@ import krakenex
 from .base import PrivateKrakenProvider
 from ..base import CurrencyMixin, TradeProvider
 
+
 class KrakenTradeProvider(PrivateKrakenProvider,
                           TradeProvider,
                           CurrencyMixin):
-
     def __init__(self, key_uri, base_currency, quote_currency, api=krakenex.API()):
         PrivateKrakenProvider.__init__(self,
                                        key_uri=key_uri,
