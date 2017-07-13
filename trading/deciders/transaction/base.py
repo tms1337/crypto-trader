@@ -10,3 +10,4 @@ class TransactionDecider(ABC):
     def apply_last(self):
         pass
 
+

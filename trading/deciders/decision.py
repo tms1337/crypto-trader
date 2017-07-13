@@ -12,17 +12,19 @@ class Decision:
     transaction_type = None
     volume = None
     price = None
+    exchange = None
 
     def is_valid(self):
         is_invalid = self.currency_pair is None or \
-                     self.transaction_type is None \
-                     or self.volume is None
+                     self.transaction_type is None or \
+                     self.volume is None or \
+                     self.exchange is None
 
         return not is_invalid
 
     def check_validity(self):
         if not self.is_valid():
-            raise AssertionError("All fileds must be set")
+            raise AssertionError("All decision fields except price must be set")
 
     def __str__(self):
         string_representations = "currency: %s, type: %s, volume: %s" % (self.currency_pair,

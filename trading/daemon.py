@@ -3,22 +3,23 @@ import time
 
 from trading.deciders.transaction.base import TransactionDecider
 from trading.deciders.volume.base import VolumeDecider
+from trading.exchange.base import ExchangeWrapper, ExchangeWrapperContainer
 
 
 class Daemon:
     def __init__(self,
-                 trader,
+                 wrapper_container,
                  transaction_decider,
                  volume_decider,
                  dt_seconds=60,
                  verbose=1):
 
-        self._check_trader(trader)
+        self._check_wrapper_container(wrapper_container)
         self._check_transaction_decider(transaction_decider)
         self._check_volume_decider(volume_decider)
         self._check_dt_seconds(dt_seconds)
 
-        self.trader = trader
+        self.wrapper_container = wrapper_container
         self.transaction_decider = transaction_decider
         self.volume_decider = volume_decider
         self.dt_seconds = dt_seconds
@@ -64,37 +65,30 @@ class Daemon:
         if self.verbose >= 1:
             print("Applying decision %s" % str(decisions))
 
-        failed_decisions = self.trader.create_bulk_offers(decisions)
-        if len(failed_decisions) != 0:
+        failed_decisions = self.wrapper_container.create_bulk_offers(decisions)
+        if failed_decisions is not None and len(failed_decisions) != 0:
             raise RuntimeError("An error has occured during transaction execution, "
                                "\n\tFailed decisions %s" % str(failed_decisions))
 
         self.transaction_decider.apply_last()
 
         if self.verbose >= 1:
-            print("\033[92mDecision succesfully applied"
-                  "\n\tTotal balance: ")
-
-            total_balance = self.trader.total_balance()
-            for currency in total_balance:
-                print("\t\t%s: %s" % (currency, total_balance[currency]))
-
-            print("\033[0m")
+            self.wrapper_container.print_balance()
 
     @staticmethod
-    def _check_trader(trader):
-        # TODO: check real class
-        pass
+    def _check_wrapper_container(wrapper_container):
+        if not isinstance(wrapper_container, ExchangeWrapperContainer):
+            raise ValueError("Wrapper container decider must be an instance of ExchangeWrapperContainer")
 
     @staticmethod
     def _check_transaction_decider(transaction_decider):
         if not isinstance(transaction_decider, TransactionDecider):
-            raise ValueError("Transaction decider must be instance of TransactionDecider")
+            raise ValueError("Transaction decider must be an instance of TransactionDecider")
 
     @staticmethod
     def _check_volume_decider(volume_decider):
         if not isinstance(volume_decider, VolumeDecider):
-            raise ValueError("Volume decider must be instance of VolumeDecider")
+            raise ValueError("Volume decider must be an instance of VolumeDecider")
 
     @staticmethod
     def _check_dt_seconds(dt_seconds):

@@ -22,6 +22,7 @@ class AlwaysBuyTransactionDecider(SingleCurrencyPairTransactionDecider):
         decision = Decision()
         decision.currency_pair = self.currency_pair
         decision.transaction_type = TransactionType.BUY
+        decision.exchange = "kraken"
 
         return [decision]
 

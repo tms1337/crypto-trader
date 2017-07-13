@@ -100,6 +100,7 @@ class ExchangeWrapper:
     def __init__(self,
                  trade_provider,
                  stats_provider):
+
         self.trade_provider = trade_provider
         self.stats_provider = stats_provider
 
@@ -112,3 +113,62 @@ class ExchangeWrapper:
     def _check_stats_provider(stats_provider):
         if not isinstance(stats_provider, StatsProvider):
             raise ValueError("Stats provider must be instance of StatsProvider")
+
+
+class ExchangeWrapperContainer:
+    def __init__(self, wrappers=None):
+        if wrappers is None:
+            self.wrappers = {}
+        else:
+            self._check_wrappers(wrappers)
+            self.wrappers = wrappers
+
+    def add_wrapper(self, exchange, wrapper):
+        self._check_wrapper(wrapper)
+        self._check_exchange(exchange)
+        self.wrappers[exchange] = wrapper
+
+    def remove_wrapper(self, exchange):
+        del self.wrappers[exchange]
+
+    def create_bulk_offers(self, decisions):
+        decisions_per_exchange = {}
+        for decision in decisions:
+            exchange = decision.exchange
+            if exchange not in decisions_per_exchange:
+                decisions_per_exchange[exchange] = []
+
+            decisions_per_exchange[exchange].append(decision)
+
+        for exchange in decisions_per_exchange:
+            decisions = decisions_per_exchange[exchange]
+            self.wrappers[exchange].trade_provider.create_bulk_offers(decisions)
+
+    def _check_wrappers(self, wrappers):
+        for exchange in wrappers:
+            self._check_exchange(exchange)
+            self._check_wrapper(wrappers[exchange])
+
+    def print_balance(self):
+        print("\033[92mDecision succesfully applied"
+              "\n\tTotal balance: ")
+
+        for exchange in self.wrappers:
+            wrapper = self.wrappers[exchange]
+            print("Exchange: %s" % exchange)
+            total_balance = wrapper.trade_provider.total_balance()
+            for currency in total_balance:
+                print("\t\t%s: %s" % (currency, total_balance[currency]))
+
+        print("\033[0m")
+
+    @staticmethod
+    def _check_wrapper(wrapper):
+        if not isinstance(wrapper, ExchangeWrapper):
+            raise ValueError("Wrapper name must be an instance \
+                             of ExchangeWrapper")
+
+    @staticmethod
+    def _check_exchange(exchange):
+        if not isinstance(exchange, str):
+            raise ValueError("Exchange name must be a string")
