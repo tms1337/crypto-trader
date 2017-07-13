@@ -24,8 +24,6 @@ try:
                                                 quote_currency=quote_currency)
     fixed_value_vd = FixedValueVolumeDecider(value=10)
 
-    print(mode)
-
     if mode == 0:
         trader = TradeProviderMock(base_currency=base_currency,
                                    quote_currency=quote_currency,
