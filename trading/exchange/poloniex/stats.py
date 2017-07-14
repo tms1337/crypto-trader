@@ -1,18 +1,26 @@
-from trading.exchange.base import CurrencyMixin, StatsProvider
+from trading.exchange.base import StatsProvider
 from poloniex import Poloniex
 from .base import PoloniexProvider
 
 
-class PoloniexStatsProvider(CurrencyMixin,
-                            StatsProvider,
+class PoloniexStatsProvider(StatsProvider,
                             PoloniexProvider):
 
     def __init__(self, base_currency, quote_currency, api=Poloniex()):
-        CurrencyMixin.__init__(base_currency, quote_currency)
-        PoloniexProvider.__init__(base_currency, quote_currency, api)
+        PoloniexProvider.__init__(self,
+                                  base_currency,
+                                  quote_currency,
+                                  api)
 
     def ohlc_history(self, interval=1, since=None):
-        super().ohlc_history(interval, since)
+        raise NotImplementedError()
+
+    def ticker_price(self):
+        ticker_response = self.api.returnTicker()
+
+        price = ticker_response[self.form_pair()]["last"]
+
+        return float(price)
 
 
 

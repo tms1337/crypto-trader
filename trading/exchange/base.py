@@ -10,18 +10,30 @@ class CurrencyMixin(ABC):
         self._check_arguments(base_currency,
                               quote_currency)
 
-        self.base_currency = base_currency
-        self.quote_currency = quote_currency
+        self.base_currency = self.map_currency(base_currency)
+        self.quote_currency = self.map_currency(quote_currency)
 
     def set_currencies(self, base_currency, quote_currency):
         self._check_arguments(base_currency, quote_currency)
+        self.check_currency(base_currency)
+        self.check_currency(quote_currency)
 
-        self.base_currency = base_currency
-        self.quote_currency = quote_currency
+        self.base_currency = self.map_currency(base_currency)
+        self.quote_currency = self.map_currency(quote_currency)
 
     def form_pair(self):
         return "%s%s" % (self.base_currency,
                          self.quote_currency)
+
+    @abstractmethod
+    def map_currency(self, currency):
+        pass
+
+    @staticmethod
+    def check_currency(currency):
+        currency_list = [ "BTC", "ETH", "XRP", "DASH" ]
+
+        return currency in currency_list
 
     @staticmethod
     def _check_arguments(base_currency, quote_currency):

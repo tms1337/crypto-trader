@@ -1,7 +1,9 @@
 import krakenex
 
+from trading.exchange.base import CurrencyMixin
 
-class KrakenProvider:
+
+class KrakenProvider(CurrencyMixin):
     def __init__(self,
                  base_currency,
                  quote_currency,
@@ -9,23 +11,18 @@ class KrakenProvider:
 
         self.k = api
 
-        self._check_currency(base_currency)
-        self._check_currency(quote_currency)
+        CurrencyMixin.__init__(self,
+                               base_currency,
+                               quote_currency)
 
-    def _check_currency(self, currency):
-        assets_response = self.k.query_public("Assets")
-        self._check_response(assets_response)
+    def map_currency(self, currency):
+        currency_mapping = {
+            "ETH": "ETH",
+            "BTC": "XBT",
+            "DASH": "DASH"
+        }
 
-        results = assets_response["result"]
-        currencies = [k for k in results]
-        alt_currencies = [results[k]["altname"]
-                          for k in
-                          results]
-
-        currencies.extend(alt_currencies)
-
-        if not currency in currencies:
-            raise ValueError("Currency must be one of %s", str(currencies))
+        return currency_mapping[currency]
 
     @staticmethod
     def _check_response(server_response):

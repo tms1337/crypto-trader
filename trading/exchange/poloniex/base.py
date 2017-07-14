@@ -1,31 +1,38 @@
 from poloniex import Poloniex
 
+from trading.exchange.base import CurrencyMixin
 
-class PoloniexProvider:
+
+class PoloniexProvider(CurrencyMixin):
+
     def __init__(self,
                  base_currency,
                  quote_currency,
                  api=Poloniex()):
-
-        self._check_base_currency(base_currency)
-        self._check_quote_currency(quote_currency)
         self._check_api(api)
         self.api = api
+
+        CurrencyMixin.__init__(self,
+                               base_currency,
+                               quote_currency)
+
+    def map_currency(self, currency):
+        currency_mapping = {
+            "ETH": "ETH",
+            "BTC": "BTC",
+            "DASH": "DASH"
+        }
+
+        return currency_mapping[currency]
+
+    def form_pair(self):
+        return "%s_%s" % (self.quote_currency,
+                          self.base_currency)
 
     @staticmethod
     def _check_api(api):
         if not isinstance(api, Poloniex):
             raise ValueError("API object must be an instance of Poloniex")
-
-    @staticmethod
-    def _check_base_currency(base_currency):
-        if not isinstance(base_currency, str):
-            raise ValueError("Base currency must be string")
-
-    @staticmethod
-    def _check_quote_currency(quote_currency):
-        if not isinstance(quote_currency, str):
-            raise ValueError("Quote currency must be string")
 
 
 class PrivatePoloniexProvider(PoloniexProvider):
@@ -47,7 +54,7 @@ class PrivatePoloniexProvider(PoloniexProvider):
         self.api.secret = self.secret
 
     def _load_key(self):
-        self.key = None
+        raise NotImplemented()
 
     def _load_secret(self):
-        self.secret = None
+        raise NotImplemented()

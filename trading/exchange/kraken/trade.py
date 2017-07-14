@@ -5,16 +5,13 @@ from ..base import CurrencyMixin, TradeProvider
 
 
 class KrakenTradeProvider(PrivateKrakenProvider,
-                          TradeProvider,
-                          CurrencyMixin):
+                          TradeProvider):
     def __init__(self, key_uri, base_currency, quote_currency, api=krakenex.API()):
         PrivateKrakenProvider.__init__(self,
                                        key_uri=key_uri,
                                        base_currency=base_currency,
                                        quote_currency=quote_currency,
                                        api=api)
-
-        CurrencyMixin.__init__(self, base_currency, quote_currency)
 
     def total_balance(self):
         balance_response = self.k.query_private("Balance")

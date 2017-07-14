@@ -3,12 +3,10 @@ from .base import KrakenProvider
 from ..base import CurrencyMixin, StatsProvider
 
 
-class KrakenStatsProvider(CurrencyMixin,
-                          StatsProvider,
+class KrakenStatsProvider(StatsProvider,
                           KrakenProvider):
 
     def __init__(self, base_currency, quote_currency, api=krakenex.API()):
-        CurrencyMixin.__init__(self, base_currency, quote_currency)
         KrakenProvider.__init__(self, base_currency, quote_currency, api)
 
     def ohlc_history(self, interval=1, since=None):
@@ -30,6 +28,8 @@ class KrakenStatsProvider(CurrencyMixin,
         ticker_response = self.k.query_public("Ticker", {"pair": self.form_pair()})
         self._check_response(ticker_response)
 
-        return float(ticker_response["result"]["c"][0])
+        pair_key = [k for k in ticker_response["result"]][0]
+
+        return float(ticker_response["result"][pair_key]["c"][0])
 
 
