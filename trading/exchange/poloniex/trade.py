@@ -1,9 +1,24 @@
+from poloniex import Poloniex
+
 from trading.exchange.base import TradeProvider
 from trading.exchange.poloniex.base import PrivatePoloniexProvider
 
 
 class PoloniexTradeProvider(PrivatePoloniexProvider,
                             TradeProvider):
+
+    def __init__(self, key_uri,
+                 base_currency,
+                 quote_currency,
+                 api=Poloniex(),
+                 verbose=1):
+        PrivatePoloniexProvider.__init__(self,
+                                key_uri,
+                                base_currency,
+                                quote_currency,
+                                api)
+        TradeProvider.__init__(self, verbose)
+
     def create_buy_offer(self, volume, price=None):
         buy_response = self.api.buy(self.form_pair(),
                                     price,
@@ -29,3 +44,7 @@ class PoloniexTradeProvider(PrivatePoloniexProvider,
     def _check_response(response):
         if "orderNumber" not in response:
             raise RuntimeError("Trade did not go trough")
+
+    def prepare_currencies(self, base_currency, quote_currency):
+        self.set_currencies(base_currency, quote_currency)
+

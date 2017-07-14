@@ -98,6 +98,8 @@ class TradeProvider(ABC):
                     print("Invalid decision object %s" % str(decision))
                 failed_decisions.append(decision)
             try:
+                self.prepare_currencies(decision.base_currency,
+                                        decision.quote_currency)
                 if decision.transaction_type == TransactionType.BUY:
                     self.create_buy_offer(volume=decision.volume,
                                           price=decision.price)
@@ -110,6 +112,9 @@ class TradeProvider(ABC):
                     print("An error has occurred, %s" % str(ex))
 
         return failed_decisions
+
+    def prepare_currencies(self, base_currency, quote_currency):
+        pass
 
 
 class ExchangeWrapper:
@@ -174,7 +179,8 @@ class ExchangeWrapperContainer:
             print("Exchange: %s" % exchange)
             total_balance = wrapper.trade_provider.total_balance()
             for currency in total_balance:
-                print("\t\t%s: %s" % (currency, total_balance[currency]))
+                if float(total_balance[currency]) != 0:
+                    print("\t\t%s: %s" % (currency, total_balance[currency]))
             print()
 
         print("\033[0m")

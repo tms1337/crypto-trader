@@ -61,3 +61,8 @@ class KrakenTradeProvider(PrivateKrakenProvider,
                                                            "volume": str(volume),
                                                            "trading_agreement": "agree"})
         self._check_response(offer_response)
+
+    def prepare_currencies(self, base_currency, quote_currency):
+        self.set_currencies(base_currency, quote_currency)
+
+

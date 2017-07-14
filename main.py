@@ -17,7 +17,9 @@ daemon = None
 try:
     base_currency = "DASH"
     quote_currency = "BTC"
-    dt = int(sys.argv[3])
+    dt = 5
+    volume = 0.1
+
 
     print("Starting daemon with base_currency: %s and quote_currency: %s" % (base_currency,
                                                                              quote_currency))
@@ -47,13 +49,18 @@ try:
 
     wrapper_container = ExchangeWrapperContainer(wrappers)
 
-    decider = ExchangeDiffDecider(base_currency=base_currency,
-                                  currencies=[quote_currency],
-                                  wrapper_container=wrapper_container,
-                                  verbose=1)
+    transaction_decider = ExchangeDiffDecider(base_currency=quote_currency,
+                                              currencies=[base_currency],
+                                              wrapper_container=wrapper_container,
+                                              verbose=0)
 
-    while True:
-        decider.decide()
+    volume_decider = FixedValueVolumeDecider(value=volume,
+                                             wrapper_container=wrapper_container)
+
+    daemon = Daemon(wrapper_container=wrapper_container,
+                    dt_seconds=dt,
+                    transaction_decider=transaction_decider,
+                    volume_decider=volume_decider)
 
 except Exception as ex:
     print("Error while initializing daemon and its parts"

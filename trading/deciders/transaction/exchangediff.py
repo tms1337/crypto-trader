@@ -1,3 +1,4 @@
+from trading.deciders.decision import Decision, TransactionType
 from trading.exchange.base import CurrencyMixin
 from .base import TransactionDecider
 import math
@@ -10,7 +11,7 @@ class ExchangeDiffDecider(TransactionDecider):
                  wrapper_container,
                  verbose=0):
 
-        self.base_currency = base_currency
+        self.trading_currency = base_currency
         CurrencyMixin.check_currency(base_currency)
 
         for curr in currencies:
@@ -22,12 +23,14 @@ class ExchangeDiffDecider(TransactionDecider):
         TransactionDecider.__init__(self, wrapper_container)
 
     def decide(self):
+        decisions = []
+
         for currency in self.currencies:
             low, high = (None, float("inf")), (None, float("-inf"))
             for exchange in self.wrapper_container.wrappers:
                 wrapper = self.wrapper_container.wrappers[exchange]
-                wrapper.stats_provider.set_currencies(self.base_currency,
-                                                      currency)
+                wrapper.stats_provider.set_currencies(currency,
+                                                      self.trading_currency)
                 price = wrapper.stats_provider.ticker_price()
 
                 if price > high[1]:
@@ -42,6 +45,25 @@ class ExchangeDiffDecider(TransactionDecider):
 
             if self.verbose >= 1:
                 print("Chose low high for %s at %s and %s" % (currency, low, high))
+
+            low_decision = Decision()
+            low_decision.base_currency = currency
+            low_decision.quote_currency = self.trading_currency
+            low_decision.transaction_type = TransactionType.BUY
+            low_decision.exchange = low[0]
+            low_decision.price = low[1]
+            decisions.append(low_decision)
+
+            high_decision = Decision()
+            high_decision.base_currency = currency
+            high_decision.quote_currency = self.trading_currency
+            high_decision.transaction_type = TransactionType.SELL
+            high_decision.exchange = high[0]
+            high_decision.price = high[1]
+            decisions.append(high_decision)
+
+        return decisions
+
 
     def apply_last(self):
         pass
