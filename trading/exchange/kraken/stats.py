@@ -30,6 +30,6 @@ class KrakenStatsProvider(StatsProvider,
 
         pair_key = [k for k in ticker_response["result"]][0]
 
-        return float(ticker_response["result"][pair_key]["l"][0])
+        return float(ticker_response["result"][pair_key]["c"][0])
 
 

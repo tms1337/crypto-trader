@@ -18,7 +18,7 @@ try:
     base_currency = "DASH"
     quote_currency = "BTC"
     dt = 5
-    volume = 0.1
+    volume = 0.5
 
     print("Starting daemon with base_currency: %s and quote_currency: %s" % (base_currency,
                                                                              quote_currency))
