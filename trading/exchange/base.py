@@ -31,7 +31,7 @@ class CurrencyMixin(ABC):
 
     @staticmethod
     def check_currency(currency):
-        currency_list = [ "BTC", "ETH", "XRP", "DASH" ]
+        currency_list = ["BTC", "ETH", "XRP", "DASH"]
 
         return currency in currency_list
 
@@ -161,18 +161,15 @@ class ExchangeWrapperContainer:
 
         for decision in decisions:
             if isinstance(decision, tuple):
-                exchange = decision[0].exchange
-            else:
-                exchange = decision.exchange
-
-            if isinstance(decision, tuple):
                 try:
                     for d in decision:
+                        exchange = d.exchange
                         self.wrappers[exchange].trade_provider.execute_single_decision(d)
                 except Exception as ex:
                     failed_decisions.append(decision)
             else:
                 try:
+                    exchange = decision.exchange
                     self.wrappers[exchange].trade_provider.execute_single_decision(decision)
                 except Exception as ex:
                     failed_decisions.append(decision)
@@ -193,7 +190,6 @@ class ExchangeWrapperContainer:
                 if float(total_balance[currency]) != 0:
                     print("\t\t%s: %s" % (currency, total_balance[currency]))
             print()
-
 
     @staticmethod
     def _check_wrapper(wrapper):
