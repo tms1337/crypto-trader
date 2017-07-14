@@ -1,4 +1,5 @@
 from trading.daemon import Daemon
+from trading.deciders.transaction.exchangediff import ExchangeDiffDecider
 from trading.deciders.transaction.simple import AlwaysBuyTransactionDecider
 from trading.deciders.volume.simple import FixedValueVolumeDecider
 from trading.exchange.base import ExchangeWrapper, ExchangeWrapperContainer
@@ -8,52 +9,55 @@ import sys
 
 from trading.exchange.kraken.stats import KrakenStatsProvider
 from trading.exchange.kraken.trade import KrakenTradeProvider
+from trading.exchange.poloniex.stats import PoloniexStatsProvider
+from trading.exchange.poloniex.trade import PoloniexTradeProvider
 
 daemon = None
 
 try:
-    base_currency = sys.argv[1]
-    quote_currency = sys.argv[2]
+    base_currency = "DASH"
+    quote_currency = "BTC"
     dt = int(sys.argv[3])
-    mode = int(sys.argv[4])  # 0 for testing, 1 for real
 
     print("Starting daemon with base_currency: %s and quote_currency: %s" % (base_currency,
                                                                              quote_currency))
 
-    if mode == 0:
-        trader = TradeProviderMock(base_currency=base_currency,
-                                   quote_currency=quote_currency,
-                                   initial_balance=1000,
-                                   verbose=2)
-    else:
-        trader = KrakenTradeProvider(base_currency=base_currency,
-                                     quote_currency=quote_currency,
-                                     key_uri="/home/faruk/Desktop/key")
+    kraken_trader = KrakenTradeProvider(base_currency=base_currency,
+                                        quote_currency=quote_currency,
+                                        key_uri="/home/faruk/Desktop/kraken_key")
 
-    stats = KrakenStatsProvider(base_currency=base_currency,
-                                quote_currency=quote_currency)
+    kraken_stats = KrakenStatsProvider(base_currency=base_currency,
+                                       quote_currency=quote_currency)
 
-    kraken_wrapper = ExchangeWrapper(stats_provider=stats,
-                                     trade_provider=trader)
+    kraken_wrapper = ExchangeWrapper(stats_provider=kraken_stats,
+                                     trade_provider=kraken_trader)
+
+    poloniex_stats = PoloniexStatsProvider(base_currency=base_currency,
+                                           quote_currency=quote_currency)
+
+    poloniex_trader = PoloniexTradeProvider(base_currency=base_currency,
+                                            quote_currency=quote_currency,
+                                            key_uri="/home/faruk/Desktop/poloniex_key")
+
+    poloniex_wrapper = ExchangeWrapper(stats_provider=poloniex_stats,
+                                       trade_provider=poloniex_trader)
 
     wrappers = {"kraken": kraken_wrapper,
-                "kraken2": kraken_wrapper}
+                "poloniex": poloniex_wrapper}
+
     wrapper_container = ExchangeWrapperContainer(wrappers)
 
-    always_buy_td = AlwaysBuyTransactionDecider(base_currency=base_currency,
-                                                quote_currency=quote_currency,
-                                                wrapper_container=wrapper_container)
-    fixed_value_vd = FixedValueVolumeDecider(value=10,
-                                             wrapper_container=wrapper_container)
+    decider = ExchangeDiffDecider(base_currency=base_currency,
+                                  currencies=[quote_currency],
+                                  wrapper_container=wrapper_container,
+                                  verbose=1)
 
-    daemon = Daemon(wrapper_container=wrapper_container,
-                    transaction_decider=always_buy_td,
-                    volume_decider=fixed_value_vd,
-                    dt_seconds=10,
-                    verbose=2)
+    while True:
+        decider.decide()
 
 except Exception as ex:
     print("Error while initializing daemon and its parts"
           "\n\tError message: %s" % str(ex))
 
-daemon.run()
+if daemon is not None:
+    daemon.run()

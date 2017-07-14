@@ -35,6 +35,7 @@ class PoloniexProvider(CurrencyMixin):
             raise ValueError("API object must be an instance of Poloniex")
 
 
+
 class PrivatePoloniexProvider(PoloniexProvider):
     def __init__(self,
                  key_uri,
@@ -54,7 +55,15 @@ class PrivatePoloniexProvider(PoloniexProvider):
         self.api.secret = self.secret
 
     def _load_key(self):
-        raise NotImplemented()
+        content = self._get_key_file_content()
+        self.key = content[0]
 
     def _load_secret(self):
-        raise NotImplemented()
+        content = self._get_key_file_content()
+        self.secret = content[1]
+
+    def _get_key_file_content(self):
+        with open(self.key_uri) as f:
+            content = f.readlines()
+        content = [x.strip() for x in content]
+        return content

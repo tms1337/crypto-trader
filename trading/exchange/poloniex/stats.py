@@ -17,10 +17,14 @@ class PoloniexStatsProvider(StatsProvider,
 
     def ticker_price(self):
         ticker_response = self.api.returnTicker()
+        self._check_response(ticker_response)
 
         price = ticker_response[self.form_pair()]["last"]
 
         return float(price)
+
+    def _check_response(self, response):
+        pass
 
 
 
