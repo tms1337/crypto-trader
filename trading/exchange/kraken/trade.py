@@ -22,6 +22,7 @@ class KrakenTradeProvider(PrivateKrakenProvider,
         return balance
 
     def create_buy_offer(self, volume, price=None):
+        price = None
         if price is None:
             self._create_market_buy_offer(volume)
         else:
@@ -34,6 +35,7 @@ class KrakenTradeProvider(PrivateKrakenProvider,
             self._check_response(offer_response)
 
     def create_sell_offer(self, volume, price=None):
+        price = None
         if price is None:
             self._create_market_sell_offer(volume)
         else:

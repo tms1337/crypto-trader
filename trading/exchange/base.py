@@ -93,25 +93,29 @@ class TradeProvider(ABC):
         failed_decisions = []
 
         for decision in decisions:
-            if not isinstance(decision, Decision):
-                if self.verbose >= 1:
-                    print("Invalid decision object %s" % str(decision))
-                failed_decisions.append(decision)
             try:
-                self.prepare_currencies(decision.base_currency,
-                                        decision.quote_currency)
-                if decision.transaction_type == TransactionType.BUY:
-                    self.create_buy_offer(volume=decision.volume,
-                                          price=decision.price)
-                elif decision.transaction_type == TransactionType.SELL:
-                    self.create_sell_offer(volume=decision.volume,
-                                           price=decision.price)
+                self.execute_single_decision(decision)
             except Exception as ex:
                 failed_decisions.append(decision)
                 if self.verbose >= 1:
                     print("An error has occurred, %s" % str(ex))
 
         return failed_decisions
+
+    def execute_single_decision(self, decision):
+        if not isinstance(decision, Decision):
+            if self.verbose >= 1:
+                print("Invalid decision object %s" % str(decision))
+            raise ValueError("Invalid decision object")
+
+        self.prepare_currencies(decision.base_currency,
+                                decision.quote_currency)
+        if decision.transaction_type == TransactionType.BUY:
+            self.create_buy_offer(volume=decision.volume,
+                                  price=decision.price)
+        elif decision.transaction_type == TransactionType.SELL:
+            self.create_sell_offer(volume=decision.volume,
+                                   price=decision.price)
 
     def prepare_currencies(self, base_currency, quote_currency):
         pass
@@ -153,17 +157,27 @@ class ExchangeWrapperContainer:
         del self.wrappers[exchange]
 
     def create_bulk_offers(self, decisions):
-        decisions_per_exchange = {}
+        failed_decisions = []
+
         for decision in decisions:
-            exchange = decision.exchange
-            if exchange not in decisions_per_exchange:
-                decisions_per_exchange[exchange] = []
+            if isinstance(decision, tuple):
+                exchange = decision[0].exchange
+            else:
+                exchange = decision.exchange
 
-            decisions_per_exchange[exchange].append(decision)
+            if isinstance(decision, tuple):
+                try:
+                    for d in decision:
+                        self.wrappers[exchange].trade_provider.execute_single_decision(d)
+                except Exception as ex:
+                    failed_decisions.append(decision)
+            else:
+                try:
+                    self.wrappers[exchange].trade_provider.execute_single_decision(decision)
+                except Exception as ex:
+                    failed_decisions.append(decision)
 
-        for exchange in decisions_per_exchange:
-            decisions = decisions_per_exchange[exchange]
-            self.wrappers[exchange].trade_provider.create_bulk_offers(decisions)
+            return failed_decisions
 
     def _check_wrappers(self, wrappers):
         for exchange in wrappers:
@@ -171,9 +185,6 @@ class ExchangeWrapperContainer:
             self._check_wrapper(wrappers[exchange])
 
     def print_balance(self):
-        print("\033[92mDecision succesfully applied"
-              "\nTotal balance:\n\n")
-
         for exchange in self.wrappers:
             wrapper = self.wrappers[exchange]
             print("Exchange: %s" % exchange)
@@ -183,7 +194,6 @@ class ExchangeWrapperContainer:
                     print("\t\t%s: %s" % (currency, total_balance[currency]))
             print()
 
-        print("\033[0m")
 
     @staticmethod
     def _check_wrapper(wrapper):

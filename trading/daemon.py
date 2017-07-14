@@ -40,7 +40,11 @@ class Daemon:
                     print("Decision made\n\t%s" % str(full_decisions))
 
                 for decision in full_decisions:
-                    decision.check_validity()
+                    if isinstance(decision, tuple):
+                        for d in decision:
+                            d.check_validity()
+                    else:
+                        decision.check_validity()
 
                 self.apply_decisions(full_decisions)
             except Exception as ex:
@@ -72,8 +76,14 @@ class Daemon:
 
         self.transaction_decider.apply_last()
 
-        if self.verbose >= 1:
+        print("\033[92mDecision succesfully applied")
+
+        if self.verbose >= 2:
+            print("Total balance:\n\n")
             self.wrapper_container.print_balance()
+
+        print("\033[0m")
+
 
     @staticmethod
     def _check_wrapper_container(wrapper_container):

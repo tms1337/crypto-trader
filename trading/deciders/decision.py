@@ -32,9 +32,9 @@ class Decision:
         currency_pair = "(%s %s)" % (self.base_currency,
                                      self.quote_currency)
         string_representations = "(currency: %s, type: %s, volume: %s, exchange: %s" % (currency_pair,
-                                                                             self.transaction_type,
-                                                                             self.volume,
-                                                                             self.exchange)
+                                                                                        self.transaction_type,
+                                                                                        self.volume,
+                                                                                        self.exchange)
 
         if self.price is not None:
             string_representations += ", price: %s" % self.price

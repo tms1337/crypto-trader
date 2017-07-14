@@ -19,7 +19,7 @@ class PoloniexStatsProvider(StatsProvider,
         ticker_response = self.api.returnTicker()
         self._check_response(ticker_response)
 
-        price = ticker_response[self.form_pair()]["last"]
+        price = ticker_response[self.form_pair()]["lowestAsk"]
 
         return float(price)
 

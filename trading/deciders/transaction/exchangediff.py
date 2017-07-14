@@ -52,7 +52,6 @@ class ExchangeDiffDecider(TransactionDecider):
             low_decision.transaction_type = TransactionType.BUY
             low_decision.exchange = low[0]
             low_decision.price = low[1]
-            decisions.append(low_decision)
 
             high_decision = Decision()
             high_decision.base_currency = currency
@@ -60,7 +59,8 @@ class ExchangeDiffDecider(TransactionDecider):
             high_decision.transaction_type = TransactionType.SELL
             high_decision.exchange = high[0]
             high_decision.price = high[1]
-            decisions.append(high_decision)
+
+            decisions.append( (low_decision, high_decision) )
 
         return decisions
 

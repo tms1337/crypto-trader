@@ -8,7 +8,11 @@ class FixedValueVolumeDecider(VolumeDecider):
 
     def decide(self, partial_decisions):
         for decision in partial_decisions:
-            decision.volume = self.value
+            if isinstance(decision, tuple):
+                for d in decision:
+                    d.volume = self.value
+            else:
+                decision.volume = self.value
 
         return partial_decisions
 
