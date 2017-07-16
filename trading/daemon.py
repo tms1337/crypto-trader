@@ -9,19 +9,19 @@ from trading.exchange.base import ExchangeWrapper, ExchangeWrapperContainer
 class Daemon:
     def __init__(self,
                  wrapper_container,
-                 transaction_decider,
+                 transaction_deciders,
                  volume_decider,
                  dt_seconds=60,
-                 dt_timeout_seconds=3,
+                 dt_timeout_seconds=2,
                  verbose=1):
 
         self._check_wrapper_container(wrapper_container)
-        self._check_transaction_decider(transaction_decider)
+        self._check_transaction_deciders(transaction_deciders)
         self._check_volume_decider(volume_decider)
         self._check_dt_seconds(dt_seconds)
 
         self.wrapper_container = wrapper_container
-        self.transaction_decider = transaction_decider
+        self.transaction_deciders = transaction_deciders
         self.volume_decider = volume_decider
         self.dt_seconds = dt_seconds
         self.dt_timeout_seconds = dt_timeout_seconds
@@ -35,7 +35,11 @@ class Daemon:
                 if self.verbose >= 1:
                     print("Making decision")
 
-                partial_decisions = self.transaction_decider.decide()
+                partial_decisions = None
+                for transaction_decider in self.transaction_deciders:
+                    partial_decisions = transaction_decider.decide(partial_decisions)
+                    time.sleep(self.dt_timeout_seconds)
+
                 full_decisions = self.volume_decider.decide(partial_decisions)
 
                 if self.verbose >= 2:
@@ -57,7 +61,9 @@ class Daemon:
                       "\n\tError: %s\033[0m" % str(ex))
             else:
                 try:
-                    self.transaction_decider.apply_last()
+                    for transaction_decider in self.transaction_deciders:
+                        transaction_decider.apply_last()
+
                 except Exception as ex_inner:
                     print("\033[91mAn error has occurred while applying decision, waiting for the next step"
                           "\n\tError: %s\033[0m" % str(ex_inner))
@@ -78,8 +84,6 @@ class Daemon:
         if failed_decisions is not None and len(failed_decisions) != 0:
             raise RuntimeError("An error has occured during transaction execution, "
                                "\n\tFailed decisions %s" % str(failed_decisions))
-
-        self.transaction_decider.apply_last()
 
         print("\033[92mDecision succesfully applied")
 
@@ -109,3 +113,7 @@ class Daemon:
     def _check_dt_seconds(dt_seconds):
         if dt_seconds < 1:
             raise ValueError("dt must be larger or equal to 1")
+
+    def _check_transaction_deciders(self, transaction_deciders):
+        for transaction_decider in transaction_deciders:
+            self._check_transaction_decider(transaction_decider)

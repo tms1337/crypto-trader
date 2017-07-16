@@ -29,6 +29,13 @@ class PoloniexStatsProvider(StatsProvider,
 
         return float(price)
 
+    def ticker_last(self):
+        ticker_response = self._ticker_price()
+
+        price = ticker_response[self.form_pair()]["last"]
+
+        return float(price)
+
     def _ticker_price(self):
         ticker_response = self.api.returnTicker()
         self._check_response(ticker_response)

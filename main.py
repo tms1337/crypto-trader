@@ -1,5 +1,5 @@
 from trading.daemon import Daemon
-from trading.deciders.transaction.exchangediff import ExchangeDiffDecider
+from trading.deciders.transaction.exchangediff import ExchangeDiffDecider, ExchangeDiffBackup
 from trading.deciders.transaction.simple import AlwaysBuyTransactionDecider
 from trading.deciders.volume.fixedincome import FixedIncomeVolumeDecider
 from trading.deciders.volume.simple import FixedValueVolumeDecider
@@ -53,6 +53,10 @@ try:
                                               currencies=trading_currencies,
                                               wrapper_container=wrapper_container,
                                               verbose=1)
+    backup_transaction_decider = ExchangeDiffBackup(base_currency=quote_currency,
+                                                    currencies=trading_currencies,
+                                                    wrapper_container=wrapper_container,
+                                                    verbose=1)
 
     volume_decider = FixedIncomeVolumeDecider(wrapper_container=wrapper_container,
                                               real_currency="USD",
@@ -60,7 +64,7 @@ try:
 
     daemon = Daemon(wrapper_container=wrapper_container,
                     dt_seconds=dt,
-                    transaction_decider=transaction_decider,
+                    transaction_deciders=[transaction_decider, backup_transaction_decider],
                     volume_decider=volume_decider,
                     verbose=1)
 

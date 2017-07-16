@@ -12,7 +12,7 @@ class SingleCurrencyPairTransactionDecider(TransactionDecider):
 
         TransactionDecider.__init__(self, wrapper_container)
 
-    def decide(self):
+    def decide(self, prev_decisions):
         super().decide()
 
     def apply_last(self):

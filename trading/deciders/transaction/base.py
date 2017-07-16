@@ -6,7 +6,7 @@ from ..decider import Decider
 
 class TransactionDecider(ABC, Decider):
     @abstractclassmethod
-    def decide(self):
+    def decide(self, prev_decisions):
         pass
 
     @abstractclassmethod
