@@ -18,7 +18,7 @@ daemon = None
 try:
     base_currency = "ETH"
     quote_currency = "BTC"
-    dt = 30
+    dt = 10
 
     print("Starting daemon with base_currency: %s and quote_currency: %s" % (base_currency,
                                                                              quote_currency))
@@ -60,7 +60,7 @@ try:
 
     volume_decider = FixedIncomeVolumeDecider(wrapper_container=wrapper_container,
                                               real_currency="USD",
-                                              value=0.4)
+                                              value=0.1)
 
     daemon = Daemon(wrapper_container=wrapper_container,
                     dt_seconds=dt,

@@ -12,7 +12,7 @@ class Daemon:
                  transaction_deciders,
                  volume_decider,
                  dt_seconds=60,
-                 dt_timeout_seconds=2,
+                 dt_timeout_seconds=1,
                  verbose=1):
 
         self._check_wrapper_container(wrapper_container)
