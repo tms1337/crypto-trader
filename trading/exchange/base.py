@@ -50,7 +50,11 @@ class StatsProvider(ABC):
         pass
 
     @abstractmethod
-    def ticker_price(self):
+    def ticker_high(self):
+        pass
+
+    @abstractmethod
+    def ticker_low(self):
         pass
 
     def last_ohlc(self, interval=1):

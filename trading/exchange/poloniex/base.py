@@ -36,6 +36,9 @@ class PoloniexProvider(CurrencyMixin):
         if not isinstance(api, Poloniex):
             raise ValueError("API object must be an instance of Poloniex")
 
+    def _check_response(self, response):
+        pass
+
 
 
 class PrivatePoloniexProvider(PoloniexProvider):

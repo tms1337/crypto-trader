@@ -24,12 +24,24 @@ class KrakenStatsProvider(StatsProvider,
 
         return ohlcs
 
-    def ticker_price(self):
+    def ticker_high(self):
+        ticker_response = self._ticker_price()
+        pair_key = [k for k in ticker_response["result"]][0]
+
+        return float(ticker_response["result"][pair_key]["h"][0])
+
+    def ticker_low(self):
+        ticker_response = self._ticker_price()
+        pair_key = [k for k in ticker_response["result"]][0]
+
+        return float(ticker_response["result"][pair_key]["l"][0])
+
+    def _ticker_price(self):
         ticker_response = self.k.query_public("Ticker", {"pair": self.form_pair()})
         self._check_response(ticker_response)
 
-        pair_key = [k for k in ticker_response["result"]][0]
+        return ticker_response
 
-        return float(ticker_response["result"][pair_key]["c"][0])
+
 
 

@@ -24,7 +24,7 @@ quote_currency = "BTC"
 
 polo_stats = PoloniexStatsProvider(base_currency="ETH",
                                    quote_currency="BTC")
-price = polo_stats.ticker_price()
+price = polo_stats.ticker_high()
 print("Poloniex ticker price: %f" % (price))
 
 polo_trader = PoloniexTradeProvider(base_currency=base_currency,

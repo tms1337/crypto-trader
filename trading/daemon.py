@@ -12,6 +12,7 @@ class Daemon:
                  transaction_decider,
                  volume_decider,
                  dt_seconds=60,
+                 dt_timeout_seconds=3,
                  verbose=1):
 
         self._check_wrapper_container(wrapper_container)
@@ -23,6 +24,7 @@ class Daemon:
         self.transaction_decider = transaction_decider
         self.volume_decider = volume_decider
         self.dt_seconds = dt_seconds
+        self.dt_timeout_seconds = dt_timeout_seconds
         self.verbose = verbose
 
     def run(self):
@@ -45,6 +47,9 @@ class Daemon:
                             d.check_validity()
                     else:
                         decision.check_validity()
+
+                # so exchange does not time us out
+                time.sleep(self.dt_timeout_seconds)
 
                 self.apply_decisions(full_decisions)
             except Exception as ex:

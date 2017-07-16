@@ -20,7 +20,8 @@ class FixedIncomeVolumeDecider(VolumeDecider):
 
             diff = decision[1].price - decision[0].price
 
-            decision[0].volume = self.value / (stats.ticker_price() * diff)
-            decision[1].volume = self.value / (stats.ticker_price() * diff)
+            high_price_trading_currency = stats.ticker_high()
+            decision[0].volume = self.value / (high_price_trading_currency * diff)
+            decision[1].volume = self.value / (high_price_trading_currency * diff)
 
         return partial_decisions

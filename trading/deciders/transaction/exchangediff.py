@@ -30,44 +30,56 @@ class ExchangeDiffDecider(TransactionDecider):
         self.current_currency_index = (self.current_currency_index + 1) % \
                                       len(self.currencies)
 
-        # for currency in self.currencies:
-        low, high = (None, float("inf")), (None, float("-inf"))
+        high_low_per_exchange = {}
         for exchange in self.wrapper_container.wrappers:
             wrapper = self.wrapper_container.wrappers[exchange]
             wrapper.stats_provider.set_currencies(currency,
                                                   self.trading_currency)
-            price = wrapper.stats_provider.ticker_price()
 
-            if price > high[1]:
-                if self.verbose >= 2:
-                    print("Setting high price for %s at (%s, %f)" % (currency, exchange, price))
-                high = (exchange, price)
+            high = wrapper.stats_provider.ticker_high()
+            low = wrapper.stats_provider.ticker_low()
 
-            if price < low[1]:
-                if self.verbose >= 2:
-                    print("Setting low price for %s at (%s, %f)" % (currency, exchange, price))
-                low = (exchange, price)
+            high_low_per_exchange[exchange] = {"low": low, "high": high}
 
-        if self.verbose >= 1:
-            print("Chose low high for %s at %s and %s" % (currency, low, high))
+        max_margin = float("-Inf")
+        best_exchanges = {}
+        for first in high_low_per_exchange:
+            for second in high_low_per_exchange:
+                if first != second:
+                    margin = high_low_per_exchange[first]["low"] - high_low_per_exchange[second]["high"]
+                    if margin > max_margin:
+                        max_margin = margin
+                        best_exchanges["buy"] = second
+                        best_exchanges["sell"] = first
 
-        low_decision = Decision()
-        low_decision.base_currency = currency
-        low_decision.quote_currency = self.trading_currency
-        low_decision.transaction_type = TransactionType.BUY
-        low_decision.exchange = low[0]
-        low_decision.price = low[1]
+                    margin = high_low_per_exchange[second]["low"] - high_low_per_exchange[first]["high"]
+                    if margin > max_margin:
+                        max_margin = margin
+                        best_exchanges["buy"] = first
+                        best_exchanges["sell"] = second
 
-        high_decision = Decision()
-        high_decision.base_currency = currency
-        high_decision.quote_currency = self.trading_currency
-        high_decision.transaction_type = TransactionType.SELL
-        high_decision.exchange = high[0]
-        high_decision.price = high[1]
+        if max_margin < 0:
+            if self.verbose >= 1:
+                print("No suitable difference to chose :(")
+            return []
+        else:
+            low_decision = Decision()
+            low_decision.base_currency = currency
+            low_decision.quote_currency = self.trading_currency
+            low_decision.transaction_type = TransactionType.SELL
+            low_decision.exchange = best_exchanges["sell"]
+            low_decision.price = high_low_per_exchange[best_exchanges["sell"]]["low"]
 
-        decisions.append((low_decision, high_decision))
+            high_decision = Decision()
+            high_decision.base_currency = currency
+            high_decision.quote_currency = self.trading_currency
+            high_decision.transaction_type = TransactionType.BUY
+            high_decision.exchange = best_exchanges["buy"]
+            high_decision.price = high_low_per_exchange[best_exchanges["buy"]]["high"]
 
-        return decisions
+            decisions.append((low_decision, high_decision))
+
+            return decisions
 
     def apply_last(self):
         pass
