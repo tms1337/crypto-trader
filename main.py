@@ -48,7 +48,7 @@ try:
 
     wrapper_container = ExchangeWrapperContainer(wrappers)
 
-    trading_currencies = [base_currency]
+    trading_currencies = [base_currency, "XRP"]
     transaction_decider = ExchangeDiffDecider(base_currency=quote_currency,
                                               currencies=trading_currencies,
                                               wrapper_container=wrapper_container,

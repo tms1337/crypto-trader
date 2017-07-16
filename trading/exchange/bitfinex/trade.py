@@ -25,24 +25,7 @@ class BitfinexTradeProvider(PrivateBitfinexProvider,
         return balance_response
 
     def create_buy_offer(self, volume, price=None):
-        buy_response = self.api.buy(self.form_pair(),
-                                    price,
-                                    volume)
-
-        self._check_response(buy_response)
+        pass
 
     def create_sell_offer(self, volume, price=None):
-        sell_response = self.api.sell(self.form_pair(),
-                                      price,
-                                      volume)
-
-        self._check_response(sell_response)
-
-    def _check_response(self, response):
-        if "error" in response:
-            if self.verbose >= 1:
-                print("Bitfinex failed with response %s" % response)
-            raise RuntimeError("Trade did not go trough")
-
-    def prepare_currencies(self, base_currency, quote_currency):
-        self.set_currencies(base_currency, quote_currency)
+        pass
