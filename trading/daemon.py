@@ -12,7 +12,7 @@ class Daemon:
                  transaction_deciders,
                  volume_decider,
                  dt_seconds=60,
-                 dt_timeout_seconds=1,
+                 dt_timeout_seconds=3,
                  verbose=1):
 
         self._check_wrapper_container(wrapper_container)
@@ -28,6 +28,8 @@ class Daemon:
         self.verbose = verbose
 
     def run(self):
+        exception_n = 0
+
         while True:
             if self.verbose >= 1:
                 print("Time: %s" % (datetime.datetime.now()))
@@ -57,6 +59,11 @@ class Daemon:
 
                 self.apply_decisions(full_decisions)
             except Exception as ex:
+                exception_n += 1
+
+                if exception_n >= 5:
+                    exit(1)
+
                 print("\033[91mAn error has occurred while creating decision, waiting for the next step"
                       "\n\tError: %s\033[0m" % str(ex))
             else:

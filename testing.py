@@ -17,15 +17,16 @@ def bitfinex_test():
     stats = BitfinexStatsProvider(base_currency="ETH",
                                   quote_currency="BTC")
 
-    print(stats.ticker_last())
-    print(stats.ticker_high())
-    print(stats.ticker_low())
+    # print(stats.ticker_last())
+    # print(stats.ticker_high())
+    # print(stats.ticker_low())
 
     trade = BitfinexTradeProvider(base_currency="ETH",
                                   quote_currency="BTC",
                                   key_uri="/home/faruk/Desktop/bitfinex_key")
 
-    print(trade.total_balance())
+    # print(trade.total_balance())
+    trade.create_buy_offer(0.1, stats.ticker_last())
 
 
 def bittrex_test():
@@ -41,5 +42,6 @@ def bittrex_test():
                                  key_uri="/home/faruk/Desktop/bittrex_key")
 
     print(trade.total_balance())
+    trade.create_buy_offer(0.1, stats.ticker_last())
 
-bittrex_test()
+bitfinex_test()

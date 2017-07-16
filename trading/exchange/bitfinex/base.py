@@ -20,15 +20,16 @@ class BitfinexProvider(CurrencyMixin):
             "DASH": "dash",
             "XRP": "xrp",
             "USD": "USD",
+            "LTC": "LTC"
         }
 
         return currency_mapping[currency]
 
     def form_pair(self):
-        return super().form_pair()
+        return CurrencyMixin.form_pair(self)
 
     def _check_response(self, response):
-        if "error" in response:
+        if not isinstance(response, dict) and not isinstance(response, list):
             raise RuntimeError("Error during connecting to Bitfinex")
 
 

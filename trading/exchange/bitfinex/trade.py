@@ -25,7 +25,19 @@ class BitfinexTradeProvider(PrivateBitfinexProvider,
         return balance_response
 
     def create_buy_offer(self, volume, price=None):
+        offer_response = self.api.place_order(amount=str(volume),
+                                              ord_type="exchange limit",
+                                              symbol=self.form_pair(),
+                                              price=str(price),
+                                              side="buy")
+        self._check_response(offer_response)
         pass
 
     def create_sell_offer(self, volume, price=None):
+        offer_response = self.api.place_order(amount=str(volume),
+                                              ord_type="exchange limit",
+                                              symbol=self.form_pair(),
+                                              price=str(price),
+                                              side="sell")
+        self._check_response(offer_response)
         pass

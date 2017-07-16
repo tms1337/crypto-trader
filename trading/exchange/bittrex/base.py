@@ -20,6 +20,8 @@ class BittrexProvider(CurrencyMixin):
             "DASH": "DASH",
             "XRP": "XRP",
             "USD": "USD",
+            "ETC": "ETC",
+            "LTC": "LTC"
         }
 
         return currency_mapping[currency]
@@ -30,7 +32,8 @@ class BittrexProvider(CurrencyMixin):
 
     @staticmethod
     def _check_response(server_response):
-        pass
+        if server_response in ["INSUFFICIENT_FUNDS"]:
+            raise RuntimeError("Bittrex response failure %s" % server_response)
 
 
 class PrivateBittrexProvider(BittrexProvider):

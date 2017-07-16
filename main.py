@@ -4,6 +4,10 @@ from trading.deciders.transaction.simple import AlwaysBuyTransactionDecider
 from trading.deciders.volume.fixedincome import FixedIncomeVolumeDecider
 from trading.deciders.volume.simple import FixedValueVolumeDecider
 from trading.exchange.base import ExchangeWrapper, ExchangeWrapperContainer
+from trading.exchange.bitfinex.stats import BitfinexStatsProvider
+from trading.exchange.bitfinex.trade import BitfinexTradeProvider
+from trading.exchange.bittrex.stats import BittrexStatsProvider
+from trading.exchange.bittrex.trade import BittrexTradeProvider
 from trading.exchange.kraken.mocks import TradeProviderMock
 
 import sys
@@ -18,7 +22,7 @@ daemon = None
 try:
     base_currency = "ETH"
     quote_currency = "BTC"
-    dt = 10
+    dt = 15
 
     print("Starting daemon with base_currency: %s and quote_currency: %s" % (base_currency,
                                                                              quote_currency))
@@ -43,16 +47,41 @@ try:
     poloniex_wrapper = ExchangeWrapper(stats_provider=poloniex_stats,
                                        trade_provider=poloniex_trader)
 
-    wrappers = {"kraken": kraken_wrapper,
-                "poloniex": poloniex_wrapper}
+    bittrex_stats = BittrexStatsProvider(base_currency=base_currency,
+                                         quote_currency=quote_currency)
+
+    bittrex_trader = BittrexTradeProvider(base_currency=base_currency,
+                                          quote_currency=quote_currency,
+                                          key_uri="/home/faruk/Desktop/bittrex_key")
+
+    bittrex_wrapper = ExchangeWrapper(stats_provider=bittrex_stats,
+                                      trade_provider=bittrex_trader)
+
+    bitfinex_stats = BitfinexStatsProvider(base_currency=base_currency,
+                                           quote_currency=quote_currency)
+
+    bitfinex_trader = BitfinexTradeProvider(base_currency=base_currency,
+                                            quote_currency=quote_currency,
+                                            key_uri="/home/faruk/Desktop/bitfinex_key")
+
+    bitfinex_wrapper = ExchangeWrapper(stats_provider=bitfinex_stats,
+                                       trade_provider=bittrex_trader)
+
+    wrappers = {
+        "kraken": kraken_wrapper,
+        "poloniex": poloniex_wrapper,
+        "bittrex": bittrex_wrapper,
+        # "bitfinex": bitfinex_wrapper
+    }
 
     wrapper_container = ExchangeWrapperContainer(wrappers)
 
-    trading_currencies = [base_currency, "XRP"]
+    trading_currencies = [base_currency, "XRP", "LTC", "ETC"]
     transaction_decider = ExchangeDiffDecider(base_currency=quote_currency,
                                               currencies=trading_currencies,
                                               wrapper_container=wrapper_container,
                                               verbose=1)
+    
     backup_transaction_decider = ExchangeDiffBackup(base_currency=quote_currency,
                                                     currencies=trading_currencies,
                                                     wrapper_container=wrapper_container,
@@ -60,7 +89,8 @@ try:
 
     volume_decider = FixedIncomeVolumeDecider(wrapper_container=wrapper_container,
                                               real_currency="USD",
-                                              value=0.1)
+                                              value=0.02,
+                                              base_value_exchange="kraken")
 
     daemon = Daemon(wrapper_container=wrapper_container,
                     dt_seconds=dt,

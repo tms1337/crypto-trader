@@ -11,19 +11,19 @@ class BitfinexStatsProvider(BitfinexProvider,
         ticker_response = self.api.ticker(symbol=self.form_pair())
         self._check_response(ticker_response)
 
-        return ticker_response["last_price"]
+        return float(ticker_response["last_price"])
 
     def ticker_low(self):
         ticker_response = self.api.ticker(symbol=self.form_pair())
         self._check_response(ticker_response)
 
-        return ticker_response["low"]
+        return float(ticker_response["low"])
 
     def ticker_high(self):
         ticker_response = self.api.ticker(symbol=self.form_pair())
         self._check_response(ticker_response)
 
-        return ticker_response["high"]
+        return float(ticker_response["high"])
 
     def ohlc_history(self, interval=1, since=None):
         raise NotImplementedError()

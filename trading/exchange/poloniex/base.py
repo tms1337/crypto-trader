@@ -23,6 +23,8 @@ class PoloniexProvider(CurrencyMixin):
             "DASH": "DASH",
             "XRP": "XRP",
             "USD": "USDT",
+            "ETC": "ETC",
+            "LTC": "LTC"
         }
 
         return currency_mapping[currency]

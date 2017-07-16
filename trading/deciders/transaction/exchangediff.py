@@ -77,7 +77,7 @@ class ExchangeDiffDecider(TransactionDecider):
             high_decision.exchange = best_exchanges["buy"]
             high_decision.price = high_low_per_exchange[best_exchanges["buy"]]["high"]
 
-            decisions.append((low_decision, high_decision))
+            decisions.append((high_decision, low_decision))
 
             return decisions
 
@@ -116,7 +116,6 @@ class ExchangeDiffBackup(TransactionDecider):
         self.current_currency_index = (self.current_currency_index + 1) % \
                                       len(self.currencies)
 
-        # for currency in self.currencies:
         low, high = (None, float("inf")), (None, float("-inf"))
         for exchange in self.wrapper_container.wrappers:
             wrapper = self.wrapper_container.wrappers[exchange]

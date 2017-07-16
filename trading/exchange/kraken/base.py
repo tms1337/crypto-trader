@@ -22,6 +22,8 @@ class KrakenProvider(CurrencyMixin):
             "DASH": "DASH",
             "XRP": "XRP",
             "USD": "USD",
+            "ETC": "ETC",
+            "LTC": "LTC"
         }
 
         return currency_mapping[currency]
