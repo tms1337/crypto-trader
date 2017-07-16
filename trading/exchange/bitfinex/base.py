@@ -7,7 +7,7 @@ class BitfinexProvider(CurrencyMixin):
                  base_currency,
                  quote_currency,
                  api=finex):
-        self.k = api
+        self.api = api
 
         CurrencyMixin.__init__(self,
                                base_currency,
@@ -38,4 +38,4 @@ class PrivateBitfinexProvider(BitfinexProvider):
                                   base_currency,
                                   quote_currency,
                                   api)
-        finex.load_keys(key_uri)
+        self.api.load_keys(key_uri)
