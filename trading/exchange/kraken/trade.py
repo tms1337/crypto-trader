@@ -66,3 +66,5 @@ class KrakenTradeProvider(PrivateKrakenProvider,
         self.set_currencies(base_currency, quote_currency)
 
 
+
+

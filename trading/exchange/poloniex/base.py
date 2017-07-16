@@ -20,7 +20,9 @@ class PoloniexProvider(CurrencyMixin):
         currency_mapping = {
             "ETH": "ETH",
             "BTC": "BTC",
-            "DASH": "DASH"
+            "DASH": "DASH",
+            "XRP": "XRP",
+            "USD": "USDT",
         }
 
         return currency_mapping[currency]

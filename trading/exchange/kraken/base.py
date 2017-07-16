@@ -19,7 +19,9 @@ class KrakenProvider(CurrencyMixin):
         currency_mapping = {
             "ETH": "ETH",
             "BTC": "XBT",
-            "DASH": "DASH"
+            "DASH": "DASH",
+            "XRP": "XRP",
+            "USD": "USD",
         }
 
         return currency_mapping[currency]

@@ -4,5 +4,5 @@ from ..decider import Decider
 
 class VolumeDecider(Decider, ABC):
     @abstractclassmethod
-    def decide(self, partial_decision):
+    def decide(self, partial_decisions):
         pass

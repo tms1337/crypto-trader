@@ -1,6 +1,7 @@
 from trading.daemon import Daemon
 from trading.deciders.transaction.exchangediff import ExchangeDiffDecider
 from trading.deciders.transaction.simple import AlwaysBuyTransactionDecider
+from trading.deciders.volume.fixedincome import FixedIncomeVolumeDecider
 from trading.deciders.volume.simple import FixedValueVolumeDecider
 from trading.exchange.base import ExchangeWrapper, ExchangeWrapperContainer
 from trading.exchange.kraken.mocks import TradeProviderMock
@@ -15,10 +16,9 @@ from trading.exchange.poloniex.trade import PoloniexTradeProvider
 daemon = None
 
 try:
-    base_currency = "DASH"
+    base_currency = "ETH"
     quote_currency = "BTC"
-    dt = 5
-    volume = 0.5
+    dt = 30
 
     print("Starting daemon with base_currency: %s and quote_currency: %s" % (base_currency,
                                                                              quote_currency))
@@ -48,13 +48,15 @@ try:
 
     wrapper_container = ExchangeWrapperContainer(wrappers)
 
+    trading_currencies = [base_currency]
     transaction_decider = ExchangeDiffDecider(base_currency=quote_currency,
-                                              currencies=[base_currency],
+                                              currencies=trading_currencies,
                                               wrapper_container=wrapper_container,
                                               verbose=1)
 
-    volume_decider = FixedValueVolumeDecider(value=volume,
-                                             wrapper_container=wrapper_container)
+    volume_decider = FixedIncomeVolumeDecider(wrapper_container=wrapper_container,
+                                              real_currency="USD",
+                                              value=0.4)
 
     daemon = Daemon(wrapper_container=wrapper_container,
                     dt_seconds=dt,
