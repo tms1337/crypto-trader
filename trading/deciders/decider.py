@@ -17,3 +17,20 @@ class Decider:
                                 ExchangeWrapperContainer"
             self.logger.error(error_message)
             raise ValueError(error_message)
+
+    def _check_decision(self, decision):
+        self.logger.debug("Checking decision %s", decision)
+
+        exchange = decision.exchange
+        wrapper = self.wrapper_container.wrappers[exchange]
+        stats = wrapper.stats_provider
+
+        balance = stats.total_balance()
+
+        if not decision.quote_currency in balance or \
+                        balance[decision.quote_currency] < decision.volume:
+
+            error_message = "Balance not sufficient for transaction"
+
+            self.logger.error(error_message)
+            raise AssertionError(error_message)

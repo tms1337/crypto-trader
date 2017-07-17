@@ -6,8 +6,8 @@ from .client import bittrex
 
 class BittrexProvider(CurrencyMixin):
     def __init__(self,
-                 base_currency,
-                 quote_currency,
+                 base_currency=None,
+                 quote_currency=None,
                  api=bittrex.bittrex(None, None),
                  logger_name="app"):
 

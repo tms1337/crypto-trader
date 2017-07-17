@@ -1,3 +1,5 @@
+import logging
+
 from poloniex import Poloniex
 
 from trading.deciders.decision import TransactionType
@@ -7,18 +9,23 @@ from trading.exchange.poloniex.base import PrivatePoloniexProvider
 
 class PoloniexTradeProvider(PrivatePoloniexProvider,
                             TradeProvider):
-
-    def __init__(self, key_uri,
-                 base_currency,
-                 quote_currency,
+    def __init__(self,
+                 key_uri,
+                 base_currency=None,
+                 quote_currency=None,
                  api=Poloniex(),
-                 verbose=1):
+                 logger_name="app"):
+
         PrivatePoloniexProvider.__init__(self,
-                                key_uri,
-                                base_currency,
-                                quote_currency,
-                                api)
-        TradeProvider.__init__(self, verbose)
+                                         key_uri,
+                                         base_currency,
+                                         quote_currency,
+                                         api)
+
+        self.logger_name = logger_name
+        self.logger = logging.getLogger(logger_name)
+
+        TradeProvider.__init__(self, logger_name)
 
     def total_balance(self):
         balance = self.api.returnBalances()
@@ -41,10 +48,8 @@ class PoloniexTradeProvider(PrivatePoloniexProvider,
 
     def _check_response(self, response):
         if "orderNumber" not in response:
-            if self.verbose >= 1:
-                print("Poloniex failed with response %s" % response)
+            self.logger.error("Poloniex failed with response %s" % response)
             raise RuntimeError("Trade did not go trough")
 
     def prepare_currencies(self, base_currency, quote_currency):
         self.set_currencies(base_currency, quote_currency)
-

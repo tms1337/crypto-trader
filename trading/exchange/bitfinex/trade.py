@@ -7,8 +7,8 @@ import FinexAPI.FinexAPI as finex
 class BitfinexTradeProvider(PrivateBitfinexProvider,
                             TradeProvider):
     def __init__(self, key_uri,
-                 base_currency,
-                 quote_currency,
+                 base_currency=None,
+                 quote_currency=None,
                  api=finex,
                  verbose=1):
         PrivateBitfinexProvider.__init__(self,

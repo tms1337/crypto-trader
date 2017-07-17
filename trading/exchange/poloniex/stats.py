@@ -6,7 +6,11 @@ from .base import PoloniexProvider
 class PoloniexStatsProvider(StatsProvider,
                             PoloniexProvider):
 
-    def __init__(self, base_currency, quote_currency, api=Poloniex()):
+    def __init__(self,
+                 base_currency=None,
+                 quote_currency=None,
+                 api=Poloniex()):
+
         PoloniexProvider.__init__(self,
                                   base_currency,
                                   quote_currency,
@@ -38,6 +42,7 @@ class PoloniexStatsProvider(StatsProvider,
 
     def _ticker_price(self):
         ticker_response = self.api.returnTicker()
+
         self._check_response(ticker_response)
         return ticker_response
 

@@ -9,22 +9,21 @@ class CurrencyMixin(ABC):
                  base_currency=None,
                  quote_currency=None,
                  logger_name="app"):
-        self._check_arguments(base_currency,
-                              quote_currency)
 
-        self.base_currency = self.map_currency(base_currency)
-        self.quote_currency = self.map_currency(quote_currency)
+        self.set_currencies(base_currency, quote_currency)
 
         self.logger_name = logger_name
         self.logger = logging.getLogger("%s.CurrencyMixin" % logger_name)
 
     def set_currencies(self, base_currency, quote_currency):
         self._check_arguments(base_currency, quote_currency)
-        self.check_currency(base_currency)
-        self.check_currency(quote_currency)
 
-        self.base_currency = self.map_currency(base_currency)
-        self.quote_currency = self.map_currency(quote_currency)
+        if not (base_currency is None and quote_currency is None):
+            self.check_currency(base_currency)
+            self.check_currency(quote_currency)
+
+            self.base_currency = self.map_currency(base_currency)
+            self.quote_currency = self.map_currency(quote_currency)
 
     def form_pair(self):
         return "%s%s" % (self.base_currency,
@@ -89,8 +88,7 @@ class StatsProvider(ABC):
 
 
 class TradeProvider(ABC):
-    def __init__(self, verbose=1, logger_name="app"):
-        self.verbose = verbose
+    def __init__(self, logger_name="app"):
 
         self.logger_name = logger_name
         self.logger = logging.getLogger("%s.TradeProvider" % logger_name)

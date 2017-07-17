@@ -7,8 +7,8 @@ from trading.exchange.base import CurrencyMixin
 
 class PoloniexProvider(CurrencyMixin):
     def __init__(self,
-                 base_currency,
-                 quote_currency,
+                 base_currency=None,
+                 quote_currency=None,
                  api=Poloniex(),
                  logger_name="app"):
 

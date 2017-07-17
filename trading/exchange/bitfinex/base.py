@@ -6,10 +6,11 @@ import FinexAPI.FinexAPI as finex
 
 class BitfinexProvider(CurrencyMixin):
     def __init__(self,
-                 base_currency,
-                 quote_currency,
+                 base_currency=None,
+                 quote_currency=None,
                  api=finex,
                  logger_name="app"):
+
         self.api = api
 
         self.logger_name = logger_name
@@ -45,7 +46,12 @@ class BitfinexProvider(CurrencyMixin):
 
 
 class PrivateBitfinexProvider(BitfinexProvider):
-    def __init__(self, key_uri, base_currency, quote_currency, api=finex):
+    def __init__(self,
+                 key_uri,
+                 base_currency=None,
+                 quote_currency=None,
+                 api=finex):
+
         BitfinexProvider.__init__(self,
                                   base_currency,
                                   quote_currency,

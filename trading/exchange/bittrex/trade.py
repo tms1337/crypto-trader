@@ -8,8 +8,8 @@ class BittrexTradeProvider(PrivateBittrexProvider,
                            TradeProvider):
     def __init__(self,
                  key_uri,
-                 base_currency,
-                 quote_currency,
+                 base_currency=None,
+                 quote_currency=None,
                  api=bittrex.bittrex(None, None)):
         PrivateBittrexProvider.__init__(self,
                                         key_uri=key_uri,

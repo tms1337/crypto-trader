@@ -27,7 +27,7 @@ class ExchangeDiffDecider(TransactionDecider):
         TransactionDecider.__init__(self, wrapper_container)
 
     def decide(self, prev_decisions):
-        decisions = []
+        decisions = prev_decisions
 
         currency = self.currencies[self.current_currency_index]
         self.current_currency_index = (self.current_currency_index + 1) % \
@@ -77,6 +77,10 @@ class ExchangeDiffDecider(TransactionDecider):
             low_decision.price = high_low_per_exchange[best_exchanges["sell"]]["low"]
 
             self.logger.debug("Low decision chosen %s" % low_decision)
+            try:
+                self._check_decision(low_decision)
+            except Exception:
+                return prev_decisions
 
             high_decision = Decision()
             high_decision.base_currency = currency
@@ -86,6 +90,10 @@ class ExchangeDiffDecider(TransactionDecider):
             high_decision.price = high_low_per_exchange[best_exchanges["buy"]]["high"]
 
             self.logger.debug("High decision chosen %s" % high_decision)
+            try:
+             self._check_decision(high_decision)
+            except Exception:
+                return prev_decisions
 
             decisions.append((high_decision, low_decision))
 
@@ -118,9 +126,6 @@ class ExchangeDiffBackup(TransactionDecider):
         TransactionDecider.__init__(self, wrapper_container)
 
     def decide(self, prev_decisions):
-        if not(prev_decisions is None or len(prev_decisions) == 0):
-            return prev_decisions
-
         decisions = []
 
         currency = self.currencies[self.current_currency_index]
@@ -155,12 +160,22 @@ class ExchangeDiffBackup(TransactionDecider):
         low_decision.exchange = low[0]
         low_decision.price = low[1] + price_margin
 
+        try:
+            self._check_decision(low_decision)
+        except Exception:
+            return prev_decisions
+
         high_decision = Decision()
         high_decision.base_currency = currency
         high_decision.quote_currency = self.trading_currency
         high_decision.transaction_type = TransactionType.SELL
         high_decision.exchange = high[0]
         high_decision.price = high[1] - price_margin
+
+        try:
+            self._check_decision(high_decision)
+        except Exception:
+            return prev_decisions
 
         self.logger.info("Chose decision pair (%s, %s)" % (low_decision, high_decision))
 

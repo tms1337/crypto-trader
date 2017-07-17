@@ -7,8 +7,8 @@ from trading.exchange.base import CurrencyMixin
 
 class KrakenProvider(CurrencyMixin):
     def __init__(self,
-                 base_currency,
-                 quote_currency,
+                 base_currency=None,
+                 quote_currency=None,
                  api=krakenex.API(),
                  logger_name="app"):
 

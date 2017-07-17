@@ -6,7 +6,12 @@ from ..base import CurrencyMixin, TradeProvider
 
 class KrakenTradeProvider(PrivateKrakenProvider,
                           TradeProvider):
-    def __init__(self, key_uri, base_currency, quote_currency, api=krakenex.API()):
+    def __init__(self,
+                 key_uri,
+                 base_currency=None,
+                 quote_currency=None,
+                 api=krakenex.API()):
+
         PrivateKrakenProvider.__init__(self,
                                        key_uri=key_uri,
                                        base_currency=base_currency,
