@@ -1,4 +1,5 @@
 import datetime
+import random
 import time
 
 from trading.deciders.transaction.base import TransactionDecider
@@ -81,7 +82,7 @@ class Daemon:
                     print("-", end="")
                 print("\n")
 
-            time.sleep(self.dt_seconds)
+            time.sleep(random.uniform(0.8 * self.dt_seconds, self.dt_seconds))
 
     def apply_decisions(self, decisions):
         if self.verbose >= 1:

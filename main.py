@@ -18,12 +18,35 @@ from trading.exchange.kraken.trade import KrakenTradeProvider
 from trading.exchange.poloniex.stats import PoloniexStatsProvider
 from trading.exchange.poloniex.trade import PoloniexTradeProvider
 
+import logging
+
+# create logger with 'spam_application'
+logger = logging.getLogger('app')
+logger.setLevel(logging.DEBUG)
+
+# create file handler which logs even debug messages
+fh = logging.FileHandler('debug.log')
+fh.setLevel(logging.DEBUG)
+
+# create console handler with a higher log level
+ch = logging.StreamHandler()
+ch.setLevel(logging.ERROR)
+
+# create formatter and add it to the handlers
+formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+fh.setFormatter(formatter)
+ch.setFormatter(formatter)
+
+# add the handlers to the logger
+logger.addHandler(fh)
+logger.addHandler(ch)
+
 daemon = None
 
 try:
     base_currency = "ETH"
     quote_currency = "BTC"
-    dt = 5
+    dt = 15
 
     print("Starting daemon with base_currency: %s and quote_currency: %s" % (base_currency,
                                                                              quote_currency))
@@ -70,8 +93,8 @@ try:
 
     wrappers = {
         "kraken": kraken_wrapper,
-        "poloniex": poloniex_wrapper,
-        "bittrex": bittrex_wrapper,
+        # "poloniex": poloniex_wrapper,
+        # "bittrex": bittrex_wrapper,
         # "bitfinex": bitfinex_wrapper
     }
 
@@ -94,13 +117,13 @@ try:
                                               base_value_exchange="kraken")
 
     fixed_volume_decider = FixedValueVolumeDecider(wrapper_container=wrapper_container,
-                                                   values={"ETH": 0.5, "XRP": 1000, "LTC": 20, "ETC": 40})
+                                                   values={"ETH": 0.1, "XRP": 200, "LTC": 20, "ETC": 40})
 
     percent_based_transaction_decider = PercentBasedTransactionDecider(currencies=trading_currencies,
                                                                        trading_currency=quote_currency,
                                                                        wrapper_container=wrapper_container,
-                                                                       sell_threshold=0.2,
-                                                                       buy_threshold=0.05)
+                                                                       sell_threshold=0.01,
+                                                                       buy_threshold=0.01)
 
     daemon = Daemon(wrapper_container=wrapper_container,
                     dt_seconds=dt,

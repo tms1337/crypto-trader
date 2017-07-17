@@ -28,13 +28,13 @@ class KrakenStatsProvider(StatsProvider,
         ticker_response = self._ticker_price()
         pair_key = [k for k in ticker_response["result"]][0]
 
-        return float(ticker_response["result"][pair_key]["h"][0])
+        return float(ticker_response["result"][pair_key]["b"][0])
 
     def ticker_low(self):
         ticker_response = self._ticker_price()
         pair_key = [k for k in ticker_response["result"]][0]
 
-        return float(ticker_response["result"][pair_key]["l"][0])
+        return float(ticker_response["result"][pair_key]["a"][0])
 
     def ticker_last(self):
         ticker_response = self._ticker_price()

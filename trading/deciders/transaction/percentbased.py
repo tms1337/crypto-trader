@@ -1,3 +1,5 @@
+import time
+
 from trading.deciders.decision import Decision, TransactionType
 from trading.deciders.transaction.base import TransactionDecider
 from trading.exchange.base import CurrencyMixin
@@ -45,6 +47,7 @@ class PercentBasedTransactionDecider(TransactionDecider):
                                      self.trading_currency)
 
                 low = stats.ticker_high()
+                time.sleep(1)
                 high = stats.ticker_low()
 
                 last_type = self.last_transaction_types[exchange][currency]

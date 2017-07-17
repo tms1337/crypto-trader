@@ -1,3 +1,4 @@
+import logging
 from enum import Enum, unique
 
 
@@ -15,6 +16,10 @@ class Decision:
     price = None
     exchange = None
 
+    def __init__(self, logger_name="app"):
+        self.logger_name = logger_name
+        self.logger = logging.getLogger("%s.Decision" % logger_name)
+
     def is_valid(self):
         is_invalid = self.base_currency is None or \
                      self.quote_currency is None or \
@@ -26,7 +31,9 @@ class Decision:
 
     def check_validity(self):
         if not self.is_valid():
-            raise AssertionError("All decision fields except price must be set")
+            error_message = "All decision fields except price must be set"
+            self.logger.error(error_message)
+            raise AssertionError(error_message)
 
     def __str__(self):
         currency_pair = "(%s %s)" % (self.base_currency,

@@ -1,3 +1,5 @@
+import logging
+
 from trading.deciders.decision import Decision, TransactionType
 from trading.exchange.base import CurrencyMixin
 from .base import TransactionDecider
@@ -9,7 +11,8 @@ class ExchangeDiffDecider(TransactionDecider):
                  currencies,
                  trading_currency,
                  wrapper_container,
-                 verbose=0):
+                 verbose=0,
+                 logger_name="app"):
 
         self.trading_currency = trading_currency
         CurrencyMixin.check_currency(trading_currency)
@@ -20,6 +23,9 @@ class ExchangeDiffDecider(TransactionDecider):
         self.current_currency_index = 0
 
         self.verbose = verbose
+
+        self.logger_name = logger_name
+        self.logger = logging.getLogger("%s.ExchangeDiffDecider" % logger_name)
 
         TransactionDecider.__init__(self, wrapper_container)
 
@@ -59,8 +65,7 @@ class ExchangeDiffDecider(TransactionDecider):
                         best_exchanges["sell"] = second
 
         if max_margin < 0:
-            if self.verbose >= 1:
-                print("No suitable difference to chose :(")
+            self.logger.debug("No suitable difference to chose :(")
             return []
         else:
             low_decision = Decision()
