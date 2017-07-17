@@ -1,3 +1,4 @@
+import logging
 import time
 
 from trading.deciders.decision import Decision, TransactionType
@@ -12,7 +13,8 @@ class PercentBasedTransactionDecider(TransactionDecider):
                  trading_currency,
                  buy_threshold,
                  sell_threshold,
-                 wrapper_container):
+                 wrapper_container,
+                 logger_name="app"):
 
         self.trading_currency = trading_currency
         CurrencyMixin.check_currency(trading_currency)
@@ -32,6 +34,9 @@ class PercentBasedTransactionDecider(TransactionDecider):
                             for exchange in wrapper_container.wrappers}
 
         self.last_applied_prices = copy.deepcopy(self.last_prices)
+
+        self.logger_name = logger_name
+        self.logger = logging.getLogger("%s.PercentBased" % logger_name)
 
         TransactionDecider.__init__(self, wrapper_container)
 

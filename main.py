@@ -29,11 +29,12 @@ fh = logging.FileHandler('debug.log')
 fh.setLevel(logging.DEBUG)
 
 # create console handler with a higher log level
-ch = logging.StreamHandler()
-ch.setLevel(logging.ERROR)
+ch = logging.StreamHandler(sys.stdout)
+ch.setLevel(logging.DEBUG)
 
 # create formatter and add it to the handlers
-formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - '
+                              '\n\t%(message)s')
 fh.setFormatter(formatter)
 ch.setFormatter(formatter)
 
@@ -46,7 +47,7 @@ daemon = None
 try:
     base_currency = "ETH"
     quote_currency = "BTC"
-    dt = 15
+    dt = 60
 
     print("Starting daemon with base_currency: %s and quote_currency: %s" % (base_currency,
                                                                              quote_currency))
@@ -117,7 +118,7 @@ try:
                                               base_value_exchange="kraken")
 
     fixed_volume_decider = FixedValueVolumeDecider(wrapper_container=wrapper_container,
-                                                   values={"ETH": 0.1, "XRP": 200, "LTC": 20, "ETC": 40})
+                                                   values={"ETH": 0.01, "XRP": 100, "LTC": 2, "ETC": 4})
 
     percent_based_transaction_decider = PercentBasedTransactionDecider(currencies=trading_currencies,
                                                                        trading_currency=quote_currency,
@@ -127,9 +128,9 @@ try:
 
     daemon = Daemon(wrapper_container=wrapper_container,
                     dt_seconds=dt,
-                    transaction_deciders=[percent_based_transaction_decider],
+                    transaction_deciders=[transaction_decider],
                     volume_decider=fixed_volume_decider,
-                    verbose=1)
+                    logger_name="app")
 
 except Exception as ex:
     print("Error while initializing daemon and its parts"

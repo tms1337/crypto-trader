@@ -51,15 +51,18 @@ class ExchangeDiffDecider(TransactionDecider):
         best_exchanges = {}
         for first in high_low_per_exchange:
             for second in high_low_per_exchange:
+                self.logger.debug("Checking exchange pair (%s, %s)" % (first, second))
                 if first != second:
                     margin = high_low_per_exchange[first]["low"] - high_low_per_exchange[second]["high"]
                     if margin > max_margin:
+                        self.logger.debug("Found new max margin %f" % max_margin)
                         max_margin = margin
                         best_exchanges["buy"] = second
                         best_exchanges["sell"] = first
 
                     margin = high_low_per_exchange[second]["low"] - high_low_per_exchange[first]["high"]
                     if margin > max_margin:
+                        self.logger.debug("Found new max margin %f" % max_margin)
                         max_margin = margin
                         best_exchanges["buy"] = first
                         best_exchanges["sell"] = second
@@ -75,12 +78,16 @@ class ExchangeDiffDecider(TransactionDecider):
             low_decision.exchange = best_exchanges["sell"]
             low_decision.price = high_low_per_exchange[best_exchanges["sell"]]["low"]
 
+            self.logger.debug("Low decision chosen %s" % low_decision)
+
             high_decision = Decision()
             high_decision.base_currency = currency
             high_decision.quote_currency = self.trading_currency
             high_decision.transaction_type = TransactionType.BUY
             high_decision.exchange = best_exchanges["buy"]
             high_decision.price = high_low_per_exchange[best_exchanges["buy"]]["high"]
+
+            self.logger.debug("High decision chosen %s" % high_decision)
 
             decisions.append((high_decision, low_decision))
 
@@ -96,7 +103,8 @@ class ExchangeDiffBackup(TransactionDecider):
                  base_currency,
                  wrapper_container,
                  price_margin_perc=0.1,
-                 verbose=0):
+                 verbose=0,
+                 logger_name="app"):
 
         self.trading_currency = base_currency
         CurrencyMixin.check_currency(base_currency)
@@ -108,6 +116,8 @@ class ExchangeDiffBackup(TransactionDecider):
 
         self.price_margin_perc = price_margin_perc
         self.verbose = verbose
+        self.logger_name = logger_name
+        self.logger = logging.getLogger("%s.DiffBackup" % self.logger_name)
 
         TransactionDecider.__init__(self, wrapper_container)
 
@@ -129,17 +139,14 @@ class ExchangeDiffBackup(TransactionDecider):
             price = wrapper.stats_provider.ticker_last()
 
             if price > high[1]:
-                if self.verbose >= 2:
-                    print("Setting high price for %s at (%s, %f)" % (currency, exchange, price))
+                self.logger.debug("Setting high price for %s at (%s, %f)" % (currency, exchange, price))
                 high = (exchange, price)
 
             if price < low[1]:
-                if self.verbose >= 2:
-                    print("Setting low price for %s at (%s, %f)" % (currency, exchange, price))
+                self.logger.debug("Setting low price for %s at (%s, %f)" % (currency, exchange, price))
                 low = (exchange, price)
 
-        if self.verbose >= 1:
-            print("Chose low high for %s at %s and %s" % (currency, low, high))
+        self.logger.info("Chose low high for %s at %s and %s" % (currency, low, high))
 
         # to ensure faster transaction
         self.price_margin_perc = 0.1
@@ -158,6 +165,8 @@ class ExchangeDiffBackup(TransactionDecider):
         high_decision.transaction_type = TransactionType.SELL
         high_decision.exchange = high[0]
         high_decision.price = high[1] - price_margin
+
+        self.logger.info("Chose decision pair (%s, %s)" % (low_decision, high_decision))
 
         decisions.append((low_decision, high_decision))
 

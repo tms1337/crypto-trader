@@ -1,3 +1,5 @@
+import logging
+
 from trading.exchange.base import CurrencyMixin
 import FinexAPI.FinexAPI as finex
 
@@ -6,8 +8,12 @@ class BitfinexProvider(CurrencyMixin):
     def __init__(self,
                  base_currency,
                  quote_currency,
-                 api=finex):
+                 api=finex,
+                 logger_name="app"):
         self.api = api
+
+        self.logger_name = logger_name
+        self.logger = logging.getLogger("%s.BitfinexProvider" % logger_name)
 
         CurrencyMixin.__init__(self,
                                base_currency,
@@ -29,8 +35,13 @@ class BitfinexProvider(CurrencyMixin):
         return CurrencyMixin.form_pair(self)
 
     def _check_response(self, response):
+        self.logger.debug("Checking response: %s" % response)
+
         if not isinstance(response, dict) and not isinstance(response, list):
-            raise RuntimeError("Error during connecting to Bitfinex")
+            error_message = "Error during connecting to Bitfinex"
+
+            self.logger.error("%s\n\t%s" % (error_message, response))
+            raise RuntimeError(error_message)
 
 
 class PrivateBitfinexProvider(BitfinexProvider):

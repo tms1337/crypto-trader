@@ -1,3 +1,5 @@
+import logging
+
 import krakenex
 
 from trading.exchange.base import CurrencyMixin
@@ -7,9 +9,13 @@ class KrakenProvider(CurrencyMixin):
     def __init__(self,
                  base_currency,
                  quote_currency,
+                 logger_name="app",
                  api=krakenex.API()):
 
         self.k = api
+
+        self.logger_name = logger_name
+        self.logger = logging.getLogger("%s.KrakenProvider" % logger_name)
 
         CurrencyMixin.__init__(self,
                                base_currency,
@@ -28,13 +34,20 @@ class KrakenProvider(CurrencyMixin):
 
         return currency_mapping[currency]
 
-    @staticmethod
-    def _check_response(server_response):
+    def _check_response(self, server_response):
+        self.logger.debug("Checking response: %s" % server_response)
+
         if "error" not in server_response:
-            raise ValueError("Server responded with invalid response")
+            error_message = "Server responded with invalid response"
+
+            self.logger.error("%s\n\t%s" % (error_message, server_response))
+            raise ValueError(error_message)
 
         if len(server_response["error"]) != 0:
-            raise RuntimeError("Server responded with error %s" % server_response["error"])
+            error_message = "Server responded with error %s" % server_response["error"]
+
+            self.logger.error(error_message)
+            raise RuntimeError(error_message)
 
     def _get_timestamp_period_before(self, period):
         time_response = self.k.query_public("Time")

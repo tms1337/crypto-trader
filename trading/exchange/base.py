@@ -1,3 +1,4 @@
+import logging
 from abc import ABC, abstractmethod
 
 from trading.deciders.decision import TransactionType, Decision
@@ -6,12 +7,16 @@ from trading.deciders.decision import TransactionType, Decision
 class CurrencyMixin(ABC):
     def __init__(self,
                  base_currency=None,
-                 quote_currency=None):
+                 quote_currency=None,
+                 logger_name="app"):
         self._check_arguments(base_currency,
                               quote_currency)
 
         self.base_currency = self.map_currency(base_currency)
         self.quote_currency = self.map_currency(quote_currency)
+
+        self.logger_name = logger_name
+        self.logger = logging.getLogger("%s.CurrencyMixin" % logger_name)
 
     def set_currencies(self, base_currency, quote_currency):
         self._check_arguments(base_currency, quote_currency)
@@ -35,13 +40,15 @@ class CurrencyMixin(ABC):
 
         return currency in currency_list
 
-    @staticmethod
-    def _check_arguments(base_currency, quote_currency):
+    def _check_arguments(self, base_currency, quote_currency):
         only_base_none = base_currency is None and quote_currency is not None
         only_quote_none = base_currency is not None and quote_currency is None
 
         if only_base_none or only_quote_none:
-            raise ValueError("Either none or both currencies must be specified")
+            error_message = "Either none or both currencies must be specified"
+
+            self.logger.error(error_message)
+            raise ValueError(error_message)
 
 
 class StatsProvider(ABC):
@@ -82,8 +89,11 @@ class StatsProvider(ABC):
 
 
 class TradeProvider(ABC):
-    def __init__(self, verbose=1):
+    def __init__(self, verbose=1, logger_name="app"):
         self.verbose = verbose
+
+        self.logger_name = logger_name
+        self.logger = logging.getLogger("%s.TradeProvider" % logger_name)
 
     @abstractmethod
     def total_balance(self):
@@ -105,15 +115,13 @@ class TradeProvider(ABC):
                 self.execute_single_decision(decision)
             except Exception as ex:
                 failed_decisions.append(decision)
-                if self.verbose >= 1:
-                    print("An error has occurred, %s" % str(ex))
+                self.logger.error("An error has occurred, %s" % str(ex))
 
         return failed_decisions
 
     def execute_single_decision(self, decision):
         if not isinstance(decision, Decision):
-            if self.verbose >= 1:
-                print("Invalid decision object %s" % str(decision))
+            self.logger.error("Invalid decision object %s" % str(decision))
             raise ValueError("Invalid decision object")
 
         self.prepare_currencies(decision.base_currency,
@@ -132,29 +140,41 @@ class TradeProvider(ABC):
 class ExchangeWrapper:
     def __init__(self,
                  trade_provider,
-                 stats_provider):
+                 stats_provider,
+                 logger_name="app"):
 
         self.trade_provider = trade_provider
         self.stats_provider = stats_provider
 
-    @staticmethod
-    def _check_trader(trader):
-        if not isinstance(trader, TradeProvider):
-            raise ValueError("Trade provider must be instance of TradeProvider")
+        self.logger_name = logger_name
+        self.logger = logging.getLogger("%s.ExchangeWrapper" % logger_name)
 
-    @staticmethod
-    def _check_stats_provider(stats_provider):
+    def _check_trader(self, trader):
+        if not isinstance(trader, TradeProvider):
+            error_message = "Trade provider must be instance of TradeProvider"
+
+            self.logger.error(error_message)
+            raise ValueError(error_message)
+
+    def _check_stats_provider(self, stats_provider):
         if not isinstance(stats_provider, StatsProvider):
-            raise ValueError("Stats provider must be instance of StatsProvider")
+            error_message = "Stats provider must be instance of StatsProvider"
+
+            self.logger.error(error_message)
+            raise ValueError(error_message)
 
 
 class ExchangeWrapperContainer:
-    def __init__(self, wrappers=None):
+    def __init__(self, wrappers=None, logger_name="app"):
         if wrappers is None:
             self.wrappers = {}
         else:
             self._check_wrappers(wrappers)
             self.wrappers = wrappers
+
+        self.logger_name = logger_name
+        self.logger = logging.getLogger("%s.ExchangeWrapperContainer" %
+                                        logger_name)
 
     def add_wrapper(self, exchange, wrapper):
         self._check_wrapper(wrapper)
@@ -191,22 +211,27 @@ class ExchangeWrapperContainer:
             self._check_wrapper(wrappers[exchange])
 
     def print_balance(self):
+        print_message = ""
         for exchange in self.wrappers:
             wrapper = self.wrappers[exchange]
-            print("Exchange: %s" % exchange)
+            print_message += "Exchange: %s\n" % exchange
             total_balance = wrapper.trade_provider.total_balance()
             for currency in total_balance:
                 if float(total_balance[currency]) != 0:
-                    print("\t\t%s: %s" % (currency, total_balance[currency]))
-            print()
+                    print_message += "\t\t%s: %s" % (currency, total_balance[currency]) + "\n"
 
-    @staticmethod
-    def _check_wrapper(wrapper):
+        self.logger.debug(print_message)
+
+    def _check_wrapper(self, wrapper):
         if not isinstance(wrapper, ExchangeWrapper):
-            raise ValueError("Wrapper name must be an instance \
-                             of ExchangeWrapper")
+            error_message = "Wrapper name must be an instance \
+                             of ExchangeWrapper"
+            self.logger.error(error_message)
+            raise ValueError(error_message)
 
-    @staticmethod
-    def _check_exchange(exchange):
+    def _check_exchange(self, exchange):
         if not isinstance(exchange, str):
-            raise ValueError("Exchange name must be a string")
+            error_message = "Exchange name must be a string"
+
+            self.logger.error(error_message)
+            raise ValueError(error_message)

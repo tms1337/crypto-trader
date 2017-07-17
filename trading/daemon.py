@@ -1,4 +1,5 @@
 import datetime
+import logging
 import random
 import time
 
@@ -14,7 +15,7 @@ class Daemon:
                  volume_decider,
                  dt_seconds=60,
                  dt_timeout_seconds=3,
-                 verbose=1):
+                 logger_name="app"):
 
         self._check_wrapper_container(wrapper_container)
         self._check_transaction_deciders(transaction_deciders)
@@ -26,17 +27,16 @@ class Daemon:
         self.volume_decider = volume_decider
         self.dt_seconds = dt_seconds
         self.dt_timeout_seconds = dt_timeout_seconds
-        self.verbose = verbose
+
+        self.logger_name = logger_name
+        self.logger = logging.getLogger("%s.Daemon" % logger_name)
 
     def run(self):
         exception_n = 0
 
         while True:
-            if self.verbose >= 1:
-                print("Time: %s" % (datetime.datetime.now()))
             try:
-                if self.verbose >= 1:
-                    print("Making decision")
+                self.logger.info("Making decision")
 
                 partial_decisions = None
                 for transaction_decider in self.transaction_deciders:
@@ -45,8 +45,7 @@ class Daemon:
 
                 full_decisions = self.volume_decider.decide(partial_decisions)
 
-                if self.verbose >= 2:
-                    print("Decision made\n\t%s" % str(full_decisions))
+                self.logger.info("Decision made:\n%s" % str(full_decisions))
 
                 for decision in full_decisions:
                     if isinstance(decision, tuple):
@@ -65,8 +64,8 @@ class Daemon:
                 if exception_n >= 5:
                     exit(1)
 
-                print("\033[91mAn error has occurred while creating decision, waiting for the next step"
-                      "\n\tError: %s\033[0m" % str(ex))
+                error_message = "An error has occurred while creating decision, waiting for the next step"
+                self.logger.error(error_message)
             else:
                 try:
                     for transaction_decider in self.transaction_deciders:
@@ -76,51 +75,51 @@ class Daemon:
                     print("\033[91mAn error has occurred while applying decision, waiting for the next step"
                           "\n\tError: %s\033[0m" % str(ex_inner))
 
-            if self.verbose >= 1:
-                print("\n")
-                for _ in range(100):
-                    print("-", end="")
-                print("\n")
-
             time.sleep(random.uniform(0.8 * self.dt_seconds, self.dt_seconds))
 
     def apply_decisions(self, decisions):
-        if self.verbose >= 1:
-            print("Applying decision %s" % str(decisions))
+        self.logger.info("Applying decision\n%s" % str(decisions))
 
         failed_decisions = self.wrapper_container.create_bulk_offers(decisions)
         if failed_decisions is not None and len(failed_decisions) != 0:
-            raise RuntimeError("An error has occured during transaction execution, "
-                               "\n\tFailed decisions %s" % str(failed_decisions))
+            error_message = "An error has occured during transaction execution, " \
+                         "\n\tFailed decisions %s" % str(failed_decisions)
 
-        print("\033[92mDecision succesfully applied")
+            self.logger.error(error_message)
+            raise RuntimeError(error_message)
 
-        if self.verbose >= 2:
-            print("Total balance:\n\n")
-            self.wrapper_container.print_balance()
+        self.logger.info("Decision succesfully applied")
 
-        print("\033[0m")
+        self.logger.info("Total balance:\n\n")
+        self.wrapper_container.print_balance()
 
-
-    @staticmethod
-    def _check_wrapper_container(wrapper_container):
+    def _check_wrapper_container(self, wrapper_container):
         if not isinstance(wrapper_container, ExchangeWrapperContainer):
-            raise ValueError("Wrapper container decider must be an instance of ExchangeWrapperContainer")
+            error_message = "Wrapper container decider must be an instance of ExchangeWrapperContainer"
 
-    @staticmethod
-    def _check_transaction_decider(transaction_decider):
+            self.logger.error(error_message)
+            raise ValueError(error_message)
+
+    def _check_transaction_decider(self, transaction_decider):
         if not isinstance(transaction_decider, TransactionDecider):
-            raise ValueError("Transaction decider must be an instance of TransactionDecider")
+            error_message = "Transaction decider must be an instance of TransactionDecider"
 
-    @staticmethod
-    def _check_volume_decider(volume_decider):
+            self.logger.error(error_message)
+            raise ValueError(error_message)
+
+    def _check_volume_decider(self, volume_decider):
         if not isinstance(volume_decider, VolumeDecider):
-            raise ValueError("Volume decider must be an instance of VolumeDecider")
+            error_message = "Volume decider must be an instance of VolumeDecider"
 
-    @staticmethod
-    def _check_dt_seconds(dt_seconds):
+            self.logger.error(error_message)
+            raise ValueError(error_message)
+
+    def _check_dt_seconds(self, dt_seconds):
         if dt_seconds < 1:
-            raise ValueError("dt must be larger or equal to 1")
+            error_message = "dt must be larger or equal to 1"
+
+            self.logger.error(error_message)
+            raise ValueError(error_message)
 
     def _check_transaction_deciders(self, transaction_deciders):
         for transaction_decider in transaction_deciders:

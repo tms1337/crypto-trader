@@ -1,16 +1,21 @@
+import logging
+
 from poloniex import Poloniex
 
 from trading.exchange.base import CurrencyMixin
 
 
 class PoloniexProvider(CurrencyMixin):
-
     def __init__(self,
                  base_currency,
                  quote_currency,
+                 logger_name="app",
                  api=Poloniex()):
         self._check_api(api)
         self.api = api
+
+        self.logger_name = logger_name
+        self.logger = logging.getLogger("%s.PoloniexProvider" % logger_name)
 
         CurrencyMixin.__init__(self,
                                base_currency,
@@ -33,14 +38,15 @@ class PoloniexProvider(CurrencyMixin):
         return "%s_%s" % (self.quote_currency,
                           self.base_currency)
 
-    @staticmethod
-    def _check_api(api):
+    def _check_api(self, api):
         if not isinstance(api, Poloniex):
-            raise ValueError("API object must be an instance of Poloniex")
+            error_message = "API object must be an instance of Poloniex"
+
+            self.logger.error(error_message)
+            raise ValueError(error_message)
 
     def _check_response(self, response):
-        pass
-
+        self.logger.debug("Checking response: %s" % response)
 
 
 class PrivatePoloniexProvider(PoloniexProvider):
