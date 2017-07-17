@@ -167,7 +167,8 @@ class ExchangeWrapperContainer:
     def create_bulk_offers(self, decisions):
         failed_decisions = []
 
-        for decision in decisions:
+        for i in range(len(decisions)):
+            decision = decisions[i]
             if isinstance(decision, tuple):
                 try:
                     for d in decision:
@@ -182,7 +183,7 @@ class ExchangeWrapperContainer:
                 except Exception as ex:
                     failed_decisions.append(decision)
 
-            return failed_decisions
+        return failed_decisions
 
     def _check_wrappers(self, wrappers):
         for exchange in wrappers:

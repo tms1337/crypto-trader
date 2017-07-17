@@ -1,5 +1,6 @@
 from trading.daemon import Daemon
 from trading.deciders.transaction.exchangediff import ExchangeDiffDecider, ExchangeDiffBackup
+from trading.deciders.transaction.percentbased import PercentBasedTransactionDecider
 from trading.deciders.transaction.simple import AlwaysBuyTransactionDecider
 from trading.deciders.volume.fixedincome import FixedIncomeVolumeDecider
 from trading.deciders.volume.simple import FixedValueVolumeDecider
@@ -22,7 +23,7 @@ daemon = None
 try:
     base_currency = "ETH"
     quote_currency = "BTC"
-    dt = 15
+    dt = 5
 
     print("Starting daemon with base_currency: %s and quote_currency: %s" % (base_currency,
                                                                              quote_currency))
@@ -76,12 +77,12 @@ try:
 
     wrapper_container = ExchangeWrapperContainer(wrappers)
 
-    trading_currencies = [base_currency, "XRP", "LTC", "ETC"]
-    transaction_decider = ExchangeDiffDecider(base_currency=quote_currency,
+    trading_currencies = [base_currency, "XRP"]
+    transaction_decider = ExchangeDiffDecider(trading_currency=quote_currency,
                                               currencies=trading_currencies,
                                               wrapper_container=wrapper_container,
                                               verbose=1)
-    
+
     backup_transaction_decider = ExchangeDiffBackup(base_currency=quote_currency,
                                                     currencies=trading_currencies,
                                                     wrapper_container=wrapper_container,
@@ -92,10 +93,19 @@ try:
                                               value=0.02,
                                               base_value_exchange="kraken")
 
+    fixed_volume_decider = FixedValueVolumeDecider(wrapper_container=wrapper_container,
+                                                   values={"ETH": 0.5, "XRP": 1000, "LTC": 20, "ETC": 40})
+
+    percent_based_transaction_decider = PercentBasedTransactionDecider(currencies=trading_currencies,
+                                                                       trading_currency=quote_currency,
+                                                                       wrapper_container=wrapper_container,
+                                                                       sell_threshold=0.2,
+                                                                       buy_threshold=0.05)
+
     daemon = Daemon(wrapper_container=wrapper_container,
                     dt_seconds=dt,
-                    transaction_deciders=[transaction_decider, backup_transaction_decider],
-                    volume_decider=volume_decider,
+                    transaction_deciders=[percent_based_transaction_decider],
+                    volume_decider=fixed_volume_decider,
                     verbose=1)
 
 except Exception as ex:

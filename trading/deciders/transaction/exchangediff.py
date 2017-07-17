@@ -7,12 +7,12 @@ import math
 class ExchangeDiffDecider(TransactionDecider):
     def __init__(self,
                  currencies,
-                 base_currency,
+                 trading_currency,
                  wrapper_container,
                  verbose=0):
 
-        self.trading_currency = base_currency
-        CurrencyMixin.check_currency(base_currency)
+        self.trading_currency = trading_currency
+        CurrencyMixin.check_currency(trading_currency)
 
         for curr in currencies:
             CurrencyMixin.check_currency(curr)

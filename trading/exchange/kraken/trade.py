@@ -28,8 +28,8 @@ class KrakenTradeProvider(PrivateKrakenProvider,
             offer_response = self.k.query_private("AddOrder", {"pair": self.form_pair(),
                                                                "type": "buy",
                                                                "ordertype": "limit",
-                                                               "price": str(price),
-                                                               "volume": str(volume),
+                                                               "price": "{0:.10f}".format(price),
+                                                               "volume": "{0:.10f}".format(volume),
                                                                "trading_agreement": "agree"})
             self._check_response(offer_response)
 
@@ -50,7 +50,7 @@ class KrakenTradeProvider(PrivateKrakenProvider,
         offer_response = self.k.query_private("AddOrder", {"pair": self.form_pair(),
                                                            "type": "buy",
                                                            "ordertype": "market",
-                                                           "volume": str(volume),
+                                                           "volume": "{0:.10f}".format(volume),
                                                            "trading_agreement": "agree"})
         self._check_response(offer_response)
 
@@ -58,7 +58,7 @@ class KrakenTradeProvider(PrivateKrakenProvider,
         offer_response = self.k.query_private("AddOrder", {"pair": self.form_pair(),
                                                            "type": "sell",
                                                            "ordertype": "market",
-                                                           "volume": str(volume),
+                                                           "volume": "{0:.10f}".format(volume),
                                                            "trading_agreement": "agree"})
         self._check_response(offer_response)
 
