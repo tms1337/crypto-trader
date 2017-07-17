@@ -18,13 +18,16 @@ class KrakenTradeProvider(PrivateKrakenProvider,
                                        quote_currency=quote_currency,
                                        api=api)
 
-    def total_balance(self):
+    def total_balance(self, currency=None):
         balance_response = self.k.query_private("Balance")
         self._check_response(balance_response)
 
         balance = balance_response["result"]
 
-        return balance
+        if not currency is None:
+            return float(balance[self.map_currency_balance(currency)])
+        else:
+            return float(balance)
 
     def create_buy_offer(self, volume, price=None):
         if price is None:

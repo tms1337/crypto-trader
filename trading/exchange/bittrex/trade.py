@@ -17,11 +17,21 @@ class BittrexTradeProvider(PrivateBittrexProvider,
                                         quote_currency=quote_currency,
                                         api=api)
 
-    def total_balance(self):
+    def total_balance(self, currency=None):
         balance_response = self.api.getbalances()
         self._check_response(balance_response)
 
-        return balance_response
+        if not currency is None:
+            currency_balance = [b for b in balance_response if b["Currency"] == self.map_currency_balance(currency)]
+
+            if len(currency_balance) == 0:
+                return 0.0
+
+            currency_balance = currency_balance[0]
+
+            return float(currency_balance["Balance"])
+        else:
+            return float(balance_response)
 
     def create_buy_offer(self, volume, price=None):
         offer_response = self.api.buylimit(self.form_pair(),

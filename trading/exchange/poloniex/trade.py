@@ -27,10 +27,13 @@ class PoloniexTradeProvider(PrivatePoloniexProvider,
 
         TradeProvider.__init__(self, logger_name)
 
-    def total_balance(self):
+    def total_balance(self, currency=None):
         balance = self.api.returnBalances()
 
-        return balance
+        if not currency is None:
+            return float(balance[currency])
+        else:
+            return float(balance)
 
     def create_buy_offer(self, volume, price=None):
         buy_response = self.api.buy(self.form_pair(),

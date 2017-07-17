@@ -12,19 +12,19 @@ class Daemon:
     def __init__(self,
                  wrapper_container,
                  transaction_deciders,
-                 volume_decider,
+                 volume_deciders,
                  dt_seconds=60,
                  dt_timeout_seconds=3,
                  logger_name="app"):
 
         self._check_wrapper_container(wrapper_container)
         self._check_transaction_deciders(transaction_deciders)
-        self._check_volume_decider(volume_decider)
+        self._check_volume_deciders(volume_deciders)
         self._check_dt_seconds(dt_seconds)
 
         self.wrapper_container = wrapper_container
         self.transaction_deciders = transaction_deciders
-        self.volume_decider = volume_decider
+        self.volume_deciders = volume_deciders
         self.dt_seconds = dt_seconds
         self.dt_timeout_seconds = dt_timeout_seconds
 
@@ -38,16 +38,17 @@ class Daemon:
             try:
                 self.logger.info("Making decision")
 
-                partial_decisions = []
-                for transaction_decider in self.transaction_deciders:
-                    partial_decisions = transaction_decider.decide(partial_decisions)
-                    time.sleep(self.dt_timeout_seconds)
+                decisions = []
+                for i in range(len(self.transaction_deciders)):
+                    transaction_decider = self.transaction_deciders[i]
+                    volume_decider = self.volume_deciders[i]
 
-                full_decisions = self.volume_decider.decide(partial_decisions)
+                    decisions = transaction_decider.decide(decisions)
+                    decisions = volume_decider.decide(decisions)
 
-                self.logger.info("Decision made:\n%s" % str(full_decisions))
+                self.logger.info("Decision made:\n%s" % str(decisions))
 
-                for decision in full_decisions:
+                for decision in decisions:
                     if isinstance(decision, tuple):
                         for d in decision:
                             d.check_validity()
@@ -55,9 +56,7 @@ class Daemon:
                         decision.check_validity()
 
                 # so exchange does not time us out
-                time.sleep(self.dt_timeout_seconds)
-
-                self.apply_decisions(full_decisions)
+                self.apply_decisions(decisions)
             except Exception as ex:
                 exception_n += 1
 
@@ -75,7 +74,6 @@ class Daemon:
                     print("\033[91mAn error has occurred while applying decision, waiting for the next step"
                           "\n\tError: %s\033[0m" % str(ex_inner))
 
-
             time.sleep(random.uniform(0.8 * self.dt_seconds, self.dt_seconds))
 
     def apply_decisions(self, decisions):
@@ -84,7 +82,7 @@ class Daemon:
         failed_decisions = self.wrapper_container.create_bulk_offers(decisions)
         if failed_decisions is not None and len(failed_decisions) != 0:
             error_message = "An error has occured during transaction execution, " \
-                         "\n\tFailed decisions %s" % str(failed_decisions)
+                            "\n\tFailed decisions %s" % str(failed_decisions)
 
             self.logger.error(error_message)
             raise RuntimeError(error_message)
@@ -107,6 +105,10 @@ class Daemon:
 
             self.logger.error(error_message)
             raise ValueError(error_message)
+
+    def _check_volume_deciders(self, volume_deciders):
+        for decider in volume_deciders:
+            self._check_volume_decider(decider)
 
     def _check_volume_decider(self, volume_decider):
         if not isinstance(volume_decider, VolumeDecider):

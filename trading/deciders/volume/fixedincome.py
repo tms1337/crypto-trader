@@ -27,13 +27,14 @@ class FixedIncomeVolumeDecider(VolumeDecider):
             if not isinstance(decision, tuple):
                 raise ValueError("Only supporting tuple decisions")
 
-            trading_currency = decision[0].quote_currency
-            stats.set_currencies(trading_currency, self.real_currency)
+            if decision[0].volume is None:
+                trading_currency = decision[0].quote_currency
+                stats.set_currencies(trading_currency, self.real_currency)
 
-            diff = decision[1].price - decision[0].price
+                diff = decision[1].price - decision[0].price
 
-            high_price_trading_currency = stats.ticker_high()
-            decision[0].volume = self.value / (high_price_trading_currency * diff)
-            decision[1].volume = self.value / (high_price_trading_currency * diff)
+                high_price_trading_currency = stats.ticker_high()
+                decision[0].volume = self.value / (high_price_trading_currency * diff)
+                decision[1].volume = self.value / (high_price_trading_currency * diff)
 
         return partial_decisions

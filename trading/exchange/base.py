@@ -33,6 +33,10 @@ class CurrencyMixin(ABC):
     def map_currency(self, currency):
         pass
 
+    @abstractmethod
+    def map_currency_balance(self, currency):
+        pass
+
     @staticmethod
     def check_currency(currency):
         currency_list = ["BTC", "ETH", "XRP", "DASH"]
@@ -94,7 +98,7 @@ class TradeProvider(ABC):
         self.logger = logging.getLogger("%s.TradeProvider" % logger_name)
 
     @abstractmethod
-    def total_balance(self):
+    def total_balance(self, currency=None):
         pass
 
     @abstractmethod
@@ -235,6 +239,7 @@ class ExchangeWrapperContainer:
             self._check_wrapper(wrappers[exchange])
 
     def print_balance(self):
+        return
         print_message = ""
         for exchange in self.wrappers:
             wrapper = self.wrappers[exchange]

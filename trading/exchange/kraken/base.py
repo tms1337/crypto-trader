@@ -1,6 +1,7 @@
 import logging
 
 import krakenex
+import time
 
 from trading.exchange.base import CurrencyMixin
 
@@ -10,9 +11,11 @@ class KrakenProvider(CurrencyMixin):
                  base_currency=None,
                  quote_currency=None,
                  api=krakenex.API(),
-                 logger_name="app"):
+                 logger_name="app",
+                 pause_dt=1.5):
 
         self.k = api
+        self.pause_dt = pause_dt
 
         self.logger_name = logger_name
         self.logger = logging.getLogger("%s.KrakenProvider" % logger_name)
@@ -34,7 +37,22 @@ class KrakenProvider(CurrencyMixin):
 
         return currency_mapping[currency]
 
+    def map_currency_balance(self, currency):
+        currency_mapping = {
+            "ETH": "XETH",
+            "BTC": "XXBT",
+            "DASH": "DASH",
+            "XRP": "XXRP",
+            "USD": "ZUSD",
+            "ETC": "XETC",
+            "LTC": "XLTC"
+        }
+
+        return currency_mapping[currency]
+
     def _check_response(self, server_response):
+        time.sleep(self.pause_dt)
+
         self.logger.debug("Checking response: %s" % server_response)
 
         if "error" not in server_response:

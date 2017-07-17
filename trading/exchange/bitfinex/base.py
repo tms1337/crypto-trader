@@ -1,5 +1,7 @@
 import logging
 
+import time
+
 from trading.exchange.base import CurrencyMixin
 import FinexAPI.FinexAPI as finex
 
@@ -9,9 +11,11 @@ class BitfinexProvider(CurrencyMixin):
                  base_currency=None,
                  quote_currency=None,
                  api=finex,
-                 logger_name="app"):
+                 logger_name="app",
+                 pause_dt=1.5):
 
         self.api = api
+        self.pause_dt = pause_dt
 
         self.logger_name = logger_name
         self.logger = logging.getLogger("%s.BitfinexProvider" % logger_name)
@@ -32,10 +36,25 @@ class BitfinexProvider(CurrencyMixin):
 
         return currency_mapping[currency]
 
+    def map_currency_balance(self, currency):
+        currency_mapping = {
+            "ETH": "ETH",
+            "BTC": "BTC",
+            "DASH": "DASH",
+            "XRP": "XRP",
+            "USD": "USD",
+            "ETC": "ETC",
+            "LTC": "LTC"
+        }
+
+        return currency_mapping[currency]
+
     def form_pair(self):
         return CurrencyMixin.form_pair(self)
 
     def _check_response(self, response):
+        time.sleep(self.pause_dt)
+
         self.logger.debug("Checking response: %s" % response)
 
         if not isinstance(response, dict) and not isinstance(response, list):
