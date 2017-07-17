@@ -34,7 +34,7 @@ ch.setLevel(logging.DEBUG)
 
 # create formatter and add it to the handlers
 formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - '
-                              '\n\t%(message)s')
+                              '%(message)s')
 fh.setFormatter(formatter)
 ch.setFormatter(formatter)
 
@@ -86,7 +86,7 @@ try:
                                               currencies=trading_currencies,
                                               wrapper_container=wrapper_container)
 
-    backup_transaction_decider = ExchangeDiffBackup(base_currency=quote_currency,
+    backup_transaction_decider = ExchangeDiffBackup(trading_currency=quote_currency,
                                                     currencies=trading_currencies,
                                                     wrapper_container=wrapper_container)
 

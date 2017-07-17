@@ -24,7 +24,8 @@ class ExchangeDiffDecider(TransactionDecider):
         self.logger_name = logger_name
         self.logger = logging.getLogger("%s.ExchangeDiffDecider" % logger_name)
 
-        TransactionDecider.__init__(self, wrapper_container)
+        TransactionDecider.__init__(self,
+                                    wrapper_container)
 
     def decide(self, prev_decisions):
         decisions = prev_decisions
@@ -50,7 +51,9 @@ class ExchangeDiffDecider(TransactionDecider):
             for second in high_low_per_exchange:
                 if first != second:
                     self.logger.debug("Checking exchange pair (%s, %s)" % (first, second))
+
                     margin = high_low_per_exchange[first]["low"] - high_low_per_exchange[second]["high"]
+                    self.logger.debug("\tMargin in order %f", margin)
 
                     if margin > max_margin:
                         max_margin = margin
@@ -59,6 +62,8 @@ class ExchangeDiffDecider(TransactionDecider):
                         self.logger.debug("Found new max margin %f" % max_margin)
 
                     margin = high_low_per_exchange[second]["low"] - high_low_per_exchange[first]["high"]
+                    self.logger.debug("\tMargin in revrsed order %f", margin)
+
                     if margin > max_margin:
                         max_margin = margin
                         best_exchanges["buy"] = first
@@ -77,10 +82,6 @@ class ExchangeDiffDecider(TransactionDecider):
             low_decision.price = high_low_per_exchange[best_exchanges["sell"]]["low"]
 
             self.logger.debug("Low decision chosen %s" % low_decision)
-            try:
-                self._check_decision(low_decision)
-            except Exception:
-                return prev_decisions
 
             high_decision = Decision()
             high_decision.base_currency = currency
@@ -90,10 +91,6 @@ class ExchangeDiffDecider(TransactionDecider):
             high_decision.price = high_low_per_exchange[best_exchanges["buy"]]["high"]
 
             self.logger.debug("High decision chosen %s" % high_decision)
-            try:
-             self._check_decision(high_decision)
-            except Exception:
-                return prev_decisions
 
             decisions.append((high_decision, low_decision))
 
@@ -106,13 +103,13 @@ class ExchangeDiffDecider(TransactionDecider):
 class ExchangeDiffBackup(TransactionDecider):
     def __init__(self,
                  currencies,
-                 base_currency,
+                 trading_currency,
                  wrapper_container,
                  price_margin_perc=0.1,
                  logger_name="app"):
 
-        self.trading_currency = base_currency
-        CurrencyMixin.check_currency(base_currency)
+        self.trading_currency = trading_currency
+        CurrencyMixin.check_currency(trading_currency)
 
         for curr in currencies:
             CurrencyMixin.check_currency(curr)
@@ -123,7 +120,8 @@ class ExchangeDiffBackup(TransactionDecider):
         self.logger_name = logger_name
         self.logger = logging.getLogger("%s.DiffBackup" % self.logger_name)
 
-        TransactionDecider.__init__(self, wrapper_container)
+        TransactionDecider.__init__(self,
+                                    wrapper_container)
 
     def decide(self, prev_decisions):
         decisions = []
@@ -160,22 +158,12 @@ class ExchangeDiffBackup(TransactionDecider):
         low_decision.exchange = low[0]
         low_decision.price = low[1] + price_margin
 
-        try:
-            self._check_decision(low_decision)
-        except Exception:
-            return prev_decisions
-
         high_decision = Decision()
         high_decision.base_currency = currency
         high_decision.quote_currency = self.trading_currency
         high_decision.transaction_type = TransactionType.SELL
         high_decision.exchange = high[0]
         high_decision.price = high[1] - price_margin
-
-        try:
-            self._check_decision(high_decision)
-        except Exception:
-            return prev_decisions
 
         self.logger.info("Chose decision pair (%s, %s)" % (low_decision, high_decision))
 

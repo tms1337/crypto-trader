@@ -75,6 +75,7 @@ class Daemon:
                     print("\033[91mAn error has occurred while applying decision, waiting for the next step"
                           "\n\tError: %s\033[0m" % str(ex_inner))
 
+
             time.sleep(random.uniform(0.8 * self.dt_seconds, self.dt_seconds))
 
     def apply_decisions(self, decisions):

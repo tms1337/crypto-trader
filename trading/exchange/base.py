@@ -139,10 +139,12 @@ class ExchangeWrapper:
     def __init__(self,
                  trade_provider,
                  stats_provider,
+                 spending_factor=1,
                  logger_name="app"):
 
         self.trade_provider = trade_provider
         self.stats_provider = stats_provider
+        self.spending_factor = spending_factor
 
         self.logger_name = logger_name
         self.logger = logging.getLogger("%s.ExchangeWrapper" % logger_name)
@@ -160,6 +162,26 @@ class ExchangeWrapper:
 
             self.logger.error(error_message)
             raise ValueError(error_message)
+
+    def _check_decision(self, decision):
+        self.logger.debug("Checking decision %s", decision)
+
+        balance = self.stats_provider.total_balance()
+
+        if decision.transaction_type == TransactionType.BUY:
+            if not decision.quote_currency in balance or \
+                            self.spending_factor * balance[decision.quote_currency] < decision.volume:
+                error_message = "Balance not sufficient for transaction %s" % decision
+
+                self.logger.error(error_message)
+                raise AssertionError(error_message)
+        elif decision.transaction_type == TransactionType.SELL:
+            if not decision.base_currency in balance or \
+                            self.spending_factor * balance[decision.base_currency] < decision.volume:
+                error_message = "Balance not sufficient for transaction %s" % decision
+
+                self.logger.error(error_message)
+                raise AssertionError(error_message)
 
 
 class ExchangeWrapperContainer:
@@ -191,14 +213,18 @@ class ExchangeWrapperContainer:
                 try:
                     for d in decision:
                         exchange = d.exchange
+                        self.wrappers[exchange].check_decision(d)
+
+                    for d in decision:
+                        exchange = d.exchange
                         self.wrappers[exchange].trade_provider.execute_single_decision(d)
-                except Exception as ex:
+                except Exception:
                     failed_decisions.append(decision)
             else:
                 try:
                     exchange = decision.exchange
                     self.wrappers[exchange].trade_provider.execute_single_decision(decision)
-                except Exception as ex:
+                except Exception:
                     failed_decisions.append(decision)
 
         return failed_decisions
