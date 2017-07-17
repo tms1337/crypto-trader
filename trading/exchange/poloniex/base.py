@@ -9,8 +9,9 @@ class PoloniexProvider(CurrencyMixin):
     def __init__(self,
                  base_currency,
                  quote_currency,
-                 logger_name="app",
-                 api=Poloniex()):
+                 api=Poloniex(),
+                 logger_name="app"):
+
         self._check_api(api)
         self.api = api
 

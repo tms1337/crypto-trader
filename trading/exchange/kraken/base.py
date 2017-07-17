@@ -9,8 +9,8 @@ class KrakenProvider(CurrencyMixin):
     def __init__(self,
                  base_currency,
                  quote_currency,
-                 logger_name="app",
-                 api=krakenex.API()):
+                 api=krakenex.API(),
+                 logger_name="app"):
 
         self.k = api
 

@@ -11,7 +11,6 @@ class ExchangeDiffDecider(TransactionDecider):
                  currencies,
                  trading_currency,
                  wrapper_container,
-                 verbose=0,
                  logger_name="app"):
 
         self.trading_currency = trading_currency
@@ -21,8 +20,6 @@ class ExchangeDiffDecider(TransactionDecider):
             CurrencyMixin.check_currency(curr)
         self.currencies = currencies
         self.current_currency_index = 0
-
-        self.verbose = verbose
 
         self.logger_name = logger_name
         self.logger = logging.getLogger("%s.ExchangeDiffDecider" % logger_name)
@@ -51,21 +48,22 @@ class ExchangeDiffDecider(TransactionDecider):
         best_exchanges = {}
         for first in high_low_per_exchange:
             for second in high_low_per_exchange:
-                self.logger.debug("Checking exchange pair (%s, %s)" % (first, second))
                 if first != second:
+                    self.logger.debug("Checking exchange pair (%s, %s)" % (first, second))
                     margin = high_low_per_exchange[first]["low"] - high_low_per_exchange[second]["high"]
+
                     if margin > max_margin:
-                        self.logger.debug("Found new max margin %f" % max_margin)
                         max_margin = margin
                         best_exchanges["buy"] = second
                         best_exchanges["sell"] = first
+                        self.logger.debug("Found new max margin %f" % max_margin)
 
                     margin = high_low_per_exchange[second]["low"] - high_low_per_exchange[first]["high"]
                     if margin > max_margin:
-                        self.logger.debug("Found new max margin %f" % max_margin)
                         max_margin = margin
                         best_exchanges["buy"] = first
                         best_exchanges["sell"] = second
+                        self.logger.debug("Found new max margin %f" % max_margin)
 
         if max_margin < 0:
             self.logger.debug("No suitable difference to chose :(")
@@ -103,7 +101,6 @@ class ExchangeDiffBackup(TransactionDecider):
                  base_currency,
                  wrapper_container,
                  price_margin_perc=0.1,
-                 verbose=0,
                  logger_name="app"):
 
         self.trading_currency = base_currency
@@ -115,7 +112,6 @@ class ExchangeDiffBackup(TransactionDecider):
         self.current_currency_index = 0
 
         self.price_margin_perc = price_margin_perc
-        self.verbose = verbose
         self.logger_name = logger_name
         self.logger = logging.getLogger("%s.DiffBackup" % self.logger_name)
 

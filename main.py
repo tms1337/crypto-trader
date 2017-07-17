@@ -94,7 +94,7 @@ try:
 
     wrappers = {
         "kraken": kraken_wrapper,
-        # "poloniex": poloniex_wrapper,
+        "poloniex": poloniex_wrapper,
         # "bittrex": bittrex_wrapper,
         # "bitfinex": bitfinex_wrapper
     }
