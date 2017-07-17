@@ -47,7 +47,7 @@ daemon = None
 try:
     base_currency = "ETH"
     quote_currency = "BTC"
-    dt = 60
+    dt = 15
 
     print("Starting daemon with base_currency: %s and quote_currency: %s" % (base_currency,
                                                                              quote_currency))
@@ -101,8 +101,9 @@ try:
     percent_based_transaction_decider = PercentBasedTransactionDecider(currencies=trading_currencies,
                                                                        trading_currency=quote_currency,
                                                                        wrapper_container=wrapper_container,
-                                                                       sell_threshold=0.01,
-                                                                       buy_threshold=0.01)
+                                                                       sell_threshold=0.02,
+                                                                       buy_threshold=0.01,
+                                                                       security_loss_threshold=0.02)
 
     daemon = Daemon(wrapper_container=wrapper_container,
                     dt_seconds=dt,

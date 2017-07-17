@@ -28,8 +28,6 @@ class ExchangeDiffDecider(TransactionDecider):
                                     wrapper_container)
 
     def decide(self, prev_decisions):
-        decisions = prev_decisions
-
         currency = self.currencies[self.current_currency_index]
         self.current_currency_index = (self.current_currency_index + 1) % \
                                       len(self.currencies)
@@ -92,9 +90,9 @@ class ExchangeDiffDecider(TransactionDecider):
 
             self.logger.debug("High decision chosen %s" % high_decision)
 
-            decisions.append((high_decision, low_decision))
+            prev_decisions.append((high_decision, low_decision))
 
-            return decisions
+            return prev_decisions
 
     def apply_last(self):
         pass
@@ -124,8 +122,6 @@ class ExchangeDiffBackup(TransactionDecider):
                                     wrapper_container)
 
     def decide(self, prev_decisions):
-        decisions = []
-
         currency = self.currencies[self.current_currency_index]
         self.current_currency_index = (self.current_currency_index + 1) % \
                                       len(self.currencies)
@@ -167,9 +163,9 @@ class ExchangeDiffBackup(TransactionDecider):
 
         self.logger.info("Chose decision pair (%s, %s)" % (low_decision, high_decision))
 
-        decisions.append((low_decision, high_decision))
+        prev_decisions.append((low_decision, high_decision))
 
-        return decisions
+        return prev_decisions
 
     def apply_last(self):
         super().apply_last()

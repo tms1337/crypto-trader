@@ -38,7 +38,7 @@ class Daemon:
             try:
                 self.logger.info("Making decision")
 
-                partial_decisions = None
+                partial_decisions = []
                 for transaction_decider in self.transaction_deciders:
                     partial_decisions = transaction_decider.decide(partial_decisions)
                     time.sleep(self.dt_timeout_seconds)

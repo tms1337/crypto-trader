@@ -13,6 +13,7 @@ class PercentBasedTransactionDecider(TransactionDecider):
                  trading_currency,
                  buy_threshold,
                  sell_threshold,
+                 security_loss_threshold,
                  wrapper_container,
                  logger_name="app"):
 
@@ -25,6 +26,8 @@ class PercentBasedTransactionDecider(TransactionDecider):
 
         self.buy_threshold = buy_threshold
         self.sell_threshold = sell_threshold
+        self.security_loss_threshold = security_loss_threshold
+
         self.wrapper_container = wrapper_container
 
         self.last_transaction_types = {exchange: {currency: None for currency in currencies}
@@ -52,7 +55,6 @@ class PercentBasedTransactionDecider(TransactionDecider):
                                      self.trading_currency)
 
                 low = stats.ticker_high()
-                time.sleep(1)
                 high = stats.ticker_low()
 
                 last_type = self.last_transaction_types[exchange][currency]
@@ -76,7 +78,8 @@ class PercentBasedTransactionDecider(TransactionDecider):
                     sell_margin = (low - last_price) / last_price
                     buy_margin = (last_price - high) / last_price
 
-                    if last_type == TransactionType.BUY and sell_margin > self.sell_threshold:
+                    if (last_type == TransactionType.BUY and sell_margin > self.sell_threshold) or \
+                        (last_type == TransactionType.BUY and sell_margin < -self.security_loss_threshold):
 
                         decision = Decision()
                         decision.exchange = exchange
