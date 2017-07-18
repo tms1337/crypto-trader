@@ -251,14 +251,15 @@ class ExchangeWrapperContainer:
             try:
                 total_balance = wrapper.trade_provider.total_balance()
                 self.logger.debug(total_balance)
+
+                for currency in total_balance:
+                    if float(total_balance[currency]) != 0:
+                        if not currency in total_balance_per_currency:
+                            total_balance_per_currency[currency] = 0
+
+                        total_balance_per_currency[currency] += total_balance[currency]
             except Exception as ex:
                 self.logger.debug("Could not print balance for %s" % exchange)
-            for currency in total_balance:
-                if float(total_balance[currency]) != 0:
-                    if not currency in total_balance_per_currency:
-                        total_balance_per_currency[currency] = 0
-
-                    total_balance_per_currency[currency] += total_balance[currency]
 
         self.logger.debug("Total balance")
         self.logger.debug(total_balance_per_currency)
