@@ -12,7 +12,7 @@ class PoloniexStatsProvider(StatsProvider,
                  base_currency=None,
                  quote_currency=None,
                  api=Poloniex(),
-                 cache_invalidation_time=5):
+                 cache_invalidation_time=10):
 
         self.last_ticker_response = None
         self.last_time = None
@@ -52,7 +52,7 @@ class PoloniexStatsProvider(StatsProvider,
         return float(price)
 
     def _ticker_price(self):
-        if not self.last_time is None and time.time() - self.last_time < self.cache_invalidation_time:
+        if (not self.last_time is None) and (time.time() - self.last_time < self.cache_invalidation_time):
             return self.last_ticker_response
 
         ticker_response = self.api.returnTicker()

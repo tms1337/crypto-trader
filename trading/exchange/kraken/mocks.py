@@ -1,3 +1,4 @@
+from trading.exchange.kraken.trade import KrakenTradeProvider
 from .base import KrakenProvider
 from ..base import CurrencyMixin, TradeProvider
 
@@ -9,51 +10,46 @@ class PrivateKrakenProviderMock(KrakenProvider):
         super(PrivateKrakenProviderMock, self).__init__(base_currency, quote_currency)
 
 
-class TradeProviderMock(PrivateKrakenProviderMock,
-                        CurrencyMixin,
-                        TradeProvider):
+class StatsProviderMock(KrakenStatsProvider):
     def __init__(self,
-                 base_currency,
-                 quote_currency,
-                 initial_balance=100,
-                 verbose=0):
+                 high_array,
+                 low_array,
+                 last_array):
+        KrakenStatsProvider.__init__(self)
 
-        PrivateKrakenProviderMock.__init__(self, base_currency, quote_currency)
-        CurrencyMixin.__init__(self, base_currency, quote_currency)
+        self.low_array = low_array
+        self.high_array = high_array
+        self.last_array = last_array
 
-        self.verbose = verbose
+        self.i = 0
 
-        self.balance = {self.base_currency: initial_balance,
-                        self.quote_currency: initial_balance}
+    def ticker_high(self):
+        result = self.high_array[self.i]
 
-        self.stats = KrakenStatsProvider(base_currency=self.base_currency,
-                                         quote_currency=self.quote_currency)
+        return result
 
-    def total_balance(self):
-        return self.balance
+    def ticker_low(self):
+        result = self.low_array[self.i]
+        self.i += 1
+
+        return result
+
+    def ticker_last(self):
+        result = self.last_array[self.i]
+        self.i += 1
+
+        return result
+
+
+class TradeProviderMock(KrakenTradeProvider):
+    def __init__(self, key_uri=None, base_currency=None, quote_currency=None, api=None):
+        pass
+
+    def total_balance(self, currency=None):
+        return 100.0
 
     def create_buy_offer(self, volume, price=None):
-        if price is None:
-            self._create_market_buy_offer(volume)
-        else:
-            raise NotImplementedError("Mock does not support this "
-                                      "operation with price parameter")
+        pass
 
     def create_sell_offer(self, volume, price=None):
-        if price is None:
-            self._create_market_sell_offer(volume)
-        else:
-            raise NotImplementedError("Mock does not support this "
-                                      "operation with price parameter")
-
-    def _create_market_buy_offer(self, volume):
-        last_closing_price = self.stats.last_close()
-
-        self.balance[self.base_currency] += volume
-        self.balance[self.quote_currency] -= volume * last_closing_price
-
-    def _create_market_sell_offer(self, volume):
-        last_closing_price = self.stats.last_close()
-
-        self.balance[self.base_currency] -= volume
-        self.balance[self.quote_currency] += volume * last_closing_price
+        pass

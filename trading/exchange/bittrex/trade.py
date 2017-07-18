@@ -31,7 +31,7 @@ class BittrexTradeProvider(PrivateBittrexProvider,
 
             return float(currency_balance["Balance"])
         else:
-            return float(balance_response)
+            return { b["Currency"]: float(b["Balance"]) for b in balance_response }
 
     def create_buy_offer(self, volume, price=None):
         offer_response = self.api.buylimit(self.form_pair(),

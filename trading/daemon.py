@@ -14,7 +14,7 @@ class Daemon:
                  transaction_deciders,
                  volume_deciders,
                  dt_seconds=60,
-                 dt_timeout_seconds=3,
+                 dt_timeout_seconds=0.5,
                  logger_name="app"):
 
         self._check_wrapper_container(wrapper_container)
@@ -46,7 +46,7 @@ class Daemon:
                     decisions = transaction_decider.decide(decisions)
                     decisions = volume_decider.decide(decisions)
 
-                self.logger.info("Decision made:\n%s" % str(decisions))
+                self.logger.info("Decisions made:\n%s" % str(decisions))
 
                 for decision in decisions:
                     if isinstance(decision, tuple):
@@ -63,7 +63,7 @@ class Daemon:
                 if exception_n >= 5:
                     exit(1)
 
-                error_message = "An error has occurred while creating decision, waiting for the next step"
+                error_message = "An error has occurred while creating decision, waiting for the next step\nError: %s" % ex
                 self.logger.error(error_message)
             else:
                 try:
@@ -71,8 +71,8 @@ class Daemon:
                         transaction_decider.apply_last()
 
                 except Exception as ex_inner:
-                    print("\033[91mAn error has occurred while applying decision, waiting for the next step"
-                          "\n\tError: %s\033[0m" % str(ex_inner))
+                    print("An error has occurred while applying decision, waiting for the next step"
+                          "\n\tError: %s" % str(ex_inner))
 
             time.sleep(random.uniform(0.8 * self.dt_seconds, self.dt_seconds))
 

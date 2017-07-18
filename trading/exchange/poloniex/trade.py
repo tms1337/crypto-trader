@@ -33,7 +33,7 @@ class PoloniexTradeProvider(PrivatePoloniexProvider,
         if not currency is None:
             return float(balance[currency])
         else:
-            return float(balance)
+            return {b:float(balance[b]) for b in balance}
 
     def create_buy_offer(self, volume, price=None):
         buy_response = self.api.buy(self.form_pair(),

@@ -10,9 +10,11 @@ class FixedValueVolumeDecider(VolumeDecider):
         for decision in partial_decisions:
             if isinstance(decision, tuple):
                 for d in decision:
-                    d.volume = self.values[d.base_currency]
+                    if d.volume is None:
+                        d.volume = self.values[d.base_currency]
             else:
-                decision.volume = self.values[decision.base_currency]
+                if decision.volume is None:
+                    decision.volume = self.values[decision.base_currency]
 
         return partial_decisions
 

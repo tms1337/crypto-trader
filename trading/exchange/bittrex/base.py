@@ -12,7 +12,7 @@ class BittrexProvider(CurrencyMixin):
                  quote_currency=None,
                  api=bittrex.bittrex(None, None),
                  logger_name="app",
-                 pause_dt=1.5):
+                 pause_dt=2):
 
         self.api = api
         self.pause_dt = pause_dt

@@ -12,7 +12,7 @@ class PoloniexProvider(CurrencyMixin):
                  quote_currency=None,
                  api=Poloniex(),
                  logger_name="app",
-                 pause_dt=1.5):
+                 pause_dt=2):
 
         self._check_api(api)
         self.api = api

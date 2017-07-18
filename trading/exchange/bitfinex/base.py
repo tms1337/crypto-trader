@@ -12,7 +12,7 @@ class BitfinexProvider(CurrencyMixin):
                  quote_currency=None,
                  api=finex,
                  logger_name="app",
-                 pause_dt=1.5):
+                 pause_dt=2):
 
         self.api = api
         self.pause_dt = pause_dt
@@ -22,7 +22,8 @@ class BitfinexProvider(CurrencyMixin):
 
         CurrencyMixin.__init__(self,
                                base_currency,
-                               quote_currency)
+                               quote_currency,
+                               logger_name=self.logger_name)
 
     def map_currency(self, currency):
         currency_mapping = {

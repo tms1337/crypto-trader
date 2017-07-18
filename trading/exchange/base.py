@@ -167,14 +167,14 @@ class ExchangeWrapper:
             self.logger.error(error_message)
             raise ValueError(error_message)
 
-    def _check_decision(self, decision):
+    def check_decision(self, decision):
         self.logger.debug("Checking decision %s", decision)
 
-        balance = self.stats_provider.total_balance()
+        balance = self.trade_provider.total_balance()
 
         if decision.transaction_type == TransactionType.BUY:
             if not decision.quote_currency in balance or \
-                            self.spending_factor * balance[decision.quote_currency] < decision.volume:
+                            self.spending_factor * balance[decision.quote_currency] < decision.volume * decision.price:
                 error_message = "Balance not sufficient for transaction %s" % decision
 
                 self.logger.error(error_message)
@@ -222,13 +222,17 @@ class ExchangeWrapperContainer:
                     for d in decision:
                         exchange = d.exchange
                         self.wrappers[exchange].trade_provider.execute_single_decision(d)
-                except Exception:
+                except Exception as ex:
+                    self.logger.error("Error during transaction execution\n\tError %s" % (decision, ex))
                     failed_decisions.append(decision)
             else:
                 try:
                     exchange = decision.exchange
+                    self.wrappers[exchange].check_decision(decision)
+
                     self.wrappers[exchange].trade_provider.execute_single_decision(decision)
-                except Exception:
+                except Exception as ex:
+                    self.logger.error("Error while executing decision %s" % ex)
                     failed_decisions.append(decision)
 
         return failed_decisions

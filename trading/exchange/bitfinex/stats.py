@@ -3,10 +3,8 @@ from trading.exchange.bitfinex.base import BitfinexProvider
 import FinexAPI.FinexAPI as finex
 
 
-
 class BitfinexStatsProvider(BitfinexProvider,
                             StatsProvider):
-
     def ticker_last(self):
         ticker_response = self.api.ticker(symbol=self.form_pair())
         self._check_response(ticker_response)
@@ -27,4 +25,3 @@ class BitfinexStatsProvider(BitfinexProvider,
 
     def ohlc_history(self, interval=1, since=None):
         raise NotImplementedError()
-

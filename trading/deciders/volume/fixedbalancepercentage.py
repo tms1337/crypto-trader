@@ -15,7 +15,7 @@ class FixedBalancePercentageVolumeDecider(VolumeDecider):
 
     def decide(self, partial_decisions):
         for decision in partial_decisions:
-            if (not isinstance(decision, tuple) and decision.volume is None):
+            if not isinstance(decision, tuple) and decision.volume is None:
                 self.decide_single(decision, partial_decisions)
             elif isinstance(decision, tuple) and decision[0].volume is None:
                 for d in decision:

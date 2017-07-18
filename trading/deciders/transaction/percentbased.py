@@ -15,10 +15,14 @@ class PercentBasedTransactionDecider(TransactionDecider):
                  sell_threshold,
                  security_loss_threshold,
                  wrapper_container,
-                 logger_name="app"):
+                 logger_name="app",
+                 every_n=5):
 
         self.trading_currency = trading_currency
         CurrencyMixin.check_currency(trading_currency)
+
+        self.every_n = every_n
+        self.i = 0
 
         for curr in currencies:
             CurrencyMixin.check_currency(curr)
@@ -44,54 +48,28 @@ class PercentBasedTransactionDecider(TransactionDecider):
         TransactionDecider.__init__(self, wrapper_container)
 
     def decide(self, prev_decisions):
-        decisions = []
+        if self.i % self.every_n == 0:
+            for exchange in self.wrapper_container.wrappers:
+                self.logger.debug("Checking exchange: %s" % exchange)
+                wrapper = self.wrapper_container.wrappers[exchange]
+                stats = wrapper.stats_provider
 
-        for exchange in self.wrapper_container.wrappers:
-            wrapper = self.wrapper_container.wrappers[exchange]
-            stats = wrapper.stats_provider
+                for currency in self.currencies:
+                    self.logger.debug("\tChecking currency %s" % currency)
 
-            for currency in self.currencies:
-                stats.set_currencies(currency,
-                                     self.trading_currency)
+                    stats.set_currencies(currency,
+                                         self.trading_currency)
 
-                low = stats.ticker_high()
-                high = stats.ticker_low()
+                    low = stats.ticker_high()
+                    high = stats.ticker_low()
 
-                last_type = self.last_transaction_types[exchange][currency]
-                last_price = self.last_applied_prices[exchange][currency]
+                    last_type = self.last_transaction_types[exchange][currency]
+                    last_price = self.last_applied_prices[exchange][currency]
 
-                if last_type is None:
-                    # first time :)
-                    self.last_prices[exchange][currency] = high
+                    if last_type is None:
+                        # first time :)
+                        self.last_prices[exchange][currency] = high
 
-                    decision = Decision()
-                    decision.exchange = exchange
-                    decision.base_currency = currency
-                    decision.quote_currency = self.trading_currency
-                    decision.transaction_type = TransactionType.BUY
-                    decision.price = high
-
-                    decisions.append(decision)
-
-                    self.last_transaction_types[exchange][currency] = TransactionType.BUY
-                else:
-                    sell_margin = (low - last_price) / last_price
-                    buy_margin = (last_price - high) / last_price
-
-                    if (last_type == TransactionType.BUY and sell_margin > self.sell_threshold) or \
-                        (last_type == TransactionType.BUY and sell_margin < -self.security_loss_threshold):
-
-                        decision = Decision()
-                        decision.exchange = exchange
-                        decision.base_currency = currency
-                        decision.quote_currency = self.trading_currency
-                        decision.transaction_type = TransactionType.SELL
-                        decision.price = low
-
-                        decisions.append(decision)
-
-                        self.last_transaction_types[exchange][currency] = TransactionType.SELL
-                    elif last_type == TransactionType.SELL and buy_margin > self.buy_threshold:
                         decision = Decision()
                         decision.exchange = exchange
                         decision.base_currency = currency
@@ -99,11 +77,41 @@ class PercentBasedTransactionDecider(TransactionDecider):
                         decision.transaction_type = TransactionType.BUY
                         decision.price = high
 
-                        decisions.append(decision)
+                        prev_decisions.append(decision)
 
                         self.last_transaction_types[exchange][currency] = TransactionType.BUY
+                    else:
+                        sell_margin = (low - last_price) / last_price
+                        buy_margin = (last_price - high) / last_price
 
-        return decisions
+                        if (last_type == TransactionType.BUY and sell_margin >= self.sell_threshold) or \
+                            (last_type == TransactionType.BUY and sell_margin < -self.security_loss_threshold):
+
+                            decision = Decision()
+                            decision.exchange = exchange
+                            decision.base_currency = currency
+                            decision.quote_currency = self.trading_currency
+                            decision.transaction_type = TransactionType.SELL
+                            decision.price = low
+
+                            prev_decisions.append(decision)
+
+                            self.last_transaction_types[exchange][currency] = TransactionType.SELL
+                        elif last_type == TransactionType.SELL and buy_margin >= self.buy_threshold:
+                            decision = Decision()
+                            decision.exchange = exchange
+                            decision.base_currency = currency
+                            decision.quote_currency = self.trading_currency
+                            decision.transaction_type = TransactionType.BUY
+                            decision.price = high
+
+                            prev_decisions.append(decision)
+
+                            self.last_transaction_types[exchange][currency] = TransactionType.BUY
+
+            return prev_decisions
+        else:
+            self.i = (self.i + 1) % self.every_n
 
     def apply_last(self):
         self.last_applied_prices = copy.deepcopy(self.last_prices)

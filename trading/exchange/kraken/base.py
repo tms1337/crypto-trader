@@ -12,7 +12,7 @@ class KrakenProvider(CurrencyMixin):
                  quote_currency=None,
                  api=krakenex.API(),
                  logger_name="app",
-                 pause_dt=1.5):
+                 pause_dt=2):
 
         self.k = api
         self.pause_dt = pause_dt
@@ -53,6 +53,8 @@ class KrakenProvider(CurrencyMixin):
     def _check_response(self, server_response):
         time.sleep(self.pause_dt)
 
+        self.k = krakenex.API()
+
         self.logger.debug("Checking response: %s" % server_response)
 
         if "error" not in server_response:
@@ -79,4 +81,9 @@ class KrakenProvider(CurrencyMixin):
 class PrivateKrakenProvider(KrakenProvider):
     def __init__(self, key_uri, base_currency, quote_currency, api=krakenex.API()):
         super(PrivateKrakenProvider, self).__init__(base_currency, quote_currency, api)
+        self.key_uri = key_uri
         self.k.load_key(key_uri)
+
+    def _check_response(self, server_response):
+        KrakenProvider._check_response(server_response)
+        self.k.load_key(self.key_uri)
