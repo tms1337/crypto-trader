@@ -77,3 +77,6 @@ class PrivateBitfinexProvider(BitfinexProvider):
                                   quote_currency,
                                   api)
         self.api.load_keys(key_uri)
+
+    def prepare_currencies(self, base_currency, quote_currency):
+        self.set_currencies(base_currency, quote_currency)

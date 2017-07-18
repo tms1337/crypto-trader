@@ -18,14 +18,23 @@ class BitfinexTradeProvider(PrivateBitfinexProvider,
                                          api)
         TradeProvider.__init__(self, verbose)
 
+    def map_currency_balance(self, currency):
+        currency_map = {
+            "BTC": "btc",
+            "ETH": "eth"
+        }
+
     def total_balance(self, currency=None):
         balance_response = self.api.balances()
         self._check_response(balance_response)
 
+        balance = {b["currency"]:float(b["amount"])
+                   for b in balance_response if b["type"] == "exchange"}
+
         if not currency is None:
-            return float(balance_response[self.map_currency(currency)])
+            return balance[self.map_currency_balance(currency)]
         else:
-            return float(balance_response)
+            return {self.inverse_map_currency(b):balance[b] for b in balance}
 
     def create_buy_offer(self, volume, price=None):
         offer_response = self.api.place_order(amount=str(volume),
@@ -42,3 +51,11 @@ class BitfinexTradeProvider(PrivateBitfinexProvider,
                                               price=str(price),
                                               side="sell")
         self._check_response(offer_response)
+
+    def inverse_map_currency(self, currency):
+        inverse_currency_mapping = {
+            "eth": "ETH",
+            "btc": "BTC"
+        }
+
+        return inverse_currency_mapping[currency]

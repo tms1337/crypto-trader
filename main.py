@@ -56,7 +56,7 @@ try:
 
     kraken_wrapper = ExchangeWrapper(stats_provider=kraken_stats,
                                      trade_provider=kraken_trader,
-                                     spending_factor=1)
+                                     spending_factor=0.2)
 
     poloniex_stats = PoloniexStatsProvider()
     poloniex_trader = PoloniexTradeProvider(key_uri=("%s/poloniex_key" % key_directory))
@@ -73,25 +73,14 @@ try:
     bitfinex_stats = BitfinexStatsProvider()
     bitfinex_trader = BitfinexTradeProvider(key_uri=("%s/bitfinex_key" % key_directory))
     bitfinex_wrapper = ExchangeWrapper(stats_provider=bitfinex_stats,
-                                       trade_provider=bittrex_trader,
-                                       spending_factor=0.2)
-
-    bitfinex_stats.set_currencies("ETH", "BTC")
-    bitfinex_trader.set_currencies("ETH", "BTC")
-    bitfinex_trader.create_sell_offer(volume=0.1, price=bitfinex_stats.ticker_last())
-
-    kraken_mock_stats = StatsProviderMock([9, 10, 8], [9, 10, 8], [1, 10.5, 1])
-    kraken_mock_trade = TradeProviderMock()
-
-    # kraken_wrapper = ExchangeWrapper(stats_provider=kraken_mock_stats,
-    #                                  trade_provider=kraken_mock_trade)
-
+                                       trade_provider=bitfinex_trader,
+                                       spending_factor=0.3)
 
     wrappers = {
-        "kraken": kraken_wrapper,
-        # "poloniex": poloniex_wrapper,
-        # "bittrex": bittrex_wrapper,
-        # "bitfinex": bitfinex_wrapper
+        # "kraken": kraken_wrapper,
+        "poloniex": poloniex_wrapper,
+        "bittrex": bittrex_wrapper,
+        "bitfinex": bitfinex_wrapper
     }
 
     wrapper_container = ExchangeWrapperContainer(wrappers)
@@ -107,7 +96,7 @@ try:
     #
     # wrapper_container.create_bulk_offers([decision])
 
-    trading_currencies = ["ETH", "ICN"]
+    trading_currencies = ["ETH"]
     transaction_decider = ExchangeDiffDecider(trading_currency=quote_currency,
                                               currencies=trading_currencies,
                                               wrapper_container=wrapper_container)
@@ -118,11 +107,11 @@ try:
 
     volume_decider = FixedIncomeVolumeDecider(wrapper_container=wrapper_container,
                                               real_currency="USD",
-                                              value=0.10,
+                                              value=0.05,
                                               base_value_exchange="kraken")
 
     fixed_volume_decider = FixedValueVolumeDecider(wrapper_container=wrapper_container,
-                                                   values={"ETH": 1, "ICN": 100,"XRP": 200, "LTC": 2, "ETC": 4})
+                                                   values={"ETH": 0.2, "ICN": 100,"XRP": 200, "LTC": 2, "ETC": 4})
 
     fixed_percentage_volume_decider = FixedBalancePercentageVolumeDecider(wrapper_container=wrapper_container,
                                                                           percentage=0.2)
