@@ -49,28 +49,29 @@ daemon = None
 try:
     quote_currency = "BTC"
     dt = 30
+    key_directory = "/home/faruk/Desktop"
 
     kraken_stats = KrakenStatsProvider()
-    kraken_trader = KrakenTradeProvider(key_uri="/home/faruk/Desktop/kraken_key")
+    kraken_trader = KrakenTradeProvider(key_uri=("%s/kraken_key" % key_directory))
 
     kraken_wrapper = ExchangeWrapper(stats_provider=kraken_stats,
                                      trade_provider=kraken_trader,
                                      spending_factor=0.2)
 
     poloniex_stats = PoloniexStatsProvider()
-    poloniex_trader = PoloniexTradeProvider(key_uri="/home/faruk/Desktop/poloniex_key")
+    poloniex_trader = PoloniexTradeProvider(key_uri=("%s/poloniex_key" % key_directory))
     poloniex_wrapper = ExchangeWrapper(stats_provider=poloniex_stats,
                                        trade_provider=poloniex_trader,
                                        spending_factor=0.2)
 
     bittrex_stats = BittrexStatsProvider()
-    bittrex_trader = BittrexTradeProvider(key_uri="/home/faruk/Desktop/bittrex_key")
+    bittrex_trader = BittrexTradeProvider(key_uri=("%s/bittrex_key" % key_directory))
     bittrex_wrapper = ExchangeWrapper(stats_provider=bittrex_stats,
                                       trade_provider=bittrex_trader,
                                       spending_factor=0.2)
 
     bitfinex_stats = BitfinexStatsProvider()
-    bitfinex_trader = BitfinexTradeProvider(key_uri="/home/faruk/Desktop/bitfinex_key")
+    bitfinex_trader = BitfinexTradeProvider(key_uri=("%s/bitfinex_key" % key_directory))
     bitfinex_wrapper = ExchangeWrapper(stats_provider=bitfinex_stats,
                                        trade_provider=bittrex_trader,
                                        spending_factor=0.2)
