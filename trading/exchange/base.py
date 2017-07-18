@@ -232,7 +232,7 @@ class ExchangeWrapperContainer:
 
                     self.wrappers[exchange].trade_provider.execute_single_decision(decision)
                 except Exception as ex:
-                    self.logger.error("Error while executing decision %s" % ex)
+                    self.logger.error("Error while executing decision %s\nError%s" % (decision, ex))
                     failed_decisions.append(decision)
 
         return failed_decisions
@@ -243,17 +243,25 @@ class ExchangeWrapperContainer:
             self._check_wrapper(wrappers[exchange])
 
     def print_balance(self):
-        return
-        print_message = ""
+        self.logger.debug("Per exchange balance")
+        total_balance_per_currency = {}
         for exchange in self.wrappers:
+            self.logger.debug("Exchange %s" % exchange)
             wrapper = self.wrappers[exchange]
-            print_message += "Exchange: %s\n" % exchange
-            total_balance = wrapper.trade_provider.total_balance()
+            try:
+                total_balance = wrapper.trade_provider.total_balance()
+                self.logger.debug(total_balance)
+            except Exception as ex:
+                self.logger.debug("Could not print balance for %s" % exchange)
             for currency in total_balance:
                 if float(total_balance[currency]) != 0:
-                    print_message += "\t\t%s: %s" % (currency, total_balance[currency]) + "\n"
+                    if not currency in total_balance_per_currency:
+                        total_balance_per_currency[currency] = 0
 
-        self.logger.debug(print_message)
+                    total_balance_per_currency[currency] += total_balance[currency]
+
+        self.logger.debug("Total balance")
+        self.logger.debug(total_balance_per_currency)
 
     def _check_wrapper(self, wrapper):
         if not isinstance(wrapper, ExchangeWrapper):

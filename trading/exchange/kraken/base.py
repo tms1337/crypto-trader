@@ -85,5 +85,5 @@ class PrivateKrakenProvider(KrakenProvider):
         self.k.load_key(key_uri)
 
     def _check_response(self, server_response):
-        KrakenProvider._check_response(server_response)
+        KrakenProvider._check_response(self, server_response)
         self.k.load_key(self.key_uri)

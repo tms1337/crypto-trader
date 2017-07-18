@@ -36,6 +36,8 @@ class Daemon:
 
         while True:
             try:
+                self.wrapper_container.print_balance()
+
                 self.logger.info("Making decision")
 
                 decisions = []
@@ -60,10 +62,11 @@ class Daemon:
             except Exception as ex:
                 exception_n += 1
 
-                if exception_n >= 5:
-                    exit(1)
+                if exception_n >= 3:
+                    self.dt_seconds *= 1.5
+                    exception_n = 0
 
-                error_message = "An error has occurred while creating decision, waiting for the next step\nError: %s" % ex
+                error_message = "An error has occurred while creating or applying decision, waiting for the next step\nError: %s" % ex
                 self.logger.error(error_message)
             else:
                 try:
@@ -89,8 +92,6 @@ class Daemon:
 
         self.logger.info("Decision succesfully applied")
 
-        self.logger.info("Total balance:\n\n")
-        self.wrapper_container.print_balance()
 
     def _check_wrapper_container(self, wrapper_container):
         if not isinstance(wrapper_container, ExchangeWrapperContainer):

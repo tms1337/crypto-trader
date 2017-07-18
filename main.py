@@ -91,16 +91,16 @@ try:
 
     wrapper_container = ExchangeWrapperContainer(wrappers)
 
-    decision = Decision()
-    decision.exchange = "kraken"
-    decision.base_currency = "ETH"
-    decision.quote_currency = "BTC"
-    kraken_stats.set_currencies("ETH", "BTC")
-    decision.price = kraken_stats.ticker_last()
-    decision.volume = 0.1
-    decision.transaction_type = TransactionType.BUY
-
-    wrapper_container.create_bulk_offers([decision])
+    # decision = Decision()
+    # decision.exchange = "kraken"
+    # decision.base_currency = "ETH"
+    # decision.quote_currency = "BTC"
+    # kraken_stats.set_currencies("ETH", "BTC")
+    # decision.price = kraken_stats.ticker_last()
+    # decision.volume = 0.1
+    # decision.transaction_type = TransactionType.BUY
+    #
+    # wrapper_container.create_bulk_offers([decision])
 
     trading_currencies = ["ETH"]
     transaction_decider = ExchangeDiffDecider(trading_currency=quote_currency,
@@ -117,7 +117,7 @@ try:
                                               base_value_exchange="poloniex")
 
     fixed_volume_decider = FixedValueVolumeDecider(wrapper_container=wrapper_container,
-                                                   values={"ETH": 0.2, "XRP": 500, "LTC": 2, "ETC": 4})
+                                                   values={"ETH": 0.1, "XRP": 200, "LTC": 2, "ETC": 4})
 
     fixed_percentage_volume_decider = FixedBalancePercentageVolumeDecider(wrapper_container=wrapper_container,
                                                                           percentage=0.2)
