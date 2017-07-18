@@ -122,7 +122,7 @@ try:
                                               base_value_exchange="poloniex")
 
     fixed_volume_decider = FixedValueVolumeDecider(wrapper_container=wrapper_container,
-                                                   values={"ETH": 0.1, "XRP": 200, "LTC": 2, "ETC": 4})
+                                                   values={"ETH": 1, "XRP": 200, "LTC": 2, "ETC": 4})
 
     fixed_percentage_volume_decider = FixedBalancePercentageVolumeDecider(wrapper_container=wrapper_container,
                                                                           percentage=0.2)
