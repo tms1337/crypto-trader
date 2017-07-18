@@ -51,6 +51,8 @@ try:
     dt = 30
     key_directory = sys.argv[1]
 
+    print("Here")
+
     kraken_stats = KrakenStatsProvider()
     kraken_trader = KrakenTradeProvider(key_uri=("%s/kraken_key" % key_directory))
 
