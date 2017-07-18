@@ -119,7 +119,7 @@ try:
     volume_decider = FixedIncomeVolumeDecider(wrapper_container=wrapper_container,
                                               real_currency="USD",
                                               value=0.10,
-                                              base_value_exchange="poloniex")
+                                              base_value_exchange="kraken")
 
     fixed_volume_decider = FixedValueVolumeDecider(wrapper_container=wrapper_container,
                                                    values={"ETH": 1, "ICN": 100,"XRP": 200, "LTC": 2, "ETC": 4})
