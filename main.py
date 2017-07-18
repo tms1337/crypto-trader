@@ -49,7 +49,7 @@ daemon = None
 try:
     quote_currency = "BTC"
     dt = 30
-    key_directory = "/home/faruk/Desktop"
+    key_directory = sys.argv[1]
 
     kraken_stats = KrakenStatsProvider()
     kraken_trader = KrakenTradeProvider(key_uri=("%s/kraken_key" % key_directory))
