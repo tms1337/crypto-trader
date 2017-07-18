@@ -65,6 +65,7 @@ class Daemon:
                 if exception_n >= 3:
                     self.dt_seconds *= 1.5
                     exception_n = 0
+                    self.logger.info("Increasing waiting time to %f to prevent further errors" % self.dt_seconds)
 
                 error_message = "An error has occurred while creating or applying decision, waiting for the next step\nError: %s" % ex
                 self.logger.error(error_message)

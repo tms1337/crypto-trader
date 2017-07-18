@@ -48,6 +48,8 @@ class PercentBasedTransactionDecider(TransactionDecider):
         TransactionDecider.__init__(self, wrapper_container)
 
     def decide(self, prev_decisions):
+        self.logger.debug("Last transaction types %s" % self.last_transaction_types)
+
         if self.i % self.every_n == 0:
             for exchange in self.wrapper_container.wrappers:
                 self.logger.debug("Checking exchange: %s" % exchange)

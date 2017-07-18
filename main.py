@@ -75,6 +75,10 @@ try:
                                        trade_provider=bittrex_trader,
                                        spending_factor=0.2)
 
+    bitfinex_stats.set_currencies("ETH", "BTC")
+    bitfinex_trader.set_currencies("ETH", "BTC")
+    bitfinex_trader.create_sell_offer(volume=0.1, price=bitfinex_stats.ticker_last())
+
     kraken_mock_stats = StatsProviderMock([9, 10, 8], [9, 10, 8], [1, 10.5, 1])
     kraken_mock_trade = TradeProviderMock()
 
@@ -83,10 +87,10 @@ try:
 
 
     wrappers = {
-        "kraken": kraken_wrapper,
+        # "kraken": kraken_wrapper,
         "poloniex": poloniex_wrapper,
         "bittrex": bittrex_wrapper,
-        # "bitfinex": bitfinex_wrapper
+        "bitfinex": bitfinex_wrapper
     }
 
     wrapper_container = ExchangeWrapperContainer(wrappers)
@@ -113,7 +117,7 @@ try:
 
     volume_decider = FixedIncomeVolumeDecider(wrapper_container=wrapper_container,
                                               real_currency="USD",
-                                              value=0.02,
+                                              value=0.15,
                                               base_value_exchange="poloniex")
 
     fixed_volume_decider = FixedValueVolumeDecider(wrapper_container=wrapper_container,
@@ -125,8 +129,8 @@ try:
     percent_based_transaction_decider = PercentBasedTransactionDecider(currencies=trading_currencies,
                                                                        trading_currency=quote_currency,
                                                                        wrapper_container=wrapper_container,
-                                                                       sell_threshold=0.05,
-                                                                       buy_threshold=0.05,
+                                                                       sell_threshold=0.1,
+                                                                       buy_threshold=0.02,
                                                                        security_loss_threshold=0.2)
 
     daemon = Daemon(wrapper_container=wrapper_container,
