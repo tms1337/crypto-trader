@@ -56,7 +56,7 @@ try:
 
     kraken_wrapper = ExchangeWrapper(stats_provider=kraken_stats,
                                      trade_provider=kraken_trader,
-                                     spending_factor=0.2)
+                                     spending_factor=1)
 
     poloniex_stats = PoloniexStatsProvider()
     poloniex_trader = PoloniexTradeProvider(key_uri=("%s/poloniex_key" % key_directory))
@@ -107,7 +107,7 @@ try:
     #
     # wrapper_container.create_bulk_offers([decision])
 
-    trading_currencies = ["ETH"]
+    trading_currencies = ["ETH", "ICN"]
     transaction_decider = ExchangeDiffDecider(trading_currency=quote_currency,
                                               currencies=trading_currencies,
                                               wrapper_container=wrapper_container)
@@ -122,7 +122,7 @@ try:
                                               base_value_exchange="poloniex")
 
     fixed_volume_decider = FixedValueVolumeDecider(wrapper_container=wrapper_container,
-                                                   values={"ETH": 1, "XRP": 200, "LTC": 2, "ETC": 4})
+                                                   values={"ETH": 1, "ICN": 100,"XRP": 200, "LTC": 2, "ETC": 4})
 
     fixed_percentage_volume_decider = FixedBalancePercentageVolumeDecider(wrapper_container=wrapper_container,
                                                                           percentage=0.2)

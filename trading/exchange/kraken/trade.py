@@ -27,12 +27,14 @@ class KrakenTradeProvider(PrivateKrakenProvider,
         if not currency is None:
             return float(balance[self.map_currency_balance(currency)])
         else:
-            return {self.inverse_map_currency(k):float(balance[k]) for k in balance if k == "XETH" or k == "XXBT"}
+            return {self.inverse_map_currency(k):float(balance[k]) for k in balance if k in ["XETH", "XXBT", "XICN", "XXLM"]}
 
     def inverse_map_currency(self, currency):
         inverse_currency_map = {
             "XXBT": "BTC",
-            "XETH": "ETH"
+            "XETH": "ETH",
+            "XICN": "ICN",
+            "XXLM": "XLM"
         }
 
         if currency in inverse_currency_map:
