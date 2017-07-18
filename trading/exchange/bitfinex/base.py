@@ -56,7 +56,7 @@ class BitfinexProvider(CurrencyMixin):
     def _check_response(self, response):
         time.sleep(self.pause_dt)
 
-        self.logger.debug("Checking response: %s" % response)
+        self.logger.debug("Checking response: %s" % str(response)[1:100])
 
         if not isinstance(response, dict) and not isinstance(response, list):
             error_message = "Error during connecting to Bitfinex"

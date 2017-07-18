@@ -55,7 +55,7 @@ class KrakenProvider(CurrencyMixin):
 
         self.k = krakenex.API()
 
-        self.logger.debug("Checking response: %s" % server_response)
+        self.logger.debug("Checking response: %s" % str(server_response)[1:100])
 
         if "error" not in server_response:
             error_message = "Server responded with invalid response"

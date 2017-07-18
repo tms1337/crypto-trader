@@ -88,10 +88,10 @@ try:
 
 
     wrappers = {
-        # "kraken": kraken_wrapper,
-        "poloniex": poloniex_wrapper,
-        "bittrex": bittrex_wrapper,
-        "bitfinex": bitfinex_wrapper
+        "kraken": kraken_wrapper,
+        # "poloniex": poloniex_wrapper,
+        # "bittrex": bittrex_wrapper,
+        # "bitfinex": bitfinex_wrapper
     }
 
     wrapper_container = ExchangeWrapperContainer(wrappers)
@@ -118,7 +118,7 @@ try:
 
     volume_decider = FixedIncomeVolumeDecider(wrapper_container=wrapper_container,
                                               real_currency="USD",
-                                              value=0.15,
+                                              value=0.1,
                                               base_value_exchange="poloniex")
 
     fixed_volume_decider = FixedValueVolumeDecider(wrapper_container=wrapper_container,
@@ -136,12 +136,8 @@ try:
 
     daemon = Daemon(wrapper_container=wrapper_container,
                     dt_seconds=dt,
-                    transaction_deciders=[transaction_decider,
-                                          backup_transaction_decider,
-                                          percent_based_transaction_decider],
-                    volume_deciders=[volume_decider,
-                                     volume_decider,
-                                     fixed_volume_decider],
+                    transaction_deciders=[percent_based_transaction_decider],
+                    volume_deciders=[fixed_volume_decider],
                     logger_name="app")
 
 except Exception as ex:

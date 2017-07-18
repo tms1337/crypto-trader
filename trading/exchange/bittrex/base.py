@@ -57,7 +57,7 @@ class BittrexProvider(CurrencyMixin):
     def _check_response(self, server_response):
         time.sleep(self.pause_dt)
 
-        self.logger.debug("Checking response: %s" % server_response)
+        self.logger.debug("Checking response: %s" % str(server_response)[1:100])
 
         if server_response in ["INSUFFICIENT_FUNDS"]:
             error_message = "Bittrex response failure %s" % server_response
