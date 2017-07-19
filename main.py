@@ -132,7 +132,7 @@ try:
                                                                        buy_threshold=0.02,
                                                                        security_loss_threshold=0.2)
 
-    if sys.argv[2] == "kraken":
+    if sys.argv[2] != "kraken":
         daemon = Daemon(wrapper_container=wrapper_container,
                         dt_seconds=dt,
                         transaction_deciders=[transaction_decider,
