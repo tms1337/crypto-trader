@@ -13,35 +13,7 @@ import poloniex
 from trading.exchange.poloniex.trade import PoloniexTradeProvider
 
 
-def bitfinex_test():
-    stats = BitfinexStatsProvider(base_currency="ETH",
-                                  quote_currency="BTC")
-
-    # print(stats.ticker_last())
-    # print(stats.ticker_high())
-    # print(stats.ticker_low())
-
-    trade = BitfinexTradeProvider(base_currency="ETH",
-                                  quote_currency="BTC",
-                                  key_uri="/home/faruk/Desktop/bitfinex_key")
-
-    # print(trade.total_balance())
-    trade.create_buy_offer(0.1, stats.ticker_last())
-
-
-def bittrex_test():
-    stats = BittrexStatsProvider(base_currency="ETH",
-                                 quote_currency="BTC")
-
-    print(stats.ticker_last())
-    print(stats.ticker_high())
-    print(stats.ticker_low())
-
-    trade = BittrexTradeProvider(base_currency="ETH",
-                                 quote_currency="BTC",
-                                 key_uri="/home/faruk/Desktop/bittrex_key")
-
-    print(trade.total_balance())
-    trade.create_buy_offer(0.1, stats.ticker_last())
-
-bitfinex_test()
+trade = PoloniexTradeProvider(key_uri="/home/faruk/Desktop/poloniex_key")
+trade.set_currencies("ETH", "BTC")
+id = trade.create_sell_offer(price=0.1, volume=0.1)
+trade.cancel_offer(id)

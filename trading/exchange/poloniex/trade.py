@@ -28,12 +28,12 @@ class PoloniexTradeProvider(PrivatePoloniexProvider,
         TradeProvider.__init__(self, logger_name)
 
     def total_balance(self, currency=None):
-        balance = self.api.returnBalances()
+        balance = self.api.returnCompleteBalances()
 
         if not currency is None:
             return float(balance[currency])
         else:
-            return {b:float(balance[b]) for b in balance}
+            return {b:float(balance[b]["available"]) + float(balance[b]["onOrders"]) for b in balance}
 
     def create_buy_offer(self, volume, price=None):
         buy_response = self.api.buy(self.form_pair(),
@@ -42,6 +42,8 @@ class PoloniexTradeProvider(PrivatePoloniexProvider,
 
         self._check_response(buy_response)
 
+        return buy_response["resultingTrades"][0]["tradeID"]
+
     def create_sell_offer(self, volume, price=None):
         sell_response = self.api.sell(self.form_pair(),
                                       price,
@@ -49,7 +51,17 @@ class PoloniexTradeProvider(PrivatePoloniexProvider,
 
         self._check_response(sell_response)
 
+        return sell_response["orderNumber"]
+
+    def cancel_offer(self, offer_id):
+        cancel_response = self.api.cancelOrder(offer_id)
+
+        self._check_response(cancel_response)
+
     def _check_response(self, response):
+        if "success" in response and response["success"] == 1:
+            return
+
         if "orderNumber" not in response:
             self.logger.error("Poloniex failed with response %s" % response)
             raise RuntimeError("Trade did not go trough")

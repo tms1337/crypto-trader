@@ -109,6 +109,10 @@ class TradeProvider(ABC):
     def create_sell_offer(self, volume, price=None):
         pass
 
+    # @abstractmethod
+    # def cancel_offer(self, offer_id):
+    #     pass
+
     def create_bulk_offers(self, decisions):
         failed_decisions = []
 
@@ -129,11 +133,11 @@ class TradeProvider(ABC):
         self.prepare_currencies(decision.base_currency,
                                 decision.quote_currency)
         if decision.transaction_type == TransactionType.BUY:
-            self.create_buy_offer(volume=decision.volume,
-                                  price=decision.price)
+            return self.create_buy_offer(volume=decision.volume,
+                                         price=decision.price)
         elif decision.transaction_type == TransactionType.SELL:
-            self.create_sell_offer(volume=decision.volume,
-                                   price=decision.price)
+            return self.create_sell_offer(volume=decision.volume,
+                                          price=decision.price)
 
     def prepare_currencies(self, base_currency, quote_currency):
         pass
@@ -174,14 +178,15 @@ class ExchangeWrapper:
 
         if decision.transaction_type == TransactionType.BUY:
             if not decision.quote_currency in balance or \
-                            self.spending_factor * balance[decision.quote_currency] < decision.volume * decision.price:
+                                    self.spending_factor * balance[
+                                decision.quote_currency] < decision.volume * decision.price:
                 error_message = "Balance not sufficient for transaction %s" % decision
 
                 self.logger.error(error_message)
                 raise AssertionError(error_message)
         elif decision.transaction_type == TransactionType.SELL:
             if not decision.base_currency in balance or \
-                            self.spending_factor * balance[decision.base_currency] < decision.volume:
+                                    self.spending_factor * balance[decision.base_currency] < decision.volume:
                 error_message = "Balance not sufficient for transaction %s" % decision
 
                 self.logger.error(error_message)
@@ -219,9 +224,10 @@ class ExchangeWrapperContainer:
                         exchange = d.exchange
                         self.wrappers[exchange].check_decision(d)
 
+                    executed = []
                     for d in decision:
                         exchange = d.exchange
-                        self.wrappers[exchange].trade_provider.execute_single_decision(d)
+                        executed.append(self.wrappers[exchange].trade_provider.execute_single_decision(d))
                 except Exception as ex:
                     self.logger.error("Error during transaction execution\n\tError %s" % (decision, ex))
                     failed_decisions.append(decision)
