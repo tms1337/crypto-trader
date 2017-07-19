@@ -105,13 +105,18 @@ try:
                                                     currencies=trading_currencies,
                                                     wrapper_container=wrapper_container)
 
+    if sys.argv[2] == "kraken":
+        base_exchange = "kraken"
+    else:
+        base_exchange = "poloniex"
+
     volume_decider = FixedIncomeVolumeDecider(wrapper_container=wrapper_container,
                                               real_currency="USD",
                                               value=0.05,
-                                              base_value_exchange="poloniex")
+                                              base_value_exchange=base_exchange)
 
     fixed_volume_decider = FixedValueVolumeDecider(wrapper_container=wrapper_container,
-                                                   values={"ETH": 0.2, "ICN": 100, "XRP": 200, "LTC": 2, "ETC": 4})
+                                                   values={"ETH": 1, "ICN": 100, "XRP": 200, "LTC": 2, "ETC": 4})
 
     fixed_percentage_volume_decider = FixedBalancePercentageVolumeDecider(wrapper_container=wrapper_container,
                                                                           percentage=0.2)
@@ -123,15 +128,22 @@ try:
                                                                        buy_threshold=0.02,
                                                                        security_loss_threshold=0.2)
 
-    daemon = Daemon(wrapper_container=wrapper_container,
-                    dt_seconds=dt,
-                    transaction_deciders=[transaction_decider,
-                                          backup_transaction_decider,
-                                          percent_based_transaction_decider],
-                    volume_deciders=[volume_decider,
-                                     volume_decider,
-                                     fixed_volume_decider],
-                    logger_name="app")
+    if sys.argv[2] == "kraken":
+        daemon = Daemon(wrapper_container=wrapper_container,
+                        dt_seconds=dt,
+                        transaction_deciders=[transaction_decider,
+                                              backup_transaction_decider,
+                                              percent_based_transaction_decider],
+                        volume_deciders=[volume_decider,
+                                         volume_decider,
+                                         fixed_volume_decider],
+                        logger_name="app")
+    else:
+        daemon = Daemon(wrapper_container=wrapper_container,
+                        dt_seconds=dt,
+                        transaction_deciders=[percent_based_transaction_decider],
+                        volume_deciders=[fixed_volume_decider],
+                        logger_name="app")
 
 except Exception as ex:
     print("Error while initializing daemon and its parts"
