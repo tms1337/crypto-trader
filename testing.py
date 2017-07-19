@@ -13,7 +13,7 @@ import poloniex
 from trading.exchange.poloniex.trade import PoloniexTradeProvider
 
 
-trade = PoloniexTradeProvider(key_uri="/home/faruk/Desktop/poloniex_key")
+trade = BittrexTradeProvider(key_uri="/home/faruk/Desktop/bittrex_key")
 trade.set_currencies("ETH", "BTC")
 id = trade.create_sell_offer(price=0.1, volume=0.1)
 trade.cancel_offer(id)
