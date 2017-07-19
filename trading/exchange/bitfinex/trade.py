@@ -44,6 +44,8 @@ class BitfinexTradeProvider(PrivateBitfinexProvider,
                                               side="buy")
         self._check_response(offer_response)
 
+        return offer_response["order_id"]
+
     def create_sell_offer(self, volume, price=None):
         offer_response = self.api.place_order(amount=str(volume),
                                               ord_type="exchange limit",
@@ -51,6 +53,13 @@ class BitfinexTradeProvider(PrivateBitfinexProvider,
                                               price=str(price),
                                               side="sell")
         self._check_response(offer_response)
+
+        return offer_response["order_id"]
+
+    def cancel_offer(self, offer_id):
+        cancel_response = self.api.delete_order(offer_id)
+
+        self._check_response(cancel_response)
 
     def inverse_map_currency(self, currency):
         inverse_currency_mapping = {

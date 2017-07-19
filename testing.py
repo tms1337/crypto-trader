@@ -1,4 +1,5 @@
 import krakenex
+import time
 
 from trading.exchange.bitfinex.base import PrivateBitfinexProvider
 from trading.exchange.bitfinex.stats import BitfinexStatsProvider
@@ -13,7 +14,7 @@ import poloniex
 from trading.exchange.poloniex.trade import PoloniexTradeProvider
 
 
-trade = BittrexTradeProvider(key_uri="/home/faruk/Desktop/bittrex_key")
+trade = BitfinexTradeProvider(key_uri="/home/faruk/Desktop/bitfinex_key")
 trade.set_currencies("ETH", "BTC")
 id = trade.create_sell_offer(price=0.1, volume=0.1)
 trade.cancel_offer(id)
