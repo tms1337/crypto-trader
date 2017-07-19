@@ -76,12 +76,16 @@ try:
                                        trade_provider=bitfinex_trader,
                                        spending_factor=0.3)
 
-    wrappers = {
-        # "kraken": kraken_wrapper,
-        "poloniex": poloniex_wrapper,
-        "bittrex": bittrex_wrapper,
-        "bitfinex": bitfinex_wrapper
-    }
+    if sys.argv[2] == "kraken":
+        wrappers = {
+            "kraken": kraken_wrapper
+        }
+    else:
+        wrappers = {
+            "poloniex": poloniex_wrapper,
+            "bittrex": bittrex_wrapper,
+            "bitfinex": bitfinex_wrapper
+        }
 
     wrapper_container = ExchangeWrapperContainer(wrappers)
 
