@@ -116,7 +116,7 @@ try:
 
     volume_decider = FixedIncomeVolumeDecider(wrapper_container=wrapper_container,
                                               real_currency="USD",
-                                              value=0.05,
+                                              value=0.1,
                                               base_value_exchange=base_exchange)
 
     fixed_volume_decider = FixedValueVolumeDecider(wrapper_container=wrapper_container,
