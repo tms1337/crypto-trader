@@ -27,7 +27,7 @@ logger = logging.getLogger('app')
 logger.setLevel(logging.DEBUG)
 
 # create file handler which logs even debug messages
-fh = logging.FileHandler('debug.log')
+fh = logging.FileHandler('debug-kraken.log')
 fh.setLevel(logging.DEBUG)
 
 # create console handler with a higher log level
