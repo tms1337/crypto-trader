@@ -29,7 +29,7 @@ class BittrexProvider(CurrencyMixin, Provider):
             "BTC": "BTC",
             "DASH": "DASH",
             "XRP": "XRP",
-            "USD": "USD",
+            "USD": "USDT",
             "ETC": "ETC",
             "LTC": "LTC"
         }
@@ -42,7 +42,7 @@ class BittrexProvider(CurrencyMixin, Provider):
             "BTC": "BTC",
             "DASH": "DASH",
             "XRP": "XRP",
-            "USD": "USD",
+            "USD": "USDT",
             "ETC": "ETC",
             "LTC": "LTC"
         }

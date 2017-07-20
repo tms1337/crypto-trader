@@ -22,7 +22,8 @@ class BitfinexTradeProvider(PrivateBitfinexProvider,
         currency_map = {
             "BTC": "btc",
             "ETH": "eth",
-            "LTC": "ltc"
+            "LTC": "ltc",
+            "USD": "usd"
         }
 
         return currency_map[currency]
@@ -68,7 +69,9 @@ class BitfinexTradeProvider(PrivateBitfinexProvider,
         inverse_currency_mapping = {
             "eth": "ETH",
             "btc": "BTC",
-            "ltc": "LTC"
+            "ltc": "LTC",
+            "usd": "USD",
+            "dsh": "DASH"
         }
 
         return inverse_currency_mapping[currency]

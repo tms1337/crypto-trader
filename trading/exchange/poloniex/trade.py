@@ -42,7 +42,10 @@ class PoloniexTradeProvider(PrivatePoloniexProvider,
 
         self._check_response(buy_response)
 
-        return buy_response["resultingTrades"][0]["tradeID"]
+        if len(buy_response["resultingTrades"]) != 0:
+            return buy_response["resultingTrades"][0]["tradeID"]
+        else:
+            return buy_response["orderNumber"]
 
     def create_sell_offer(self, volume, price=None):
         sell_response = self.api.sell(self.form_pair(),

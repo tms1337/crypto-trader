@@ -27,7 +27,7 @@ logger = logging.getLogger('app')
 logger.setLevel(logging.DEBUG)
 
 # create file handler which logs even debug messages
-fh = logging.FileHandler('debug-kraken.log')
+fh = logging.FileHandler('debug.log')
 fh.setLevel(logging.DEBUG)
 
 # create console handler with a higher log level
@@ -56,25 +56,25 @@ try:
 
     kraken_wrapper = ExchangeWrapper(stats_provider=kraken_stats,
                                      trade_provider=kraken_trader,
-                                     spending_factor=0.2)
+                                     spending_factor=1)
 
     poloniex_stats = PoloniexStatsProvider()
     poloniex_trader = PoloniexTradeProvider(key_uri=("%s/poloniex_key" % key_directory))
     poloniex_wrapper = ExchangeWrapper(stats_provider=poloniex_stats,
                                        trade_provider=poloniex_trader,
-                                       spending_factor=0.2)
+                                       spending_factor=1)
 
     bittrex_stats = BittrexStatsProvider()
     bittrex_trader = BittrexTradeProvider(key_uri=("%s/bittrex_key" % key_directory))
     bittrex_wrapper = ExchangeWrapper(stats_provider=bittrex_stats,
                                       trade_provider=bittrex_trader,
-                                      spending_factor=0.2)
+                                      spending_factor=1)
 
     bitfinex_stats = BitfinexStatsProvider()
     bitfinex_trader = BitfinexTradeProvider(key_uri=("%s/bitfinex_key" % key_directory))
     bitfinex_wrapper = ExchangeWrapper(stats_provider=bitfinex_stats,
                                        trade_provider=bitfinex_trader,
-                                       spending_factor=0.3)
+                                       spending_factor=1)
 
     wrappers = {
         "poloniex": poloniex_wrapper,
@@ -84,50 +84,53 @@ try:
 
     wrapper_container = ExchangeWrapperContainer(wrappers)
 
-    # decision = Decision()
-    # decision.exchange = "kraken"
-    # decision.base_currency = "ETH"
-    # decision.quote_currency = "BTC"
-    # kraken_stats.set_currencies("ETH", "BTC")
-    # decision.price = kraken_stats.ticker_last()
-    # decision.volume = 0.1
-    # decision.transaction_type = TransactionType.BUY
-    #
-    # wrapper_container.create_bulk_offers([decision])
-
-    trading_currencies = ["ETH", "LTC"]
-    transaction_decider = ExchangeDiffDecider(trading_currency=quote_currency,
-                                              currencies=trading_currencies,
-                                              wrapper_container=wrapper_container)
-
-    backup_transaction_decider = ExchangeDiffBackup(trading_currency=quote_currency,
-                                                    currencies=trading_currencies,
-                                                    wrapper_container=wrapper_container)
+    trading_currencies = ["ETH", "LTC", "DASH"]
 
     base_exchange = "poloniex"
 
-    volume_decider = FixedIncomeVolumeDecider(wrapper_container=wrapper_container,
-                                              real_currency="USD",
-                                              value=0.1,
-                                              base_value_exchange=base_exchange)
+    sell_threshold = 0.05
+    buy_threshold = 0.02
+    security_loss = 0.2
 
-    fixed_volume_decider = FixedValueVolumeDecider(wrapper_container=wrapper_container,
-                                                   values={"ETH": 2, "ICN": 100, "XRP": 200, "LTC": 10, "ETC": 4})
+    eth_value = 1
+    dash_value = 1.5
+    ltc_value = 4
+    btc_value = 0.2
 
-    fixed_percentage_volume_decider = FixedBalancePercentageVolumeDecider(wrapper_container=wrapper_container,
-                                                                          percentage=0.2)
 
     percent_based_transaction_decider = PercentBasedTransactionDecider(currencies=trading_currencies,
                                                                        trading_currency=quote_currency,
                                                                        wrapper_container=wrapper_container,
-                                                                       sell_threshold=0.05,
-                                                                       buy_threshold=0.02,
-                                                                       security_loss_threshold=0.2)
+                                                                       sell_threshold=sell_threshold,
+                                                                       buy_threshold=buy_threshold,
+                                                                       security_loss_threshold=security_loss)
+
+    fixed_volume_decider = FixedValueVolumeDecider(wrapper_container=wrapper_container,
+                                                   values={"ETH": eth_value, "DASH": dash_value, "LTC": ltc_value})
+
+    euro_wrappers = {
+        "bittrex": bittrex_wrapper,
+        "bitfinex": bitfinex_wrapper
+    }
+
+    euro_wrapper_container = ExchangeWrapperContainer(wrappers=euro_wrappers)
+
+    euro_transaction_decider = PercentBasedTransactionDecider(currencies=["BTC"],
+                                                              trading_currency="USD",
+                                                              wrapper_container=euro_wrapper_container,
+                                                              sell_threshold=sell_threshold,
+                                                              buy_threshold=buy_threshold,
+                                                              security_loss_threshold=security_loss)
+
+    euro_volume_decider = FixedValueVolumeDecider(wrapper_container=wrapper_container,
+                                                  values={"BTC": btc_value})
 
     daemon = Daemon(wrapper_container=wrapper_container,
                     dt_seconds=dt,
-                    transaction_deciders=[percent_based_transaction_decider],
-                    volume_deciders=[fixed_volume_decider],
+                    transaction_deciders=[percent_based_transaction_decider,
+                                          euro_transaction_decider],
+                    volume_deciders=[fixed_volume_decider,
+                                     euro_volume_decider],
                     logger_name="app")
 
 except Exception as ex:

@@ -30,7 +30,6 @@ class StatsProviderMock(KrakenStatsProvider):
 
     def ticker_low(self):
         result = self.low_array[self.i]
-        self.i += 1
 
         return result
 

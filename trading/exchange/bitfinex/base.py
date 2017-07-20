@@ -12,7 +12,7 @@ class BitfinexProvider(CurrencyMixin, Provider):
                  quote_currency=None,
                  api=finex,
                  logger_name="app",
-                 pause_dt=2):
+                 pause_dt=1):
 
         self.api = api
         self.pause_dt = pause_dt
@@ -29,7 +29,7 @@ class BitfinexProvider(CurrencyMixin, Provider):
         currency_mapping = {
             "ETH": "eth",
             "BTC": "btc",
-            "DASH": "dash",
+            "DASH": "dsh",
             "XRP": "xrp",
             "USD": "usd",
             "LTC": "ltc"
@@ -39,13 +39,12 @@ class BitfinexProvider(CurrencyMixin, Provider):
 
     def currency_mapping_for_balance(self, currency):
         currency_mapping = {
-            "ETH": "ETH",
-            "BTC": "BTC",
-            "DASH": "DASH",
-            "XRP": "XRP",
-            "USD": "USD",
-            "ETC": "ETC",
-            "LTC": "LTC"
+            "ETH": "eth",
+            "BTC": "btc",
+            "DASH": "dsh",
+            "XRP": "xrp",
+            "USD": "usd",
+            "LTC": "ltc"
         }
 
         return currency_mapping[currency]
