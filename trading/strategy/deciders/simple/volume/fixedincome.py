@@ -1,6 +1,6 @@
 import logging
 
-from trading.strategy.deciders.volume import VolumeDecider
+from trading.strategy.deciders.simple.volume import VolumeDecider
 
 
 class FixedIncomeVolumeDecider(VolumeDecider):

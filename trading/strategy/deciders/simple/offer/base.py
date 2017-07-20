@@ -3,7 +3,11 @@ from abc import ABC, abstractclassmethod
 from trading.strategy.deciders.decider import Decider
 
 
-class VolumeDecider(Decider, ABC):
+class OfferDecider(ABC):
     @abstractclassmethod
-    def decide(self, partial_decisions):
+    def decide(self, stats_matrix):
+        pass
+
+    @abstractclassmethod
+    def apply_last(self):
         pass

@@ -2,11 +2,11 @@ import copy
 import logging
 
 from trading.exchange.base import CurrencyMixin
-from trading.strategy.deciders.transaction import TransactionDecider
+from trading.strategy.deciders.simple.offer import TransactionDecider
 from trading.strategy.decision import Decision, TransactionType
 
 
-class PercentBasedTransactionDecider(TransactionDecider):
+class PercentBasedOfferDecider(TransactionDecider):
     def __init__(self,
                  currencies,
                  trading_currency,

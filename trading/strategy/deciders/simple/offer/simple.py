@@ -1,8 +1,8 @@
-from trading.strategy.deciders.transaction import TransactionDecider
+from trading.strategy.deciders.simple.offer import TransactionDecider
 from trading.strategy.decision import Decision, TransactionType
 
 
-class SingleCurrencyPairTransactionDecider(TransactionDecider):
+class SingleCurrencyPairOfferDecider(TransactionDecider):
     def __init__(self, base_currency, quote_currency, wrapper_container):
         self.base_currency = base_currency
         self.quote_currency = quote_currency
@@ -19,7 +19,7 @@ class SingleCurrencyPairTransactionDecider(TransactionDecider):
         super().apply_last()
 
 
-class AlwaysBuyTransactionDecider(SingleCurrencyPairTransactionDecider):
+class AlwaysBuyOfferDecider(SingleCurrencyPairOfferDecider):
     def decide(self):
         decision = Decision()
         decision.currency_pair = self.currency_pair
@@ -32,7 +32,7 @@ class AlwaysBuyTransactionDecider(SingleCurrencyPairTransactionDecider):
         pass
 
 
-class AlwaysSellTransactionDecider(SingleCurrencyPairTransactionDecider):
+class AlwaysSellOfferDecider(SingleCurrencyPairOfferDecider):
     def decide(self):
         decision = Decision()
         decision.currency_pair = self.currency_pair

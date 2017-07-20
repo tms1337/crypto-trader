@@ -5,7 +5,7 @@ import time
 from trading.strategy.transaction.base import TransactionDecider
 
 from trading.exchange.base import ExchangeWrapperContainer
-from trading.strategy.deciders.volume import VolumeDecider
+from trading.strategy.deciders.simple.volume import VolumeDecider
 
 
 class Daemon:

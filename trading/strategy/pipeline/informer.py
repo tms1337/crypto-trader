@@ -10,7 +10,7 @@ from trading.util.typechecker import TypeChecker
 max_retry_attempts = None
 
 class Informer:
-    # Informer, ya' no say daddy me Snow me I go blame
+    # ya' no say daddy me Snow me I go blame
     # A licky boom boom down
 
     def __init__(self,
@@ -51,7 +51,11 @@ class Informer:
         TypeChecker.check_type(base_currency, str)
 
     def _generate_cell(self, exchange, currency):
-        stats = self.stats_providers[exchange]
+        try:
+            stats = self.stats_providers[exchange]
+        except KeyError:
+            raise ValueError("Exchange %s not in a list" % exchange)
+
         stats.set_currency(currency,
                            self.base_currency)
 

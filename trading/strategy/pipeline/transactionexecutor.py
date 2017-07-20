@@ -27,6 +27,21 @@ class TransactionExecutor:
         global max_retry_attempts
         max_retry_attempts = retry_attempts
 
+    def execute_batch(self, transactions):
+        failed_transactions = []
+
+        TypeChecker.check_type(transactions, list)
+        for t in transactions:
+            TypeChecker.check_type(t, Transaction)
+
+        for t in transactions:
+            try:
+                self.execute(t)
+            except TransactionNotExecutedError:
+                failed_transactions.append(t)
+
+        return failed_transactions
+
     def execute(self, transaction):
         TypeChecker.check_type(transaction, Transaction)
 

@@ -3,7 +3,10 @@ from trading.util.typechecker import TypeChecker
 
 
 class Transaction:
-    def __init__(self, decisions=[]):
+    def __init__(self, decisions=None):
+        if decisions is None:
+            decisions = []
+
         TypeChecker.check_type(decisions, list)
         for d in decisions:
             TypeChecker.check_type(d, Decision)

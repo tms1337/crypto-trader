@@ -2,11 +2,11 @@ import logging
 
 from trading.strategy.decision import Decision, TransactionType
 from trading.exchange.base import CurrencyMixin
-from .base import TransactionDecider
+from .base import OfferDecider
 import math
 
 
-class ExchangeDiffDecider(TransactionDecider):
+class ExchangeDiffOfferDecider(OfferDecider):
     def __init__(self,
                  currencies,
                  trading_currency,
@@ -24,8 +24,8 @@ class ExchangeDiffDecider(TransactionDecider):
         self.logger_name = logger_name
         self.logger = logging.getLogger("%s.ExchangeDiffDecider" % logger_name)
 
-        TransactionDecider.__init__(self,
-                                    wrapper_container)
+        OfferDecider.__init__(self,
+                              wrapper_container)
 
     def decide(self, prev_decisions):
         currency = self.currencies[self.current_currency_index]
@@ -98,7 +98,7 @@ class ExchangeDiffDecider(TransactionDecider):
         pass
 
 
-class ExchangeDiffBackup(TransactionDecider):
+class ExchangeDiffBackup(OfferDecider):
     def __init__(self,
                  currencies,
                  trading_currency,
@@ -118,8 +118,8 @@ class ExchangeDiffBackup(TransactionDecider):
         self.logger_name = logger_name
         self.logger = logging.getLogger("%s.DiffBackup" % self.logger_name)
 
-        TransactionDecider.__init__(self,
-                                    wrapper_container)
+        OfferDecider.__init__(self,
+                              wrapper_container)
 
     def decide(self, prev_decisions):
         currency = self.currencies[self.current_currency_index]
