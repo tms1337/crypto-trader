@@ -204,6 +204,7 @@ class ExchangeWrapper:
 
     def check_decision(self, decision):
         self.logger.debug("Checking decision %s", decision)
+        return
 
         balance = self.trade_provider.total_balance()
 

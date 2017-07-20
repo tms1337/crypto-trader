@@ -47,7 +47,7 @@ class Decision:
         if self.price is not None:
             string_representations += ", price: %s" % self.price
 
-        string_representations += ")\n"
+        string_representations += ")"
 
         return string_representations
 
