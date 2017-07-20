@@ -1,5 +1,6 @@
+from trading.exceptions.servererror import ServerError
 from trading.exchange.base import StatsProvider
-from trading.strategy.statsmatrix import StatsMatrix, StatsCell
+from trading.strategy.pipeline.statsmatrix import StatsMatrix, StatsCell
 from trading.util.typechecker import TypeChecker
 
 
@@ -48,21 +49,21 @@ class Informer:
         cell = StatsCell()
         try:
             cell.high = stats.ticker_high()
-        except (ConnectionError, ValueError):
+        except (ConnectionError, ServerError):
             cell.high = None
         except Exception:
             cell.high = None
 
         try:
             cell.low = stats.ticker_low()
-        except (ConnectionError, ValueError):
+        except (ConnectionError, ServerError):
             cell.low = None
         except Exception:
             cell.high = None
 
         try:
             cell.last = stats.ticker_last()
-        except (ConnectionError, ValueError):
+        except (ConnectionError, ServerError):
             cell.last = None
         except Exception:
             cell.high = None

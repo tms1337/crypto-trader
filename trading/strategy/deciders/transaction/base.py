@@ -1,7 +1,6 @@
 from abc import ABC, abstractclassmethod
 
-from trading.exchange.base import ExchangeWrapperContainer
-from ..decider import Decider
+from trading.strategy.deciders.decider import Decider
 
 
 class TransactionDecider(ABC, Decider):

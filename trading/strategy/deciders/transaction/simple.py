@@ -1,5 +1,5 @@
+from trading.strategy.deciders.transaction import TransactionDecider
 from trading.strategy.decision import Decision, TransactionType
-from trading.strategy.transaction.base import TransactionDecider
 
 
 class SingleCurrencyPairTransactionDecider(TransactionDecider):

@@ -1,11 +1,11 @@
-import datetime
 import logging
 import random
 import time
 
 from trading.strategy.transaction.base import TransactionDecider
-from trading.strategy.volume.base import VolumeDecider
-from trading.exchange.base import ExchangeWrapper, ExchangeWrapperContainer
+
+from trading.exchange.base import ExchangeWrapperContainer
+from trading.strategy.deciders.volume import VolumeDecider
 
 
 class Daemon:

@@ -1,0 +1,2 @@
+class TransactionNotExecutedError(Exception):
+    pass

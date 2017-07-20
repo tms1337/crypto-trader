@@ -1,20 +1,6 @@
-import krakenex
-import time
-
-from trading.strategy.transaction.percentbased import PercentBasedTransactionDecider
 from trading.exchange.base import ExchangeWrapper, ExchangeWrapperContainer
-from trading.exchange.bitfinex.base import PrivateBitfinexProvider
-from trading.exchange.bitfinex.stats import BitfinexStatsProvider
-from trading.exchange.bitfinex.trade import BitfinexTradeProvider
-from trading.exchange.bittrex.stats import BittrexStatsProvider
-from trading.exchange.bittrex.trade import BittrexTradeProvider
 from trading.exchange.kraken.mocks import StatsProviderMock, TradeProviderMock
-from trading.exchange.kraken.stats import KrakenStatsProvider
-from trading.exchange.kraken.trade import KrakenTradeProvider
-from trading.exchange.poloniex.stats import PoloniexStatsProvider
-import poloniex
-
-from trading.exchange.poloniex.trade import PoloniexTradeProvider
+from trading.strategy.deciders.transaction import PercentBasedTransactionDecider
 
 last_array = [1, 1, 1, 1.05, 0.95, 1.1, 1.1, 1.1, 0.95, 0.95, 0.95, 2, 1.95, 1.95]
 mock_stats = StatsProviderMock(high_array=[],

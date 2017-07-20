@@ -1,26 +1,19 @@
-from trading.daemon import Daemon
-from trading.strategy.decision import Decision, TransactionType
-from trading.strategy.transaction.exchangediff import ExchangeDiffDecider, ExchangeDiffBackup
+import logging
+import sys
+
 from trading.strategy.transaction.percentbased import PercentBasedTransactionDecider
-from trading.strategy.transaction.simple import AlwaysBuyTransactionDecider
-from trading.strategy.volume.fixedbalancepercentage import FixedBalancePercentageVolumeDecider
-from trading.strategy.volume.fixedincome import FixedIncomeVolumeDecider
 from trading.strategy.volume.simple import FixedValueVolumeDecider
+
+from trading.daemon import Daemon
 from trading.exchange.base import ExchangeWrapper, ExchangeWrapperContainer
 from trading.exchange.bitfinex.stats import BitfinexStatsProvider
 from trading.exchange.bitfinex.trade import BitfinexTradeProvider
 from trading.exchange.bittrex.stats import BittrexStatsProvider
 from trading.exchange.bittrex.trade import BittrexTradeProvider
-from trading.exchange.kraken.mocks import TradeProviderMock, StatsProviderMock
-
-import sys
-
 from trading.exchange.kraken.stats import KrakenStatsProvider
 from trading.exchange.kraken.trade import KrakenTradeProvider
 from trading.exchange.poloniex.stats import PoloniexStatsProvider
 from trading.exchange.poloniex.trade import PoloniexTradeProvider
-
-import logging
 
 # create logger with 'spam_application'
 logger = logging.getLogger('app')

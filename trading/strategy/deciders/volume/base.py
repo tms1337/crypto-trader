@@ -1,5 +1,6 @@
 from abc import ABC, abstractclassmethod
-from ..decider import Decider
+
+from trading.strategy.deciders.decider import Decider
 
 
 class VolumeDecider(Decider, ABC):
