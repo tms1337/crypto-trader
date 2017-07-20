@@ -6,11 +6,7 @@ from trading.deciders.decision import TransactionType, Decision
 
 class CurrencyMixin(ABC):
     def __init__(self,
-                 base_currency=None,
-                 quote_currency=None,
                  logger_name="app"):
-
-        self.set_currencies(base_currency, quote_currency)
 
         self.logger_name = logger_name
         self.logger = logging.getLogger("%s.CurrencyMixin" % logger_name)
@@ -30,16 +26,28 @@ class CurrencyMixin(ABC):
                          self.quote_currency)
 
     @abstractmethod
-    def map_currency(self, currency):
+    def currency_mapping(self):
         pass
 
+    def map_currency(self, currency):
+        return self.currency_mapping[currency]
+
     @abstractmethod
-    def map_currency_balance(self, currency):
+    def currency_mapping_for_balance(self, currency):
         pass
+
+    def map_currency_balance(self, currency):
+        return self.currency_mapping_for_balance[currency]
+
+    def inverse_map_currency(self, currency):
+        currency_map = self.currency_mapping()
+        inverse_currency_map = {currency_map[k]:k for k in currency_map}
+
+        return inverse_currency_map[currency]
 
     @staticmethod
     def check_currency(currency):
-        currency_list = ["BTC", "ETH", "XRP", "DASH"]
+        currency_list = ["BTC", "ETH", "XRP", "DASH", "LTC"]
 
         return currency in currency_list
 
@@ -52,6 +60,12 @@ class CurrencyMixin(ABC):
 
             self.logger.error(error_message)
             raise ValueError(error_message)
+
+
+class Provider(ABC):
+    @abstractmethod
+    def _check_response(self, response):
+        pass
 
 
 class StatsProvider(ABC):

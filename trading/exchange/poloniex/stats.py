@@ -9,16 +9,12 @@ class PoloniexStatsProvider(StatsProvider,
                             PoloniexProvider):
 
     def __init__(self,
-                 base_currency=None,
-                 quote_currency=None,
                  api=Poloniex()):
 
         self.last_ticker_response = None
         self.last_time = None
 
         PoloniexProvider.__init__(self,
-                                  base_currency,
-                                  quote_currency,
                                   api)
 
     def ohlc_history(self, interval=1, since=None):

@@ -2,11 +2,11 @@ import logging
 
 import time
 
-from trading.exchange.base import CurrencyMixin, KeyLoaderMixin
+from trading.exchange.base import CurrencyMixin, KeyLoaderMixin, Provider
 from .client import bittrex
 
 
-class BittrexProvider(CurrencyMixin):
+class BittrexProvider(CurrencyMixin, Provider):
     def __init__(self,
                  base_currency=None,
                  quote_currency=None,
@@ -36,7 +36,7 @@ class BittrexProvider(CurrencyMixin):
 
         return currency_mapping[currency]
 
-    def map_currency_balance(self, currency):
+    def currency_mapping_for_balance(self, currency):
         currency_mapping = {
             "ETH": "ETH",
             "BTC": "BTC",

@@ -8,8 +8,6 @@ from trading.exchange.base import CurrencyMixin
 
 class KrakenProvider(CurrencyMixin):
     def __init__(self,
-                 base_currency=None,
-                 quote_currency=None,
                  api=krakenex.API(),
                  logger_name="app",
                  pause_dt=2):
@@ -20,12 +18,10 @@ class KrakenProvider(CurrencyMixin):
         self.logger_name = logger_name
         self.logger = logging.getLogger("%s.KrakenProvider" % logger_name)
 
-        CurrencyMixin.__init__(self,
-                               base_currency,
-                               quote_currency)
+        CurrencyMixin.__init__(self)
 
-    def map_currency(self, currency):
-        currency_mapping = {
+    def currency_mapping(self):
+        mapping = {
             "ETH": "ETH",
             "BTC": "XBT",
             "DASH": "DASH",
@@ -37,9 +33,9 @@ class KrakenProvider(CurrencyMixin):
             "XLM": "XLM"
         }
 
-        return currency_mapping[currency]
+        return mapping
 
-    def map_currency_balance(self, currency):
+    def currency_mapping_for_balance(self, currency):
         currency_mapping = {
             "ETH": "XETH",
             "BTC": "XXBT",

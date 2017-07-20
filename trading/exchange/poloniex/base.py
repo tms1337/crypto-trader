@@ -8,8 +8,6 @@ from trading.exchange.base import CurrencyMixin, KeyLoaderMixin
 
 class PoloniexProvider(CurrencyMixin):
     def __init__(self,
-                 base_currency=None,
-                 quote_currency=None,
                  api=Poloniex(),
                  logger_name="app",
                  pause_dt=2):
@@ -21,25 +19,11 @@ class PoloniexProvider(CurrencyMixin):
         self.logger = logging.getLogger("%s.PoloniexProvider" % logger_name)
         self.pause_dt = pause_dt
 
-        CurrencyMixin.__init__(self,
-                               base_currency,
-                               quote_currency)
+        CurrencyMixin.__init__(self)
 
-    def map_currency(self, currency):
-        currency_mapping = {
-            "ETH": "ETH",
-            "BTC": "BTC",
-            "DASH": "DASH",
-            "XRP": "XRP",
-            "USD": "USDT",
-            "ETC": "ETC",
-            "LTC": "LTC"
-        }
 
-        return currency_mapping[currency]
-
-    def map_currency_balance(self, currency):
-        currency_mapping = {
+    def currency_mapping(self):
+        mapping = {
             "ETH": "ETH",
             "BTC": "BTC",
             "DASH": "DASH",
@@ -49,7 +33,20 @@ class PoloniexProvider(CurrencyMixin):
             "LTC": "LTC"
         }
 
-        return currency_mapping[currency]
+        return mapping
+
+    def currency_mapping_for_balance(self):
+        mapping = {
+            "ETH": "ETH",
+            "BTC": "BTC",
+            "DASH": "DASH",
+            "XRP": "XRP",
+            "USD": "USD",
+            "ETC": "ETC",
+            "LTC": "LTC"
+        }
+
+        return mapping
 
     def form_pair(self):
         return "%s_%s" % (self.quote_currency,

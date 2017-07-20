@@ -22,7 +22,7 @@ class BittrexTradeProvider(PrivateBittrexProvider,
         self._check_response(balance_response)
 
         if not currency is None:
-            currency_balance = [b for b in balance_response if b["Currency"] == self.map_currency_balance(currency)]
+            currency_balance = [b for b in balance_response if b["Currency"] == self.currency_mapping_for_balance(currency)]
 
             if len(currency_balance) == 0:
                 return 0.0
@@ -31,7 +31,7 @@ class BittrexTradeProvider(PrivateBittrexProvider,
 
             return float(currency_balance["Balance"])
         else:
-            return { b["Currency"]: float(b["Balance"]) for b in balance_response }
+            return {b["Currency"]: float(b["Balance"]) for b in balance_response}
 
     def create_buy_offer(self, volume, price=None):
         offer_response = self.api.buylimit(self.form_pair(),
@@ -55,4 +55,3 @@ class BittrexTradeProvider(PrivateBittrexProvider,
 
     def prepare_currencies(self, base_currency, quote_currency):
         self.set_currencies(base_currency, quote_currency)
-

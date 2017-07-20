@@ -2,11 +2,11 @@ import logging
 
 import time
 
-from trading.exchange.base import CurrencyMixin
+from trading.exchange.base import CurrencyMixin, Provider
 import FinexAPI.FinexAPI as finex
 
 
-class BitfinexProvider(CurrencyMixin):
+class BitfinexProvider(CurrencyMixin, Provider):
     def __init__(self,
                  base_currency=None,
                  quote_currency=None,
@@ -37,7 +37,7 @@ class BitfinexProvider(CurrencyMixin):
 
         return currency_mapping[currency]
 
-    def map_currency_balance(self, currency):
+    def currency_mapping_for_balance(self, currency):
         currency_mapping = {
             "ETH": "ETH",
             "BTC": "BTC",

@@ -18,7 +18,7 @@ class BitfinexTradeProvider(PrivateBitfinexProvider,
                                          api)
         TradeProvider.__init__(self, verbose)
 
-    def map_currency_balance(self, currency):
+    def currency_mapping_for_balance(self, currency):
         currency_map = {
             "BTC": "btc",
             "ETH": "eth",
@@ -35,7 +35,7 @@ class BitfinexTradeProvider(PrivateBitfinexProvider,
                    for b in balance_response if b["type"] == "exchange"}
 
         if not currency is None:
-            return balance[self.map_currency_balance(currency)]
+            return balance[self.currency_mapping_for_balance(currency)]
         else:
             return {self.inverse_map_currency(b):balance[b] for b in balance}
 
