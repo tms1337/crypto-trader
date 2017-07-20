@@ -77,20 +77,18 @@ try:
                                        spending_factor=1)
 
     wrappers = {
-        "poloniex": poloniex_wrapper,
-        "bittrex": bittrex_wrapper,
-        "bitfinex": bitfinex_wrapper
+        "kraken": kraken_wrapper,
     }
 
     wrapper_container = ExchangeWrapperContainer(wrappers)
 
     trading_currencies = ["ETH", "LTC", "DASH"]
 
-    base_exchange = "poloniex"
+    base_exchange = "kraken"
 
-    sell_threshold = 0.05
-    buy_threshold = 0.02
-    security_loss = 0.2
+    sell_threshold = 0.01
+    buy_threshold = 0.005
+    security_loss = 0.05
 
     eth_value = 1
     dash_value = 1.5
@@ -109,8 +107,7 @@ try:
                                                    values={"ETH": eth_value, "DASH": dash_value, "LTC": ltc_value})
 
     euro_wrappers = {
-        "bittrex": bittrex_wrapper,
-        "bitfinex": bitfinex_wrapper
+        "kraken": bittrex_wrapper,
     }
 
     euro_wrapper_container = ExchangeWrapperContainer(wrappers=euro_wrappers)
