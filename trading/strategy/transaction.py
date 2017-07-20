@@ -1,20 +1,19 @@
 from trading.strategy.decision import Decision
+from trading.util.typechecker import TypeChecker
 
 
 class Transaction:
     def __init__(self, decisions=None):
-        self._check_decisions(decisions)
-
         if decisions is None:
             self.decisions = []
         else:
+            TypeChecker.check_type(decisions, list)
+            for d in decisions:
+                TypeChecker.check_type(d, Decision)
+
             self.decisions = decisions
 
-    def _check_decisions(self, decisions):
-        if decisions is not None:
-            for d in decisions:
-                self._check_decision(d)
+    def add_decision(self, decision):
+        TypeChecker.check_type(decision, Decision)
 
-    def _check_decision(self, d):
-        if not isinstance(d, Decision):
-            raise TypeError("Parameter not of Decision type")
+        self.decisions.append(decision)

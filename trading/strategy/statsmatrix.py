@@ -14,6 +14,9 @@ class StatsMatrix:
         self._check_argument_types(exchanges, currencies)
         self.matrix = {e: {c: None for c in currencies} for e in exchanges}
 
+        self.exchanges = exchanges
+        self.currencies = currencies
+
     def get(self, exchange, currency):
         return self.matrix[exchange][currency]
 
@@ -23,6 +26,12 @@ class StatsMatrix:
         TypeChecker.check_type(cell, StatsCell)
 
         self.matrix[exchange][currency] = cell
+
+    def all_exchanges(self):
+        return self.exchanges
+
+    def all_currencies(self):
+        return self.currencies
 
     def _check_argument_types(self, exchanges, currencies):
         TypeChecker.check_type(exchanges, list)
