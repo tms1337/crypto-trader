@@ -302,7 +302,7 @@ class ExchangeWrapperContainer:
         self.logger.debug("Total balance")
         self.logger.debug(total_balance_per_currency)
 
-        f = open('./stats', 'w+')
+        f = open('./stats', 'a+')
         f.write(str(total_balance_per_currency))
         f.close()
 

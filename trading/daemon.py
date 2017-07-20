@@ -101,7 +101,7 @@ class Daemon:
         self.total_transactions += 1
 
         if self.total_transactions % 10 == 1:
-            f = open('./total_transactions', 'w+')
+            f = open('./total_transactions', 'a+')
             f.write(str(self.total_transactions))
             f.close()
 
