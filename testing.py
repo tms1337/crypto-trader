@@ -14,7 +14,7 @@ import poloniex
 from trading.exchange.poloniex.trade import PoloniexTradeProvider
 
 
-trade = BitfinexTradeProvider(key_uri="/home/faruk/Desktop/bitfinex_key")
+trade = KrakenTradeProvider(key_uri="/home/faruk/Desktop/kraken_key")
 trade.set_currencies("ETH", "BTC")
-id = trade.create_sell_offer(price=0.1, volume=0.1)
+id = trade.create_buy_offer(price=0.1, volume=0.1)
 trade.cancel_offer(id)

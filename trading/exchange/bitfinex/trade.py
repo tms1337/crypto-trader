@@ -21,8 +21,11 @@ class BitfinexTradeProvider(PrivateBitfinexProvider,
     def map_currency_balance(self, currency):
         currency_map = {
             "BTC": "btc",
-            "ETH": "eth"
+            "ETH": "eth",
+            "LTC": "ltc"
         }
+
+        return currency_map[currency]
 
     def total_balance(self, currency=None):
         balance_response = self.api.balances()
@@ -64,7 +67,8 @@ class BitfinexTradeProvider(PrivateBitfinexProvider,
     def inverse_map_currency(self, currency):
         inverse_currency_mapping = {
             "eth": "ETH",
-            "btc": "BTC"
+            "btc": "BTC",
+            "ltc": "LTC"
         }
 
         return inverse_currency_mapping[currency]

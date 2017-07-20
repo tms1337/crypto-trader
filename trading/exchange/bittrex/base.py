@@ -2,7 +2,7 @@ import logging
 
 import time
 
-from trading.exchange.base import CurrencyMixin
+from trading.exchange.base import CurrencyMixin, KeyLoaderMixin
 from .client import bittrex
 
 
@@ -13,7 +13,6 @@ class BittrexProvider(CurrencyMixin):
                  api=bittrex.bittrex(None, None),
                  logger_name="app",
                  pause_dt=2):
-
         self.api = api
         self.pause_dt = pause_dt
 
@@ -66,7 +65,7 @@ class BittrexProvider(CurrencyMixin):
             raise RuntimeError(error_message)
 
 
-class PrivateBittrexProvider(BittrexProvider):
+class PrivateBittrexProvider(BittrexProvider, KeyLoaderMixin):
     def __init__(self,
                  key_uri,
                  base_currency,
@@ -77,24 +76,7 @@ class PrivateBittrexProvider(BittrexProvider):
                                  quote_currency,
                                  api)
 
-        self.key_uri = key_uri
-        self._load_key()
-        self._load_secret()
+        KeyLoaderMixin.__init__(self, key_uri)
 
         self.api = bittrex.bittrex(self.key,
                                    self.secret)
-
-    # TODO: key loader superclass
-    def _load_key(self):
-        content = self._get_key_file_content()
-        self.key = content[0]
-
-    def _load_secret(self):
-        content = self._get_key_file_content()
-        self.secret = content[1]
-
-    def _get_key_file_content(self):
-        with open(self.key_uri) as f:
-            content = f.readlines()
-        content = [x.strip() for x in content]
-        return content

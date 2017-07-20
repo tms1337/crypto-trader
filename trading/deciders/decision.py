@@ -15,6 +15,7 @@ class Decision:
     volume = None
     price = None
     exchange = None
+    decider = None
 
     def __init__(self, logger_name="app"):
         self.logger_name = logger_name

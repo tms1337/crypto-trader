@@ -109,9 +109,9 @@ class TradeProvider(ABC):
     def create_sell_offer(self, volume, price=None):
         pass
 
-    # @abstractmethod
-    # def cancel_offer(self, offer_id):
-    #     pass
+    @abstractmethod
+    def cancel_offer(self, offer_id):
+        pass
 
     def create_bulk_offers(self, decisions):
         failed_decisions = []
@@ -132,15 +132,46 @@ class TradeProvider(ABC):
 
         self.prepare_currencies(decision.base_currency,
                                 decision.quote_currency)
-        if decision.transaction_type == TransactionType.BUY:
-            return self.create_buy_offer(volume=decision.volume,
-                                         price=decision.price)
-        elif decision.transaction_type == TransactionType.SELL:
-            return self.create_sell_offer(volume=decision.volume,
-                                          price=decision.price)
 
+        id = None
+        if decision.transaction_type == TransactionType.BUY:
+            id = self.create_buy_offer(volume=decision.volume,
+                                       price=decision.price)
+        elif decision.transaction_type == TransactionType.SELL:
+            id = self.create_sell_offer(volume=decision.volume,
+                                        price=decision.price)
+
+        if id is None:
+            raise RuntimeError("Error while executing")
+        else:
+            decision.decider.apply_last()
+            return id
+
+    @abstractmethod
     def prepare_currencies(self, base_currency, quote_currency):
         pass
+
+
+class KeyLoaderMixin(ABC):
+    def __init__(self, key_uri):
+        self.key_uri = key_uri
+
+        self._load_key()
+        self._load_secret()
+
+    def _load_key(self):
+        content = self._get_key_file_content()
+        self.key = content[0]
+
+    def _load_secret(self):
+        content = self._get_key_file_content()
+        self.secret = content[1]
+
+    def _get_key_file_content(self):
+        with open(self.key_uri) as f:
+            content = f.readlines()
+        content = [x.strip() for x in content]
+        return content
 
 
 class ExchangeWrapper:
@@ -238,7 +269,7 @@ class ExchangeWrapperContainer:
 
                     self.wrappers[exchange].trade_provider.execute_single_decision(decision)
                 except Exception as ex:
-                    self.logger.error("Error while executing decision %s\nError%s" % (decision, ex))
+                    self.logger.error("Error while executing decision %s\nError %s" % (decision, ex))
                     failed_decisions.append(decision)
 
         return failed_decisions
@@ -265,10 +296,14 @@ class ExchangeWrapperContainer:
 
                         total_balance_per_currency[currency] += total_balance[currency]
             except Exception as ex:
-                self.logger.debug("Could not print balance for %s" % exchange)
+                self.logger.error("Could not print balance for %s" % exchange)
 
         self.logger.debug("Total balance")
         self.logger.debug(total_balance_per_currency)
+
+        f = open('./stats', 'w+')
+        f.write(str(total_balance_per_currency))
+        f.close()
 
     def _check_wrapper(self, wrapper):
         if not isinstance(wrapper, ExchangeWrapper):

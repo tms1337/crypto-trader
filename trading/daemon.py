@@ -26,10 +26,13 @@ class Daemon:
         self.transaction_deciders = transaction_deciders
         self.volume_deciders = volume_deciders
         self.dt_seconds = dt_seconds
+        self.initial_dt_seconds = dt_seconds
         self.dt_timeout_seconds = dt_timeout_seconds
 
         self.logger_name = logger_name
         self.logger = logging.getLogger("%s.Daemon" % logger_name)
+
+        self.total_transactions = 0
 
     def run(self):
         exception_n = 0
@@ -70,13 +73,16 @@ class Daemon:
                 error_message = "An error has occurred while creating or applying decision, waiting for the next step\nError: %s" % ex
                 self.logger.error(error_message)
             else:
-                try:
-                    for transaction_decider in self.transaction_deciders:
-                        transaction_decider.apply_last()
+                # try:
+                #     for transaction_decider in self.transaction_deciders:
+                #         transaction_decider.apply_last()
+                #
+                # except Exception as ex_inner:
+                #     print("An error has occurred while applying decision, waiting for the next step"
+                #           "\n\tError: %s" % str(ex_inner))
 
-                except Exception as ex_inner:
-                    print("An error has occurred while applying decision, waiting for the next step"
-                          "\n\tError: %s" % str(ex_inner))
+                if self.dt_seconds > self.initial_dt_seconds:
+                    self.dt_seconds /= 1.5
 
             time.sleep(random.uniform(0.8 * self.dt_seconds, self.dt_seconds))
 
@@ -92,7 +98,12 @@ class Daemon:
             raise RuntimeError(error_message)
 
         self.logger.info("Decision succesfully applied")
+        self.total_transactions += 1
 
+        if self.total_transactions % 10 == 1:
+            f = open('./total_transactions', 'w+')
+            f.write(str(self.total_transactions))
+            f.close()
 
     def _check_wrapper_container(self, wrapper_container):
         if not isinstance(wrapper_container, ExchangeWrapperContainer):

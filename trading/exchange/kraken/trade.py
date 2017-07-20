@@ -44,7 +44,7 @@ class KrakenTradeProvider(PrivateKrakenProvider,
 
     def create_buy_offer(self, volume, price=None):
         if price is None:
-            self._create_market_buy_offer(volume)
+            return self._create_market_buy_offer(volume)
         else:
             offer_response = self.k.query_private("AddOrder", {"pair": "XETHXXBT",
                                                                "type": "buy",
@@ -54,9 +54,12 @@ class KrakenTradeProvider(PrivateKrakenProvider,
                                                                "trading_agreement": "agree"})
             self._check_response(offer_response)
 
+            # TODO: check if multiple :(
+            return offer_response["result"]["txid"][0]
+
     def create_sell_offer(self, volume, price=None):
         if price is None:
-            self._create_market_sell_offer(volume)
+            return self._create_market_sell_offer(volume)
         else:
             offer_response = self.k.query_private("AddOrder", {"pair": self.form_pair(),
                                                                "type": "sell",
@@ -67,6 +70,13 @@ class KrakenTradeProvider(PrivateKrakenProvider,
 
             self._check_response(offer_response)
 
+            return offer_response["result"]["txid"][0]
+
+    def cancel_offer(self, offer_id):
+        cancel_response = self.k.query_private("CancelOrder", {"txid": offer_id})
+
+        self._check_response(cancel_response)
+
     def _create_market_buy_offer(self, volume):
         offer_response = self.k.query_private("AddOrder", {"pair": self.form_pair(),
                                                            "type": "buy",
@@ -75,6 +85,8 @@ class KrakenTradeProvider(PrivateKrakenProvider,
                                                            "trading_agreement": "agree"})
         self._check_response(offer_response)
 
+        return offer_response["result"]["txid"][0]
+
     def _create_market_sell_offer(self, volume):
         offer_response = self.k.query_private("AddOrder", {"pair": self.form_pair(),
                                                            "type": "sell",
@@ -82,6 +94,8 @@ class KrakenTradeProvider(PrivateKrakenProvider,
                                                            "volume": "{0:.10f}".format(volume),
                                                            "trading_agreement": "agree"})
         self._check_response(offer_response)
+
+        return offer_response["result"]["txid"][0]
 
     def prepare_currencies(self, base_currency, quote_currency):
         self.set_currencies(base_currency, quote_currency)

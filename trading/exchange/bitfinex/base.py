@@ -31,8 +31,8 @@ class BitfinexProvider(CurrencyMixin):
             "BTC": "btc",
             "DASH": "dash",
             "XRP": "xrp",
-            "USD": "USD",
-            "LTC": "LTC"
+            "USD": "usd",
+            "LTC": "ltc"
         }
 
         return currency_mapping[currency]
