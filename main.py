@@ -90,21 +90,7 @@ try:
     buy_threshold = 0.005
     security_loss = 0.05
 
-    eth_value = 1
-    dash_value = 1.5
-    ltc_value = 4
-    btc_value = 0.2
-
-
-    percent_based_transaction_decider = PercentBasedTransactionDecider(currencies=trading_currencies,
-                                                                       trading_currency=quote_currency,
-                                                                       wrapper_container=wrapper_container,
-                                                                       sell_threshold=sell_threshold,
-                                                                       buy_threshold=buy_threshold,
-                                                                       security_loss_threshold=security_loss)
-
-    fixed_volume_decider = FixedValueVolumeDecider(wrapper_container=wrapper_container,
-                                                   values={"ETH": eth_value, "DASH": dash_value, "LTC": ltc_value})
+    btc_value = 0.5
 
     euro_wrappers = {
         "kraken": bittrex_wrapper,
@@ -124,10 +110,8 @@ try:
 
     daemon = Daemon(wrapper_container=wrapper_container,
                     dt_seconds=dt,
-                    transaction_deciders=[percent_based_transaction_decider,
-                                          euro_transaction_decider],
-                    volume_deciders=[fixed_volume_decider,
-                                     euro_volume_decider],
+                    transaction_deciders=[euro_transaction_decider],
+                    volume_deciders=[euro_volume_decider],
                     logger_name="app")
 
 except Exception as ex:

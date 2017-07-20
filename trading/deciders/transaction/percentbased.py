@@ -40,6 +40,12 @@ class PercentBasedTransactionDecider(TransactionDecider):
         self.last_prices = {exchange: {currency: None for currency in currencies}
                             for exchange in wrapper_container.wrappers}
 
+        for e in wrapper_container.wrappers:
+            for currency in currencies:
+                stats = self.wrapper_container.wrappers[e].stats_provider
+                stats.set_currencies(currency, trading_currency)
+                self.last_prices[e][currency] = stats.ticker_last()
+
         self.last_applied_prices = copy.deepcopy(self.last_prices)
         self.last_applied_transaction_types = copy.deepcopy(self.last_transaction_types)
 
@@ -51,7 +57,6 @@ class PercentBasedTransactionDecider(TransactionDecider):
     def decide(self, prev_decisions):
         self.logger.debug("Last transaction types %s" % self.last_applied_transaction_types)
 
-        # if self.i % self.every_n == 0:
         for exchange in self.wrapper_container.wrappers:
             self.logger.debug("Checking exchange: %s" % exchange)
             wrapper = self.wrapper_container.wrappers[exchange]
@@ -63,14 +68,35 @@ class PercentBasedTransactionDecider(TransactionDecider):
                 stats.set_currencies(currency,
                                      self.trading_currency)
 
-                low = stats.ticker_low()
-                high = stats.ticker_high()
+                # low = stats.ticker_low()
+                # high = stats.ticker_high()
+
+                last = stats.ticker_last()
+                low = last
+                high = last
 
                 last_type = self.last_applied_transaction_types[exchange][currency]
                 last_price = self.last_applied_prices[exchange][currency]
 
-                if last_type is None:
-                    # first time :)
+                sell_margin = (low - last_price) / last_price
+                buy_margin = (last_price - high) / last_price
+
+                if (last_type == TransactionType.BUY and sell_margin >= self.sell_threshold) or \
+                    (last_type == TransactionType.BUY and sell_margin < -self.security_loss_threshold):
+
+                    decision = Decision()
+                    decision.exchange = exchange
+                    decision.base_currency = currency
+                    decision.quote_currency = self.trading_currency
+                    decision.transaction_type = TransactionType.SELL
+                    decision.price = low
+                    decision.decider = self
+
+                    prev_decisions.append(decision)
+
+                    self.last_transaction_types[exchange][currency] = TransactionType.SELL
+                    self.last_prices[exchange][currency] = decision.price
+                elif (last_type == TransactionType.SELL or last_type is None) and buy_margin >= self.buy_threshold:
                     decision = Decision()
                     decision.exchange = exchange
                     decision.base_currency = currency
@@ -82,43 +108,9 @@ class PercentBasedTransactionDecider(TransactionDecider):
                     prev_decisions.append(decision)
 
                     self.last_transaction_types[exchange][currency] = TransactionType.BUY
-                    self.last_prices[exchange][currency] = high
-                else:
-                    sell_margin = (low - last_price) / last_price
-                    buy_margin = (last_price - high) / last_price
-
-                    if (last_type == TransactionType.BUY and sell_margin >= self.sell_threshold) or \
-                        (last_type == TransactionType.BUY and sell_margin < -self.security_loss_threshold):
-
-                        decision = Decision()
-                        decision.exchange = exchange
-                        decision.base_currency = currency
-                        decision.quote_currency = self.trading_currency
-                        decision.transaction_type = TransactionType.SELL
-                        decision.price = low
-                        decision.decider = self
-
-                        prev_decisions.append(decision)
-
-                        self.last_transaction_types[exchange][currency] = TransactionType.SELL
-                        self.last_prices[exchange][currency] = decision.price
-                    elif last_type == TransactionType.SELL and buy_margin >= self.buy_threshold:
-                        decision = Decision()
-                        decision.exchange = exchange
-                        decision.base_currency = currency
-                        decision.quote_currency = self.trading_currency
-                        decision.transaction_type = TransactionType.BUY
-                        decision.price = high
-                        decision.decider = self
-
-                        prev_decisions.append(decision)
-
-                        self.last_transaction_types[exchange][currency] = TransactionType.BUY
-                        self.last_prices[exchange][currency] = decision.price
+                    self.last_prices[exchange][currency] = decision.price
 
         return prev_decisions
-        # else:
-        #     self.i = (self.i + 1) % self.every_n
 
     def apply_last(self):
         self.last_applied_prices = copy.deepcopy(self.last_prices)

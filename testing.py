@@ -16,7 +16,7 @@ import poloniex
 
 from trading.exchange.poloniex.trade import PoloniexTradeProvider
 
-last_array = [1, 1, 1, 1.05, 0.95, 1.1, 1.1, 1.1, 0.95, 0.95, 0.95, 2, 1.95, 1.95]
+last_array = [1, 1, 1, 0.8, 0.7, 1.01]
 mock_stats = StatsProviderMock(high_array=[],
                                last_array=last_array,
                                low_array=[])
@@ -35,7 +35,7 @@ decider = PercentBasedTransactionDecider(buy_threshold=0.1,
                                          trading_currency="BTC",
                                          wrapper_container=wrapper_container)
 
-for i in range(len(last_array)):
+for i in range(len(last_array) - 1):
     decisions = []
     decider.decide(decisions)
     for d in decisions:
