@@ -1,6 +1,6 @@
 import logging
 
-from trading.deciders.decision import Decision, TransactionType
+from trading.strategy.decision import Decision, TransactionType
 from trading.exchange.base import CurrencyMixin
 from .base import TransactionDecider
 import math

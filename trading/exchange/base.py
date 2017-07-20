@@ -1,7 +1,7 @@
 import logging
 from abc import ABC, abstractmethod
 
-from trading.deciders.decision import TransactionType, Decision
+from trading.strategy.decision import TransactionType, Decision
 
 
 class CurrencyMixin(ABC):

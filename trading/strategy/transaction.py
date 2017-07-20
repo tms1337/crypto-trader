@@ -1,4 +1,4 @@
-from trading.deciders.decision import Decision
+from trading.strategy.decision import Decision
 
 
 class Transaction:

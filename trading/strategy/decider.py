@@ -1,7 +1,7 @@
 import logging
 from abc import ABC
 
-from trading.deciders.decision import TransactionType
+from trading.strategy.decision import TransactionType
 from trading.exchange.base import ExchangeWrapperContainer
 
 

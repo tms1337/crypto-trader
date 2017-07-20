@@ -1,7 +1,7 @@
 import krakenex
 import time
 
-from trading.deciders.transaction.percentbased import PercentBasedTransactionDecider
+from trading.strategy.transaction.percentbased import PercentBasedTransactionDecider
 from trading.exchange.base import ExchangeWrapper, ExchangeWrapperContainer
 from trading.exchange.bitfinex.base import PrivateBitfinexProvider
 from trading.exchange.bitfinex.stats import BitfinexStatsProvider

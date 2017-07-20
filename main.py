@@ -1,11 +1,11 @@
 from trading.daemon import Daemon
-from trading.deciders.decision import Decision, TransactionType
-from trading.deciders.transaction.exchangediff import ExchangeDiffDecider, ExchangeDiffBackup
-from trading.deciders.transaction.percentbased import PercentBasedTransactionDecider
-from trading.deciders.transaction.simple import AlwaysBuyTransactionDecider
-from trading.deciders.volume.fixedbalancepercentage import FixedBalancePercentageVolumeDecider
-from trading.deciders.volume.fixedincome import FixedIncomeVolumeDecider
-from trading.deciders.volume.simple import FixedValueVolumeDecider
+from trading.strategy.decision import Decision, TransactionType
+from trading.strategy.transaction.exchangediff import ExchangeDiffDecider, ExchangeDiffBackup
+from trading.strategy.transaction.percentbased import PercentBasedTransactionDecider
+from trading.strategy.transaction.simple import AlwaysBuyTransactionDecider
+from trading.strategy.volume.fixedbalancepercentage import FixedBalancePercentageVolumeDecider
+from trading.strategy.volume.fixedincome import FixedIncomeVolumeDecider
+from trading.strategy.volume.simple import FixedValueVolumeDecider
 from trading.exchange.base import ExchangeWrapper, ExchangeWrapperContainer
 from trading.exchange.bitfinex.stats import BitfinexStatsProvider
 from trading.exchange.bitfinex.trade import BitfinexTradeProvider
@@ -97,7 +97,6 @@ try:
     ltc_value = 4
     btc_value = 0.2
 
-
     percent_based_transaction_decider = PercentBasedTransactionDecider(currencies=trading_currencies,
                                                                        trading_currency=quote_currency,
                                                                        wrapper_container=wrapper_container,
@@ -108,12 +107,12 @@ try:
     fixed_volume_decider = FixedValueVolumeDecider(wrapper_container=wrapper_container,
                                                    values={"ETH": eth_value, "DASH": dash_value, "LTC": ltc_value})
 
-    euro_wrappers = {
+    usd_wrappers = {
         "bittrex": bittrex_wrapper,
         "bitfinex": bitfinex_wrapper
     }
 
-    euro_wrapper_container = ExchangeWrapperContainer(wrappers=euro_wrappers)
+    euro_wrapper_container = ExchangeWrapperContainer(wrappers=usd_wrappers)
 
     euro_transaction_decider = PercentBasedTransactionDecider(currencies=["BTC"],
                                                               trading_currency="USD",

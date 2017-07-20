@@ -26,7 +26,8 @@ class Decision:
                      self.quote_currency is None or \
                      self.transaction_type is None or \
                      self.volume is None or \
-                     self.exchange is None
+                     self.exchange is None or \
+                     self.decider is None
 
         return not is_invalid
 

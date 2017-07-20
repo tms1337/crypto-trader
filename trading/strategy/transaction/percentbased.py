@@ -1,8 +1,8 @@
 import logging
 import time
 
-from trading.deciders.decision import Decision, TransactionType
-from trading.deciders.transaction.base import TransactionDecider
+from trading.strategy.decision import Decision, TransactionType
+from trading.strategy.transaction.base import TransactionDecider
 from trading.exchange.base import CurrencyMixin
 import copy
 

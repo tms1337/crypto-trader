@@ -2,7 +2,7 @@ import logging
 
 from poloniex import Poloniex
 
-from trading.deciders.decision import TransactionType
+from trading.strategy.decision import TransactionType
 from trading.exchange.base import TradeProvider
 from trading.exchange.poloniex.base import PrivatePoloniexProvider
 

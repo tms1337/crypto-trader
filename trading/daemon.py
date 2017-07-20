@@ -3,8 +3,8 @@ import logging
 import random
 import time
 
-from trading.deciders.transaction.base import TransactionDecider
-from trading.deciders.volume.base import VolumeDecider
+from trading.strategy.transaction.base import TransactionDecider
+from trading.strategy.volume.base import VolumeDecider
 from trading.exchange.base import ExchangeWrapper, ExchangeWrapperContainer
 
 
