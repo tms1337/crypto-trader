@@ -16,6 +16,10 @@ import poloniex
 
 from trading.exchange.poloniex.trade import PoloniexTradeProvider
 
+trade = KrakenTradeProvider(key_uri="/home/faruk/Desktop/kraken_key")
+trade.set_currencies("BTC", "EUR")
+trade.create_sell_offer(volume=0.01, price=2000)
+
 last_array = [1, 1, 1, 0.8, 0.7, 1.01]
 mock_stats = StatsProviderMock(high_array=[],
                                last_array=last_array,

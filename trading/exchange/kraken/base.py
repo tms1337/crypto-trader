@@ -34,7 +34,8 @@ class KrakenProvider(CurrencyMixin):
             "ETC": "ETC",
             "LTC": "LTC",
             "ICN": "ICN",
-            "XLM": "XLM"
+            "XLM": "XLM",
+            "EUR": "EUR"
         }
 
         return currency_mapping[currency]
@@ -49,7 +50,8 @@ class KrakenProvider(CurrencyMixin):
             "ETC": "XETC",
             "LTC": "XLTC",
             "ICN": "XICN",
-            "XLM": "XXLM"
+            "XLM": "XXLM",
+            "EUR": "ZEUR"
         }
 
         return currency_mapping[currency]

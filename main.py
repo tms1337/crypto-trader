@@ -99,7 +99,7 @@ try:
     euro_wrapper_container = ExchangeWrapperContainer(wrappers=euro_wrappers)
 
     euro_transaction_decider = PercentBasedTransactionDecider(currencies=["BTC"],
-                                                              trading_currency="USD",
+                                                              trading_currency="EUR",
                                                               wrapper_container=euro_wrapper_container,
                                                               sell_threshold=sell_threshold,
                                                               buy_threshold=buy_threshold,
