@@ -5,7 +5,7 @@ from trading.exceptions.transactionnotexecuted import TransactionNotExecutedErro
 from trading.exceptions.util import is_provider_error
 from trading.exchange.base import TradeProvider
 from trading.strategy.decision import ExecutedDecision
-from trading.strategy.pipeline.transaction import Transaction
+from trading.strategy.transaction import Transaction
 from trading.util.typechecker import TypeChecker
 
 # hacky

@@ -15,7 +15,7 @@ from trading.exchange.kraken.trade import KrakenTradeProvider
 from trading.exchange.poloniex.stats import PoloniexStatsProvider
 from trading.exchange.poloniex.trade import PoloniexTradeProvider
 
-# create logger with 'spam_application'
+# create logger with 'app'
 logger = logging.getLogger('app')
 logger.setLevel(logging.DEBUG)
 

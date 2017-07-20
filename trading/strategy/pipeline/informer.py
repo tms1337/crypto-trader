@@ -39,6 +39,8 @@ class Informer:
                 cell = self._generate_cell(exchange, currency)
                 self.stats_matrix.set(exchange, currency, cell)
 
+        return self.stats_matrix
+
     def _check_argument_types(self, stats_providers, currencies, base_currency):
         TypeChecker.check_type(stats_providers, dict)
         for k in stats_providers:
