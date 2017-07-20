@@ -1,8 +1,13 @@
+from retrying import retry
+
 from trading.exceptions.servererror import ServerError
+from trading.exceptions.util import is_provider_error
 from trading.exchange.base import StatsProvider
 from trading.strategy.pipeline.statsmatrix import StatsMatrix, StatsCell
 from trading.util.typechecker import TypeChecker
 
+
+max_retry_attempts = None
 
 class Informer:
     # Informer, ya' no say daddy me Snow me I go blame
@@ -11,7 +16,8 @@ class Informer:
     def __init__(self,
                  stats_providers,
                  currencies,
-                 base_currency):
+                 base_currency,
+                 retry_attempts=3):
 
         self._check_argument_types(stats_providers,
                                    currencies,
@@ -23,6 +29,9 @@ class Informer:
 
         self.stats_matrix = StatsMatrix([e for e in stats_providers],
                                         currencies)
+
+        global max_retry_attempts
+        max_retry_attempts = retry_attempts
 
     def stats_matrix(self):
         for exchange in self.stats_providers:
@@ -48,24 +57,39 @@ class Informer:
 
         cell = StatsCell()
         try:
-            cell.high = stats.ticker_high()
+            self._set_high(cell, stats)
         except (ConnectionError, ServerError):
             cell.high = None
         except Exception:
             cell.high = None
 
         try:
-            cell.low = stats.ticker_low()
+            self._set_low(cell, stats)
         except (ConnectionError, ServerError):
             cell.low = None
         except Exception:
             cell.high = None
 
         try:
-            cell.last = stats.ticker_last()
+            self._set_last(cell, stats)
         except (ConnectionError, ServerError):
             cell.last = None
         except Exception:
             cell.high = None
 
         return cell
+
+    @retry(retry_on_exception=is_provider_error,
+           stop_max_attempt_numer=max_retry_attempts)
+    def _set_last(self, cell, stats):
+        cell.last = stats.ticker_last()
+
+    @retry(retry_on_exception=is_provider_error,
+           stop_max_attempt_numer=max_retry_attempts)
+    def _set_low(self, cell, stats):
+        cell.low = stats.ticker_low()
+
+    @retry(retry_on_exception=is_provider_error,
+           stop_max_attempt_numer=max_retry_attempts)
+    def _set_high(self, cell, stats):
+        cell.high = stats.ticker_high()
