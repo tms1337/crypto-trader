@@ -1,4 +1,4 @@
-from trading.strategy.decision import TransactionType
+from trading.strategy.decision import OfferType
 from trading.exchange.base import TradeProvider
 from trading.exchange.bitfinex.base import PrivateBitfinexProvider
 import FinexAPI.FinexAPI as finex

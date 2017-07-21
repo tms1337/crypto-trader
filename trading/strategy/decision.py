@@ -3,7 +3,7 @@ from enum import Enum, unique
 
 
 @unique
-class TransactionType(Enum):
+class OfferType(Enum):
     BUY = 1
     SELL = 2
 

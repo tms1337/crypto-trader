@@ -1,7 +1,7 @@
 import logging
 from abc import ABC, abstractmethod
 
-from trading.strategy.decision import TransactionType, Decision
+from trading.strategy.decision import OfferType, Decision
 
 
 class CurrencyMixin(ABC):
@@ -148,10 +148,10 @@ class TradeProvider(ABC):
                                 decision.quote_currency)
 
         id = None
-        if decision.transaction_type == TransactionType.BUY:
+        if decision.transaction_type == OfferType.BUY:
             id = self.create_buy_offer(volume=decision.volume,
                                        price=decision.price)
-        elif decision.transaction_type == TransactionType.SELL:
+        elif decision.transaction_type == OfferType.SELL:
             id = self.create_sell_offer(volume=decision.volume,
                                         price=decision.price)
 
@@ -222,7 +222,7 @@ class ExchangeWrapper:
 
         balance = self.trade_provider.total_balance()
 
-        if decision.transaction_type == TransactionType.BUY:
+        if decision.transaction_type == OfferType.BUY:
             if not decision.quote_currency in balance or \
                                     self.spending_factor * balance[
                                 decision.quote_currency] < decision.volume * decision.price:
@@ -230,7 +230,7 @@ class ExchangeWrapper:
 
                 self.logger.error(error_message)
                 raise AssertionError(error_message)
-        elif decision.transaction_type == TransactionType.SELL:
+        elif decision.transaction_type == OfferType.SELL:
             if not decision.base_currency in balance or \
                                     self.spending_factor * balance[decision.base_currency] < decision.volume:
                 error_message = "Balance not sufficient for transaction %s" % decision

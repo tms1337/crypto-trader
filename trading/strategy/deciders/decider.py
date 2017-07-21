@@ -13,3 +13,7 @@ class Decider(ABC):
     def decide(self, stats_matrix):
         pass
 
+    @abstractmethod
+    def apply_last(self):
+        pass
+

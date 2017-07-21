@@ -1,4 +1,4 @@
-from trading.strategy.deciders.simple.volume import VolumeDecider
+from trading.strategy.deciders.simple.volume.base import VolumeDecider
 
 
 class FixedValueVolumeDecider(VolumeDecider):

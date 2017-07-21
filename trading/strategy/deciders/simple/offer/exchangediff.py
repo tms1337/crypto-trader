@@ -1,6 +1,6 @@
 import logging
 
-from trading.strategy.decision import Decision, TransactionType
+from trading.strategy.decision import Decision, OfferType
 from trading.exchange.base import CurrencyMixin
 from .base import OfferDecider
 import math
@@ -75,7 +75,7 @@ class ExchangeDiffOfferDecider(OfferDecider):
             low_decision = Decision()
             low_decision.base_currency = currency
             low_decision.quote_currency = self.trading_currency
-            low_decision.transaction_type = TransactionType.SELL
+            low_decision.transaction_type = OfferType.SELL
             low_decision.exchange = best_exchanges["sell"]
             low_decision.price = high_low_per_exchange[best_exchanges["sell"]]["low"]
 
@@ -84,7 +84,7 @@ class ExchangeDiffOfferDecider(OfferDecider):
             high_decision = Decision()
             high_decision.base_currency = currency
             high_decision.quote_currency = self.trading_currency
-            high_decision.transaction_type = TransactionType.BUY
+            high_decision.transaction_type = OfferType.BUY
             high_decision.exchange = best_exchanges["buy"]
             high_decision.price = high_low_per_exchange[best_exchanges["buy"]]["high"]
 
@@ -150,14 +150,14 @@ class ExchangeDiffBackup(OfferDecider):
         low_decision = Decision()
         low_decision.base_currency = currency
         low_decision.quote_currency = self.trading_currency
-        low_decision.transaction_type = TransactionType.BUY
+        low_decision.transaction_type = OfferType.BUY
         low_decision.exchange = low[0]
         low_decision.price = low[1] + price_margin
 
         high_decision = Decision()
         high_decision.base_currency = currency
         high_decision.quote_currency = self.trading_currency
-        high_decision.transaction_type = TransactionType.SELL
+        high_decision.transaction_type = OfferType.SELL
         high_decision.exchange = high[0]
         high_decision.price = high[1] - price_margin
 

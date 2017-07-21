@@ -1,7 +1,7 @@
 from trading.strategy.deciders.decider import Decider
 from trading.strategy.deciders.simple.offer.base import OfferDecider
 from trading.strategy.deciders.simple.volume.base import VolumeDecider
-from trading.util.typechecker import TypeChecker
+from trading.util.asserting import TypeChecker
 
 
 class SimpleCompositeDecider(Decider):
@@ -9,7 +9,6 @@ class SimpleCompositeDecider(Decider):
                  trade_provider,
                  offer_decider,
                  volume_decider):
-
         TypeChecker.check_type(offer_decider, OfferDecider)
         TypeChecker.check_type(volume_decider, VolumeDecider)
 
@@ -21,4 +20,11 @@ class SimpleCompositeDecider(Decider):
     def decide(self, stats_matrix):
         transactions = self.offer_decider.decide(stats_matrix)
         transactions = self.volume_decider.decide(transactions)
+
+        return transactions
+
+    def apply_last(self):
+        self.offer_decider.apply_last()
+        self.volume_decider.apply_last()
+
 

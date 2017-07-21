@@ -4,7 +4,7 @@ from trading.exceptions.servererror import ServerError
 from trading.exceptions.util import is_provider_error
 from trading.exchange.base import StatsProvider
 from trading.strategy.pipeline.statsmatrix import StatsMatrix, StatsCell
-from trading.util.typechecker import TypeChecker
+from trading.util.asserting import TypeChecker
 
 
 max_retry_attempts = None

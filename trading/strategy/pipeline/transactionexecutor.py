@@ -6,7 +6,7 @@ from trading.exceptions.util import is_provider_error
 from trading.exchange.base import TradeProvider
 from trading.strategy.decision import ExecutedDecision
 from trading.strategy.transaction import Transaction
-from trading.util.typechecker import TypeChecker
+from trading.util.asserting import TypeChecker
 
 # hacky
 max_retry_attempts = None
