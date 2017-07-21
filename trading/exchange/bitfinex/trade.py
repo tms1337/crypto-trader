@@ -16,7 +16,7 @@ class BitfinexTradeProvider(PrivateBitfinexProvider,
         PrivateBitfinexProvider.__init__(self,
                                          key_uri,
                                          api)
-        TradeProvider.__init__(self, verbose)
+        TradeProvider.__init__(self)
         LoggableMixin.__init__(self, BitfinexTradeProvider)
 
     def currency_mapping_for_balance(self):

@@ -6,6 +6,8 @@ from trading.exchange.bitfinex.stats import BitfinexStatsProvider
 from trading.exchange.bitfinex.trade import BitfinexTradeProvider
 from trading.exchange.bittrex.stats import BittrexStatsProvider
 from trading.exchange.bittrex.trade import BittrexTradeProvider
+from trading.exchange.kraken.stats import KrakenStatsProvider
+from trading.exchange.kraken.trade import KrakenTradeProvider
 from trading.exchange.poloniex.stats import PoloniexStatsProvider
 from trading.exchange.poloniex.trade import PoloniexTradeProvider
 from trading.strategy.deciders.simple.base import SimpleCompositeDecider
@@ -41,14 +43,16 @@ currencies = ["ETH"]
 trading_currency = "BTC"
 
 stats_providers = {
-    "poloniex": PoloniexStatsProvider(),
-    "bittrex": BittrexStatsProvider(),
-    "bitfinex": BitfinexStatsProvider()
+    # "poloniex": PoloniexStatsProvider(),
+    # "bittrex": BittrexStatsProvider(),
+    # "bitfinex": BitfinexStatsProvider(),
+    "kraken": KrakenStatsProvider()
 }
 trade_providers = {
-    "poloniex": PoloniexTradeProvider(key_uri="/home/faruk/Desktop/poloniex_key"),
-    "bittrex": BittrexTradeProvider(key_uri="/home/faruk/Desktop/bittrex_key"),
-    "bitfinex": BitfinexTradeProvider(key_uri="/home/faruk/Desktop/bitfinex_key")
+    # "poloniex": PoloniexTradeProvider(key_uri="/home/faruk/Desktop/poloniex_key"),
+    # "bittrex": BittrexTradeProvider(key_uri="/home/faruk/Desktop/bittrex_key"),
+    # "bitfinex": BitfinexTradeProvider(key_uri="/home/faruk/Desktop/bitfinex_key"),
+    "kraken": KrakenTradeProvider(key_uri="/home/faruk/Desktop/kraken_key")
 }
 
 informer = Informer(base_currency=trading_currency,
