@@ -1,17 +1,19 @@
 import krakenex
+
+from trading.util.logging import LoggableMixin
 from .base import KrakenProvider
 from ..base import CurrencyMixin, StatsProvider
 
 
 class KrakenStatsProvider(StatsProvider,
-                          KrakenProvider):
+                          KrakenProvider,
+                          LoggableMixin):
 
     def __init__(self,
-                 base_currency=None,
-                 quote_currency=None,
                  api=krakenex.API()):
 
-        KrakenProvider.__init__(self, base_currency, quote_currency, api)
+        KrakenProvider.__init__(self, api)
+        LoggableMixin.__init__(self, KrakenStatsProvider)
 
     def ohlc_history(self, interval=1, since=None):
         parameters = {"pair": self.form_pair(),

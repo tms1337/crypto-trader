@@ -3,30 +3,42 @@ from trading.exchange.base import TradeProvider
 from trading.exchange.bitfinex.base import PrivateBitfinexProvider
 import FinexAPI.FinexAPI as finex
 
+from trading.util.logging import LoggableMixin
+
 
 class BitfinexTradeProvider(PrivateBitfinexProvider,
-                            TradeProvider):
-    def __init__(self, key_uri,
-                 base_currency=None,
-                 quote_currency=None,
+                            TradeProvider,
+                            LoggableMixin):
+    def __init__(self,
+                 key_uri,
                  api=finex,
                  verbose=1):
         PrivateBitfinexProvider.__init__(self,
                                          key_uri,
-                                         base_currency,
-                                         quote_currency,
                                          api)
         TradeProvider.__init__(self, verbose)
+        LoggableMixin.__init__(self, BitfinexTradeProvider)
 
-    def currency_mapping_for_balance(self, currency):
-        currency_map = {
+    def currency_mapping_for_balance(self):
+        mapping = {
             "BTC": "btc",
             "ETH": "eth",
             "LTC": "ltc",
             "USD": "usd"
         }
 
-        return currency_map[currency]
+        return mapping
+
+    def inverse_map_currency(self, currency):
+        mapping = {
+            "eth": "ETH",
+            "btc": "BTC",
+            "ltc": "LTC",
+            "usd": "USD",
+            "dsh": "DASH"
+        }
+
+        return mapping
 
     def total_balance(self, currency=None):
         balance_response = self.api.balances()
@@ -64,14 +76,3 @@ class BitfinexTradeProvider(PrivateBitfinexProvider,
         cancel_response = self.api.delete_order(offer_id)
 
         self._check_response(cancel_response)
-
-    def inverse_map_currency(self, currency):
-        inverse_currency_mapping = {
-            "eth": "ETH",
-            "btc": "BTC",
-            "ltc": "LTC",
-            "usd": "USD",
-            "dsh": "DASH"
-        }
-
-        return inverse_currency_mapping[currency]

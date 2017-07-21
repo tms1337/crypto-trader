@@ -5,22 +5,19 @@ import time
 from trading.exchange.base import CurrencyMixin, Provider
 import FinexAPI.FinexAPI as finex
 
+from trading.util.logging import LoggableMixin
 
-class BitfinexProvider(CurrencyMixin, Provider):
+
+class BitfinexProvider(CurrencyMixin, Provider, LoggableMixin):
     def __init__(self,
-                 base_currency=None,
-                 quote_currency=None,
                  api=finex,
-                 logger_name="app",
                  pause_dt=1):
 
         self.api = api
         self.pause_dt = pause_dt
 
-        self.logger_name = logger_name
-        self.logger = logging.getLogger("%s.BitfinexProvider" % logger_name)
-
         CurrencyMixin.__init__(self)
+        LoggableMixin.__init__(self, BitfinexProvider)
 
     def currency_mapping(self):
         mapping = {
@@ -49,8 +46,6 @@ class BitfinexProvider(CurrencyMixin, Provider):
     def form_pair(self):
         return CurrencyMixin.form_pair(self)
 
-
-
     def _check_response(self, response):
         time.sleep(self.pause_dt)
         self.logger.debug("Checking response: %s" % str(response)[1:100])
@@ -62,18 +57,15 @@ class BitfinexProvider(CurrencyMixin, Provider):
             raise RuntimeError(error_message)
 
 
-class PrivateBitfinexProvider(BitfinexProvider):
+class PrivateBitfinexProvider(BitfinexProvider, LoggableMixin):
     def __init__(self,
                  key_uri,
-                 base_currency=None,
-                 quote_currency=None,
                  api=finex):
 
         BitfinexProvider.__init__(self,
-                                  base_currency,
-                                  quote_currency,
                                   api)
         self.api.load_keys(key_uri)
+        LoggableMixin.__init__(self, PrivateBitfinexProvider)
 
     def prepare_currencies(self, base_currency, quote_currency):
         self.set_currencies(base_currency, quote_currency)

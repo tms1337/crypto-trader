@@ -1,3 +1,4 @@
+from trading.util.logging import LoggableMixin
 from .client import bittrex
 
 from .base import PrivateBittrexProvider
@@ -5,17 +6,15 @@ from ..base import CurrencyMixin, TradeProvider
 
 
 class BittrexTradeProvider(PrivateBittrexProvider,
-                           TradeProvider):
+                           TradeProvider,
+                           LoggableMixin):
     def __init__(self,
                  key_uri,
-                 base_currency=None,
-                 quote_currency=None,
                  api=bittrex.bittrex(None, None)):
         PrivateBittrexProvider.__init__(self,
                                         key_uri=key_uri,
-                                        base_currency=base_currency,
-                                        quote_currency=quote_currency,
                                         api=api)
+        LoggableMixin.__init__(self, BittrexTradeProvider)
 
     def total_balance(self, currency=None):
         balance_response = self.api.getbalances()

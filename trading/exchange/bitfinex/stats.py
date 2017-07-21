@@ -2,9 +2,19 @@ from trading.exchange.base import StatsProvider
 from trading.exchange.bitfinex.base import BitfinexProvider
 import FinexAPI.FinexAPI as finex
 
+from trading.util.logging import LoggableMixin
+
 
 class BitfinexStatsProvider(BitfinexProvider,
-                            StatsProvider):
+                            StatsProvider,
+                            LoggableMixin):
+    def __init__(self,
+                 api=finex,
+                 pause_dt=1):
+
+        LoggableMixin.__init__(self, BitfinexStatsProvider)
+        BitfinexProvider.__init__(self, api, pause_dt)
+
     def ticker_last(self):
         ticker_response = self.api.ticker(symbol=self.form_pair())
         self._check_response(ticker_response)

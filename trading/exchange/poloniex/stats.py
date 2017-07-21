@@ -17,8 +17,7 @@ class PoloniexStatsProvider(StatsProvider,
         self.last_ticker_response = None
         self.last_time = None
 
-        PoloniexProvider.__init__(self,
-                                  api)
+        PoloniexProvider.__init__(self, api)
 
         LoggableMixin.__init__(self, PoloniexStatsProvider)
 

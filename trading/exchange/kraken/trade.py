@@ -1,22 +1,22 @@
 import krakenex
 
+from trading.util.logging import LoggableMixin
 from .base import PrivateKrakenProvider
 from ..base import CurrencyMixin, TradeProvider
 
 
 class KrakenTradeProvider(PrivateKrakenProvider,
-                          TradeProvider):
+                          TradeProvider,
+                          LoggableMixin):
     def __init__(self,
                  key_uri,
-                 base_currency=None,
-                 quote_currency=None,
                  api=krakenex.API()):
 
         PrivateKrakenProvider.__init__(self,
                                        key_uri=key_uri,
-                                       base_currency=base_currency,
-                                       quote_currency=quote_currency,
                                        api=api)
+
+        LoggableMixin.__init__(self, KrakenTradeProvider)
 
     def total_balance(self, currency=None):
         balance_response = self.k.query_private("Balance")

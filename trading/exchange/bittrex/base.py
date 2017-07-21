@@ -3,23 +3,19 @@ import logging
 import time
 
 from trading.exchange.base import CurrencyMixin, KeyLoaderMixin, Provider
+from trading.util.logging import LoggableMixin
 from .client import bittrex
 
 
-class BittrexProvider(CurrencyMixin, Provider):
+class BittrexProvider(CurrencyMixin, Provider, LoggableMixin):
     def __init__(self,
-                 base_currency=None,
-                 quote_currency=None,
                  api=bittrex.bittrex(None, None),
-                 logger_name="app",
                  pause_dt=2):
         self.api = api
         self.pause_dt = pause_dt
 
-        self.logger_name = logger_name
-        self.logger = logging.getLogger("%s.BittrexProvider" % logger_name)
-
         CurrencyMixin.__init__(self)
+        LoggableMixin.__init__(self, BittrexProvider)
 
     def currency_mapping(self):
         mapping = {
@@ -63,18 +59,16 @@ class BittrexProvider(CurrencyMixin, Provider):
             raise RuntimeError(error_message)
 
 
-class PrivateBittrexProvider(BittrexProvider, KeyLoaderMixin):
+class PrivateBittrexProvider(BittrexProvider, KeyLoaderMixin, LoggableMixin):
     def __init__(self,
                  key_uri,
-                 base_currency,
-                 quote_currency,
                  api=bittrex.bittrex(None, None)):
         BittrexProvider.__init__(self,
-                                 base_currency,
-                                 quote_currency,
                                  api)
 
         KeyLoaderMixin.__init__(self, key_uri)
 
         self.api = bittrex.bittrex(self.key,
                                    self.secret)
+
+        LoggableMixin.__init__(self, PrivateBittrexProvider)
