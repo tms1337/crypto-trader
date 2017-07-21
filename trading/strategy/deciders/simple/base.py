@@ -6,7 +6,7 @@ from trading.util.asserting import TypeChecker
 
 class SimpleCompositeDecider(Decider):
     def __init__(self,
-                 trade_provider,
+                 trade_providers,
                  offer_decider,
                  volume_decider):
         TypeChecker.check_type(offer_decider, OfferDecider)
@@ -15,7 +15,7 @@ class SimpleCompositeDecider(Decider):
         self.offer_decider = offer_decider
         self.volume_decider = volume_decider
 
-        Decider.__init__(self, trade_provider)
+        Decider.__init__(self, trade_providers)
 
     def decide(self, stats_matrix):
         transactions = self.offer_decider.decide(stats_matrix)

@@ -1,11 +1,54 @@
 import copy
-import logging
-
-from trading.exchange.base import CurrencyMixin
 from trading.strategy.deciders.simple.offer.base import OfferDecider
 from trading.strategy.decision import Decision, OfferType
+from trading.strategy.pipeline.statsmatrix import StatsMatrix
 from trading.strategy.transaction import Transaction
+from trading.util.asserting import TypeChecker
 from trading.util.logging import LoggableMixin
+
+
+class OfferTypeMatrix:
+    def __init__(self,
+                 exchanges,
+                 currencies):
+
+        TypeChecker.check_type(exchanges, list)
+        for e in exchanges:
+            TypeChecker.check_type(e, str)
+
+        TypeChecker.check_type(currencies, list)
+        for c in currencies:
+            TypeChecker.check_type(c, str)
+
+        self.matrix = {e: {c: None for c in currencies} for e in exchanges}
+
+    def get(self, exchange, currency):
+        TypeChecker.check_type(exchange, str)
+        TypeChecker.check_type(currency, str)
+
+        assert exchange in self.matrix, "Exchange %s must be in matrix" % exchange
+        assert currency in self.matrix[exchange], "Currency %s must be in matrix" % currency
+
+    def set(self, exchange, currency, value):
+        TypeChecker.check_type(exchange, str)
+        TypeChecker.check_type(currency, str)
+        TypeChecker.check_type(value, OfferType)
+
+        assert exchange in self.matrix, "Exchange %s must be in matrix" % exchange
+        assert currency in self.matrix[exchange], "Currency %s must be in matrix" % currency
+
+        self.matrix[exchange][currency] = value
+
+
+class DecisionRecord:
+    def __init__(self,
+                 stats_matrix,
+                 offer_type_matrix):
+        TypeChecker.check_type(stats_matrix, StatsMatrix)
+        TypeChecker.check_type(offer_type_matrix, OfferTypeMatrix)
+
+        self.stats_matrix = stats_matrix
+        self.offer_type_matrix = offer_type_matrix
 
 
 class PercentBasedOfferDecider(OfferDecider, LoggableMixin):
@@ -15,36 +58,69 @@ class PercentBasedOfferDecider(OfferDecider, LoggableMixin):
                  buy_threshold,
                  sell_threshold,
                  security_loss_threshold):
-
         self.currencies = currencies
         self.trading_currency = trading_currency
         self.buy_threshold = buy_threshold
         self.sell_threshold = sell_threshold
         self.security_loss_threshold = security_loss_threshold
 
-        LoggableMixin.__init__(self)
+        self.last_decision_record = None
+        self.last_applied_decision_record = None
+
+        LoggableMixin.__init__(self, PercentBasedOfferDecider)
 
     def decide(self, stats_matrix):
+        TypeChecker.check_type(stats_matrix, StatsMatrix)
+
         transaction = Transaction()
 
-        self.logger.debug("Last transaction types %s" % self.last_applied_transaction_types)
+        if self.last_decision_record is None:
+            # first time :)
+            offer_type_matrix = OfferTypeMatrix(stats_matrix.all_exchanges(),
+                                                stats_matrix.all_currencies())
+            self.last_decision_record = DecisionRecord(stats_matrix,
+                                                       offer_type_matrix)
 
-        for exchange in stats_matrix.all_exchanges():
-            self.logger.debug("Checking exchange: %s" % exchange)
-            for currency in stats_matrix.all_currencies():
-                self.logger.debug("\tChecking currency %s" % currency)
+            self.last_applied_decision_record = copy.deepcopy(self.last_decision_record)
+            for e in self.last_applied_decision_record.stats_matrix.all_exchanges():
+                for c in self.last_applied_decision_record.stats_matrix.all_currencies():
+                    cell = self.last_applied_decision_record.stats_matrix.get(e, c)
+                    cell.price = cell.last
 
-                low = stats_matrix.get(exchange, currency).low
-                high = stats_matrix.get(exchange, currency).high
+                    self.last_applied_decision_record.stats_matrix.set(e, c, cell)
 
-                last_type = self.last_applied_transaction_types[exchange][currency]
-                last_price = self.last_applied_prices[exchange][currency]
+        else:
+            self.last_decision_record.stats_matrix = stats_matrix
 
-                if last_type is None:
-                    # first time :)
+        for e in stats_matrix.all_exchanges():
+            for c in stats_matrix.all_currencies():
+                low = stats_matrix.get(e, c).low
+                high = stats_matrix.get(e, c).high
+                last_applied_price = self.last_applied_decision_record.stats_matrix.get(e, c).price
+                last_applied_decision = self.last_applied_decision_record.offer_type_matrix.get(e, c)
+
+                buy_margin = (last_applied_price - high) / last_applied_price
+                sell_margin = (low - last_applied_price) / last_applied_price
+
+                if (last_applied_decision == OfferType.BUY and sell_margin >= self.sell_threshold) or \
+                        (last_applied_decision == OfferType.BUY and sell_margin < -self.security_loss_threshold):
+
                     decision = Decision()
-                    decision.exchange = exchange
-                    decision.base_currency = currency
+                    decision.exchange = e
+                    decision.base_currency = c
+                    decision.quote_currency = self.trading_currency
+                    decision.transaction_type = OfferType.SELL
+                    decision.price = low
+                    decision.decider = self
+
+                    transaction.add_decision(decision)
+
+                    self.last_decision_record.offer_type_matrix.set(e, c, OfferType.SELL)
+                elif (last_applied_decision == OfferType.SELL or last_applied_decision is None) and \
+                                buy_margin >= self.buy_threshold:
+                    decision = Decision()
+                    decision.exchange = e
+                    decision.base_currency = c
                     decision.quote_currency = self.trading_currency
                     decision.transaction_type = OfferType.BUY
                     decision.price = high
@@ -52,43 +128,9 @@ class PercentBasedOfferDecider(OfferDecider, LoggableMixin):
 
                     transaction.add_decision(decision)
 
-                    self.last_transaction_types[exchange][currency] = OfferType.BUY
-                    self.last_prices[exchange][currency] = high
-                else:
-                    sell_margin = (low - last_price) / last_price
-                    buy_margin = (last_price - high) / last_price
+                    self.last_decision_record.offer_type_matrix.set(e, c, OfferType.BUY)
 
-                    if (last_type == OfferType.BUY and sell_margin >= self.sell_threshold) or \
-                            (last_type == OfferType.BUY and sell_margin < -self.security_loss_threshold):
-
-                        decision = Decision()
-                        decision.exchange = exchange
-                        decision.base_currency = currency
-                        decision.quote_currency = self.trading_currency
-                        decision.transaction_type = OfferType.SELL
-                        decision.price = low
-                        decision.decider = self
-
-                        transaction.add_decision(decision)
-
-                        self.last_transaction_types[exchange][currency] = OfferType.SELL
-                        self.last_prices[exchange][currency] = decision.price
-                    elif last_type == OfferType.SELL and buy_margin >= self.buy_threshold:
-                        decision = Decision()
-                        decision.exchange = exchange
-                        decision.base_currency = currency
-                        decision.quote_currency = self.trading_currency
-                        decision.transaction_type = OfferType.BUY
-                        decision.price = high
-                        decision.decider = self
-
-                        transaction.add_decision(decision)
-
-                        self.last_transaction_types[exchange][currency] = OfferType.BUY
-                        self.last_prices[exchange][currency] = decision.price
-
-        return transaction
+        return [transaction]
 
     def apply_last(self):
-        self.last_applied_prices = copy.deepcopy(self.last_prices)
-        self.last_applied_transaction_types = copy.deepcopy(self.last_transaction_types)
+        self.last_applied_decision_record = copy.deepcopy(self.last_decision_record)

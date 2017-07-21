@@ -1,21 +1,21 @@
 import logging
 import sys
 
-from trading.strategy.transaction.percentbased import PercentBasedTransactionDecider
-from trading.strategy.volume.simple import FixedValueVolumeDecider
-
 from trading.daemon import Daemon
-from trading.exchange.base import ExchangeWrapper, ExchangeWrapperContainer
 from trading.exchange.bitfinex.stats import BitfinexStatsProvider
 from trading.exchange.bitfinex.trade import BitfinexTradeProvider
 from trading.exchange.bittrex.stats import BittrexStatsProvider
 from trading.exchange.bittrex.trade import BittrexTradeProvider
-from trading.exchange.kraken.stats import KrakenStatsProvider
-from trading.exchange.kraken.trade import KrakenTradeProvider
 from trading.exchange.poloniex.stats import PoloniexStatsProvider
 from trading.exchange.poloniex.trade import PoloniexTradeProvider
+from trading.strategy.deciders.simple.base import SimpleCompositeDecider
+from trading.strategy.deciders.simple.offer.percentbased import PercentBasedOfferDecider
+from trading.strategy.deciders.simple.volume.fixedvalue import FixedValueVolumeDecider
+from trading.strategy.pipeline.block import Block
+from trading.strategy.pipeline.deciderpipeline import DeciderPipeline
+from trading.strategy.pipeline.informer import Informer
+from trading.strategy.pipeline.transactionexecutor import TransactionExecutor
 
-# create logger with 'app'
 logger = logging.getLogger('app')
 logger.setLevel(logging.DEBUG)
 
@@ -37,97 +37,41 @@ ch.setFormatter(formatter)
 logger.addHandler(fh)
 logger.addHandler(ch)
 
-daemon = None
+currencies = ["ETH"]
+trading_currency = "BTC"
 
-try:
-    quote_currency = "BTC"
-    dt = 30
-    key_directory = sys.argv[1]
+stats_providers = {
+    "poloniex": PoloniexStatsProvider(),
+    "bittrex": BittrexStatsProvider(),
+    "bitfinex": BitfinexStatsProvider()
+}
+trade_providers = {
+    "poloniex": PoloniexTradeProvider(key_uri="/home/faruk/Desktop/poloniex_key"),
+    "bittrex": BittrexTradeProvider(key_uri="/home/faruk/Desktop/bittrex_key"),
+    "bitfinex": BitfinexTradeProvider(key_uri="/home/faruk/Desktop/bitfinex_key")
+}
 
-    kraken_stats = KrakenStatsProvider()
-    kraken_trader = KrakenTradeProvider(key_uri=("%s/kraken_key" % key_directory))
+informer = Informer(base_currency=trading_currency,
+                    stats_providers=stats_providers,
+                    currencies=currencies)
 
-    kraken_wrapper = ExchangeWrapper(stats_provider=kraken_stats,
-                                     trade_provider=kraken_trader,
-                                     spending_factor=1)
+percent_decider = SimpleCompositeDecider(trade_providers=trade_providers,
+                                         offer_decider=PercentBasedOfferDecider(currencies=currencies,
+                                                                                buy_threshold=0.1,
+                                                                                sell_threshold=0.1,
+                                                                                security_loss_threshold=0.1,
+                                                                                trading_currency=trading_currency),
+                                         volume_decider=FixedValueVolumeDecider(values={"ETH": 0.1}))
 
-    poloniex_stats = PoloniexStatsProvider()
-    poloniex_trader = PoloniexTradeProvider(key_uri=("%s/poloniex_key" % key_directory))
-    poloniex_wrapper = ExchangeWrapper(stats_provider=poloniex_stats,
-                                       trade_provider=poloniex_trader,
-                                       spending_factor=1)
+# he's gonna kill you !!!
+executor = TransactionExecutor(trade_providers=trade_providers)
 
-    bittrex_stats = BittrexStatsProvider()
-    bittrex_trader = BittrexTradeProvider(key_uri=("%s/bittrex_key" % key_directory))
-    bittrex_wrapper = ExchangeWrapper(stats_provider=bittrex_stats,
-                                      trade_provider=bittrex_trader,
-                                      spending_factor=1)
+block = Block(decider_pipeline=DeciderPipeline(deciders=[percent_decider]),
+              informer=informer,
+              transaction_executor=executor)
 
-    bitfinex_stats = BitfinexStatsProvider()
-    bitfinex_trader = BitfinexTradeProvider(key_uri=("%s/bitfinex_key" % key_directory))
-    bitfinex_wrapper = ExchangeWrapper(stats_provider=bitfinex_stats,
-                                       trade_provider=bitfinex_trader,
-                                       spending_factor=1)
+daemon = Daemon(blocks=[block])
 
-    wrappers = {
-        "poloniex": poloniex_wrapper,
-        "bittrex": bittrex_wrapper,
-        "bitfinex": bitfinex_wrapper
-    }
-
-    wrapper_container = ExchangeWrapperContainer(wrappers)
-
-    trading_currencies = ["ETH", "LTC", "DASH"]
-
-    base_exchange = "poloniex"
-
-    sell_threshold = 0.05
-    buy_threshold = 0.02
-    security_loss = 0.2
-
-    eth_value = 1
-    dash_value = 1.5
-    ltc_value = 4
-    btc_value = 0.2
-
-    percent_based_transaction_decider = PercentBasedTransactionDecider(currencies=trading_currencies,
-                                                                       trading_currency=quote_currency,
-                                                                       wrapper_container=wrapper_container,
-                                                                       sell_threshold=sell_threshold,
-                                                                       buy_threshold=buy_threshold,
-                                                                       security_loss_threshold=security_loss)
-
-    fixed_volume_decider = FixedValueVolumeDecider(wrapper_container=wrapper_container,
-                                                   values={"ETH": eth_value, "DASH": dash_value, "LTC": ltc_value})
-
-    usd_wrappers = {
-        "bittrex": bittrex_wrapper,
-        "bitfinex": bitfinex_wrapper
-    }
-
-    euro_wrapper_container = ExchangeWrapperContainer(wrappers=usd_wrappers)
-
-    euro_transaction_decider = PercentBasedTransactionDecider(currencies=["BTC"],
-                                                              trading_currency="USD",
-                                                              wrapper_container=euro_wrapper_container,
-                                                              sell_threshold=sell_threshold,
-                                                              buy_threshold=buy_threshold,
-                                                              security_loss_threshold=security_loss)
-
-    euro_volume_decider = FixedValueVolumeDecider(wrapper_container=wrapper_container,
-                                                  values={"BTC": btc_value})
-
-    daemon = Daemon(wrapper_container=wrapper_container,
-                    dt_seconds=dt,
-                    transaction_deciders=[percent_based_transaction_decider,
-                                          euro_transaction_decider],
-                    volume_deciders=[fixed_volume_decider,
-                                     euro_volume_decider],
-                    logger_name="app")
-
-except Exception as ex:
-    print("Error while initializing daemon and its parts"
-          "\n\tError message: %s" % str(ex))
 
 if daemon is not None:
     daemon.run()

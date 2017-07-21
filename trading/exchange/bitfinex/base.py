@@ -20,13 +20,10 @@ class BitfinexProvider(CurrencyMixin, Provider):
         self.logger_name = logger_name
         self.logger = logging.getLogger("%s.BitfinexProvider" % logger_name)
 
-        CurrencyMixin.__init__(self,
-                               base_currency,
-                               quote_currency,
-                               logger_name=self.logger_name)
+        CurrencyMixin.__init__(self)
 
-    def map_currency(self, currency):
-        currency_mapping = {
+    def currency_mapping(self):
+        mapping = {
             "ETH": "eth",
             "BTC": "btc",
             "DASH": "dsh",
@@ -35,10 +32,10 @@ class BitfinexProvider(CurrencyMixin, Provider):
             "LTC": "ltc"
         }
 
-        return currency_mapping[currency]
+        return mapping
 
-    def currency_mapping_for_balance(self, currency):
-        currency_mapping = {
+    def currency_mapping_for_balance(self):
+        mapping = {
             "ETH": "eth",
             "BTC": "btc",
             "DASH": "dsh",
@@ -47,10 +44,12 @@ class BitfinexProvider(CurrencyMixin, Provider):
             "LTC": "ltc"
         }
 
-        return currency_mapping[currency]
+        return mapping
 
     def form_pair(self):
         return CurrencyMixin.form_pair(self)
+
+
 
     def _check_response(self, response):
         time.sleep(self.pause_dt)

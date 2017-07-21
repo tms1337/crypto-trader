@@ -5,5 +5,5 @@ from trading.strategy.deciders.decider import Decider
 
 class VolumeDecider(ABC):
     @abstractclassmethod
-    def decide(self, partial_decisions):
+    def decide(self, transactions):
         pass

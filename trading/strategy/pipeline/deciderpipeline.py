@@ -1,5 +1,5 @@
 from trading.strategy.deciders.decider import Decider
-from trading.util.typechecker import TypeChecker
+from trading.util.asserting import TypeChecker
 
 
 class DeciderPipeline:
@@ -18,4 +18,11 @@ class DeciderPipeline:
         self.deciders.append(decider)
 
     def decide(self, stats_matrix):
-        pass
+        all_transactions = []
+        for d in self.deciders:
+            transactions = d.decide(stats_matrix)
+            assert not transactions is None, \
+                "Decided transaction list should not be None"
+            all_transactions.extend(transactions)
+
+        return all_transactions

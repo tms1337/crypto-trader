@@ -2,11 +2,14 @@ import time
 
 from trading.exchange.base import StatsProvider
 from poloniex import Poloniex
+
+from trading.util.logging import LoggableMixin
 from .base import PoloniexProvider
 
 
 class PoloniexStatsProvider(StatsProvider,
-                            PoloniexProvider):
+                            PoloniexProvider,
+                            LoggableMixin):
 
     def __init__(self,
                  api=Poloniex()):
@@ -16,6 +19,8 @@ class PoloniexStatsProvider(StatsProvider,
 
         PoloniexProvider.__init__(self,
                                   api)
+
+        LoggableMixin.__init__(self, PoloniexStatsProvider)
 
     def ohlc_history(self, interval=1, since=None):
         raise NotImplementedError()

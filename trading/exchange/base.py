@@ -2,14 +2,12 @@ import logging
 from abc import ABC, abstractmethod
 
 from trading.strategy.decision import OfferType, Decision
+from trading.util.logging import LoggableMixin
 
 
-class CurrencyMixin(ABC):
-    def __init__(self,
-                 logger_name="app"):
-
-        self.logger_name = logger_name
-        self.logger = logging.getLogger("%s.CurrencyMixin" % logger_name)
+class CurrencyMixin(ABC, LoggableMixin):
+    def __init__(self):
+        LoggableMixin.__init__(self, CurrencyMixin)
 
     def set_currencies(self, base_currency, quote_currency):
         self._check_arguments(base_currency, quote_currency)
@@ -30,14 +28,14 @@ class CurrencyMixin(ABC):
         pass
 
     def map_currency(self, currency):
-        return self.currency_mapping[currency]
+        return self.currency_mapping()[currency]
 
     @abstractmethod
-    def currency_mapping_for_balance(self, currency):
+    def currency_mapping_for_balance(self):
         pass
 
     def map_currency_balance(self, currency):
-        return self.currency_mapping_for_balance[currency]
+        return self.currency_mapping_for_balance()[currency]
 
     def inverse_map_currency(self, currency):
         currency_map = self.currency_mapping()

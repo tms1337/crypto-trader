@@ -19,11 +19,22 @@ class BittrexProvider(CurrencyMixin, Provider):
         self.logger_name = logger_name
         self.logger = logging.getLogger("%s.BittrexProvider" % logger_name)
 
-        CurrencyMixin.__init__(self,
-                               base_currency,
-                               quote_currency)
+        CurrencyMixin.__init__(self)
 
-    def map_currency(self, currency):
+    def currency_mapping(self):
+        mapping = {
+            "ETH": "ETH",
+            "BTC": "BTC",
+            "DASH": "DASH",
+            "XRP": "XRP",
+            "USD": "USDT",
+            "ETC": "ETC",
+            "LTC": "LTC"
+        }
+
+        return mapping
+
+    def currency_mapping_for_balance(self):
         currency_mapping = {
             "ETH": "ETH",
             "BTC": "BTC",
@@ -34,20 +45,7 @@ class BittrexProvider(CurrencyMixin, Provider):
             "LTC": "LTC"
         }
 
-        return currency_mapping[currency]
-
-    def currency_mapping_for_balance(self, currency):
-        currency_mapping = {
-            "ETH": "ETH",
-            "BTC": "BTC",
-            "DASH": "DASH",
-            "XRP": "XRP",
-            "USD": "USDT",
-            "ETC": "ETC",
-            "LTC": "LTC"
-        }
-
-        return currency_mapping[currency]
+        return currency_mapping
 
     def form_pair(self):
         return "%s-%s" % (self.quote_currency,

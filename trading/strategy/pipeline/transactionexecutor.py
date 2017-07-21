@@ -16,7 +16,7 @@ class TransactionExecutor:
                  trade_providers,
                  retry_attempts=3):
 
-        TypeChecker.check_type(trade_providers, list)
+        TypeChecker.check_type(trade_providers, dict)
         for t in trade_providers:
             TypeChecker.check_type(t, str)
             TypeChecker.check_type(trade_providers[t], TradeProvider)
@@ -37,6 +37,9 @@ class TransactionExecutor:
         for t in transactions:
             try:
                 self.execute(t)
+                for d in t.decisions:
+                    assert not d is None, "Decision %s should have decider" % d
+                    d.decider.apply_last()
             except TransactionNotExecutedError:
                 failed_transactions.append(t)
 

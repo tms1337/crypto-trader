@@ -1,20 +1,20 @@
 from trading.strategy.deciders.simple.volume.base import VolumeDecider
+from trading.util.asserting import TypeChecker
 
 
 class FixedValueVolumeDecider(VolumeDecider):
-    def __init__(self, values, wrapper_container):
+    def __init__(self, values):
+        TypeChecker.check_type(values, dict)
+        for k in values:
+            TypeChecker.check_type(k, str)
+            TypeChecker.check_type(values[k], float)
+
         self.values = values
-        VolumeDecider.__init__(self, wrapper_container)
 
-    def decide(self, partial_decisions):
-        for decision in partial_decisions:
-            if isinstance(decision, tuple):
-                for d in decision:
-                    if d.volume is None:
-                        d.volume = self.values[d.base_currency]
-            else:
-                if decision.volume is None:
-                    decision.volume = self.values[decision.base_currency]
+    def decide(self, transactions):
+        for transaction in transactions:
+            for decision in transaction.decisions:
+                decision.volume = self.values[decision.base_currency]
 
-        return partial_decisions
+        return transactions
 

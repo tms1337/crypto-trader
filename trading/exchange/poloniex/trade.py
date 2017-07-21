@@ -5,27 +5,22 @@ from poloniex import Poloniex
 from trading.strategy.decision import OfferType
 from trading.exchange.base import TradeProvider
 from trading.exchange.poloniex.base import PrivatePoloniexProvider
+from trading.util.logging import LoggableMixin
 
 
 class PoloniexTradeProvider(PrivatePoloniexProvider,
-                            TradeProvider):
+                            TradeProvider,
+                            LoggableMixin):
     def __init__(self,
                  key_uri,
-                 base_currency=None,
-                 quote_currency=None,
-                 api=Poloniex(),
-                 logger_name="app"):
+                 api=Poloniex()):
 
         PrivatePoloniexProvider.__init__(self,
                                          key_uri,
-                                         base_currency,
-                                         quote_currency,
                                          api)
 
-        self.logger_name = logger_name
-        self.logger = logging.getLogger(logger_name)
-
-        TradeProvider.__init__(self, logger_name)
+        TradeProvider.__init__(self)
+        LoggableMixin.__init__(self, PoloniexTradeProvider)
 
     def total_balance(self, currency=None):
         balance = self.api.returnCompleteBalances()

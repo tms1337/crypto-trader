@@ -1,23 +1,18 @@
-import logging
-import random
-import time
-
-from trading.strategy.transaction.base import TransactionDecider
-
-from trading.exchange.base import ExchangeWrapperContainer
-from trading.strategy.deciders.simple.volume import VolumeDecider
+from trading.strategy.pipeline.block import Block
+from trading.util.asserting import TypeChecker
 
 
 class Daemon:
     def __init__(self,
-                 wrapper_container,
-                 transaction_deciders,
-                 volume_deciders,
-                 dt_seconds=60,
-                 dt_timeout_seconds=0.5,
-                 logger_name="app"):
+                 blocks,
+                 dt_seconds=60):
 
-        pass
+        TypeChecker.check_type(blocks, list)
+        for b in blocks:
+            TypeChecker.check_type(b, Block)
+
+        self.blocks = blocks
 
     def run(self):
-        pass
+        for b in self.blocks:
+            b.run()
