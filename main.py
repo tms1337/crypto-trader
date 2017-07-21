@@ -50,6 +50,7 @@ try:
     quote_currency = "BTC"
     dt = 30
     key_directory = sys.argv[1]
+    mode = sys.argv[2]
 
     kraken_stats = KrakenStatsProvider()
     kraken_trader = KrakenTradeProvider(key_uri=("%s/kraken_key" % key_directory))
@@ -84,54 +85,90 @@ try:
 
     wrapper_container = ExchangeWrapperContainer(wrappers)
 
-    trading_currencies = ["ETH", "LTC", "DASH"]
+    trading_currencies = ["ETH"]
 
     base_exchange = "poloniex"
 
-    sell_threshold = 0.05
-    buy_threshold = 0.02
-    security_loss = 0.2
+    if mode == "test":
+        short_sell_threshold = 0.02
+        short_buy_threshold = 0.01
+        short_security = 0.1
 
-    eth_value = 1
-    dash_value = 1.5
-    ltc_value = 4
-    btc_value = 0.2
+        short_eth_value = 0.1
+        short_btc_value = 0.01
+    else:
+        short_sell_threshold = 0.02
+        short_buy_threshold = 0.01
+        short_security = 0.1
 
+        short_eth_value = 5
+        short_btc_value = 0.3
 
-    percent_based_transaction_decider = PercentBasedTransactionDecider(currencies=trading_currencies,
-                                                                       trading_currency=quote_currency,
-                                                                       wrapper_container=wrapper_container,
-                                                                       sell_threshold=sell_threshold,
-                                                                       buy_threshold=buy_threshold,
-                                                                       security_loss_threshold=security_loss)
+    short_percent_based_transaction_decider = PercentBasedTransactionDecider(currencies=trading_currencies,
+                                                                             trading_currency=quote_currency,
+                                                                             wrapper_container=wrapper_container,
+                                                                             sell_threshold=short_sell_threshold,
+                                                                             buy_threshold=short_buy_threshold,
+                                                                             security_loss_threshold=short_security)
 
-    fixed_volume_decider = FixedValueVolumeDecider(wrapper_container=wrapper_container,
-                                                   values={"ETH": eth_value, "DASH": dash_value, "LTC": ltc_value})
+    short_fixed_volume_decider = FixedValueVolumeDecider(wrapper_container=wrapper_container,
+                                                         values={"ETH": short_eth_value})
 
-    euro_wrappers = {
-        "bittrex": bittrex_wrapper,
-        "bitfinex": bitfinex_wrapper,
-        "poloniex": poloniex_wrapper
-    }
+    short_fiat_transaction_decider = PercentBasedTransactionDecider(currencies=["BTC"],
+                                                                    trading_currency="USD",
+                                                                    wrapper_container=wrapper_container,
+                                                                    sell_threshold=short_sell_threshold,
+                                                                    buy_threshold=short_buy_threshold,
+                                                                    security_loss_threshold=short_security)
 
-    euro_wrapper_container = ExchangeWrapperContainer(wrappers=euro_wrappers)
+    short_fiat_volume_decider = FixedValueVolumeDecider(wrapper_container=wrapper_container,
+                                                        values={"BTC": short_btc_value})
 
-    euro_transaction_decider = PercentBasedTransactionDecider(currencies=["BTC"],
-                                                              trading_currency="USD",
-                                                              wrapper_container=euro_wrapper_container,
-                                                              sell_threshold=sell_threshold,
-                                                              buy_threshold=buy_threshold,
-                                                              security_loss_threshold=security_loss)
+    if mode == "test":
+        long_sell_threshold = 0.04
+        long_buy_threshold = 0.02
+        long_security = 0.1
 
-    euro_volume_decider = FixedValueVolumeDecider(wrapper_container=wrapper_container,
-                                                  values={"BTC": btc_value})
+        long_eth_value = 0.1
+        long_btc_value = 0.01
+    else:
+        long_sell_threshold = 0.04
+        long_buy_threshold = 0.02
+        long_security = 0.1
+
+        long_eth_value = 5
+        long_btc_value = 0.3
+
+    long_percent_based_transaction_decider = PercentBasedTransactionDecider(currencies=trading_currencies,
+                                                                            trading_currency=quote_currency,
+                                                                            wrapper_container=wrapper_container,
+                                                                            sell_threshold=long_sell_threshold,
+                                                                            buy_threshold=long_buy_threshold,
+                                                                            security_loss_threshold=long_security)
+
+    long_fixed_volume_decider = FixedValueVolumeDecider(wrapper_container=wrapper_container,
+                                                        values={"ETH": long_eth_value})
+
+    long_fiat_transaction_decider = PercentBasedTransactionDecider(currencies=["BTC"],
+                                                                    trading_currency="USD",
+                                                                    wrapper_container=wrapper_container,
+                                                                    sell_threshold=long_sell_threshold,
+                                                                    buy_threshold=long_buy_threshold,
+                                                                    security_loss_threshold=long_security)
+
+    long_fiat_volume_decider = FixedValueVolumeDecider(wrapper_container=wrapper_container,
+                                                        values={"BTC": long_btc_value})
 
     daemon = Daemon(wrapper_container=wrapper_container,
                     dt_seconds=dt,
-                    transaction_deciders=[percent_based_transaction_decider,
-                                          euro_transaction_decider],
-                    volume_deciders=[fixed_volume_decider,
-                                     euro_volume_decider],
+                    transaction_deciders=[short_percent_based_transaction_decider,
+                                          short_fiat_transaction_decider,
+                                          long_percent_based_transaction_decider,
+                                          long_fiat_transaction_decider],
+                    volume_deciders=[short_fixed_volume_decider,
+                                     short_fiat_volume_decider,
+                                     long_fixed_volume_decider,
+                                     long_fiat_volume_decider],
                     logger_name="app")
 
 except Exception as ex:
