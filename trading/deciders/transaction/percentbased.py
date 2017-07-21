@@ -67,12 +67,8 @@ class PercentBasedTransactionDecider(TransactionDecider):
                 stats.set_currencies(currency,
                                      self.trading_currency)
 
-                # low = stats.ticker_low()
-                # high = stats.ticker_high()
-
-                last = stats.ticker_last()
-                low = last
-                high = last
+                low = stats.ticker_low()
+                high = stats.ticker_high()
 
                 last_type = self.last_applied_transaction_types[exchange][currency]
                 last_price = self.last_applied_prices[exchange][currency]
