@@ -16,6 +16,14 @@ import poloniex
 
 from trading.exchange.poloniex.trade import PoloniexTradeProvider
 
+stats = PoloniexStatsProvider()
+stats.set_currencies("BTC", "USD")
+trade = PoloniexTradeProvider(key_uri="/home/faruk/Desktop/poloniex_key")
+trade.set_currencies("BTC", "USD")
+
+id = trade.create_buy_offer(volume=0.01, price=stats.ticker_last())
+trade.cancel_offer(id)
+
 last_array = [1, 1, 0.89, 1.2, 1.2, 1.2, 1.2, 1, 0.79]
 mock_stats = StatsProviderMock(high_array=[],
                                last_array=last_array,

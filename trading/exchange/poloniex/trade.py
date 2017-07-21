@@ -54,7 +54,10 @@ class PoloniexTradeProvider(PrivatePoloniexProvider,
 
         self._check_response(sell_response)
 
-        return sell_response["orderNumber"]
+        if len(sell_response["resultingTrades"]) != 0:
+            return sell_response["resultingTrades"][0]["tradeID"]
+        else:
+            return sell_response["orderNumber"]
 
     def cancel_offer(self, offer_id):
         cancel_response = self.api.cancelOrder(offer_id)

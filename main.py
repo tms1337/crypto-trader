@@ -101,7 +101,7 @@ try:
         short_buy_threshold = 0.01
         short_security = 0.1
 
-        short_eth_value = 5
+        short_eth_value = 6
         short_btc_value = 0.3
 
     short_percent_based_transaction_decider = PercentBasedTransactionDecider(currencies=trading_currencies,
@@ -136,7 +136,7 @@ try:
         long_buy_threshold = 0.02
         long_security = 0.1
 
-        long_eth_value = 5
+        long_eth_value = 6
         long_btc_value = 0.3
 
     long_percent_based_transaction_decider = PercentBasedTransactionDecider(currencies=trading_currencies,
