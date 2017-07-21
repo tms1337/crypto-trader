@@ -98,7 +98,7 @@ try:
         short_btc_value = 0.01
     else:
         short_sell_threshold = 0.02
-        short_buy_threshold = 0.01
+        short_buy_threshold = 0.005
         short_security = 0.1
 
         short_eth_value = 6
@@ -133,7 +133,7 @@ try:
         long_btc_value = 0.01
     else:
         long_sell_threshold = 0.04
-        long_buy_threshold = 0.02
+        long_buy_threshold = 0.005
         long_security = 0.1
 
         long_eth_value = 6
