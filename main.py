@@ -110,7 +110,8 @@ try:
 
     euro_wrappers = {
         "bittrex": bittrex_wrapper,
-        "bitfinex": bitfinex_wrapper
+        "bitfinex": bitfinex_wrapper,
+        "poloniex": poloniex_wrapper
     }
 
     euro_wrapper_container = ExchangeWrapperContainer(wrappers=euro_wrappers)
