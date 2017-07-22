@@ -74,7 +74,8 @@ block = Block(decider_pipeline=DeciderPipeline(deciders=[percent_decider]),
               informer=informer,
               transaction_executor=executor)
 
-daemon = Daemon(blocks=[block])
+daemon = Daemon(blocks=[block],
+                dt_seconds=15)
 
 
 if daemon is not None:

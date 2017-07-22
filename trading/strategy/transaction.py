@@ -17,3 +17,15 @@ class Transaction:
         TypeChecker.check_type(decision, Decision)
 
         self.decisions.append(decision)
+
+    def __str__(self):
+        transaction_str = "{ Decisions: "
+        for d in self.decisions:
+            transaction_str += str(d) + ", "
+
+        transaction_str += "}"
+
+        return transaction_str
+
+    def __repr__(self):
+        return self.__str__()

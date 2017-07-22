@@ -43,8 +43,11 @@ class Informer(LoggableMixin):
         LoggableMixin.__init__(self, Informer)
 
     def get_stats_matrix(self):
+        self.logger.debug("Getting stats matrix")
         for exchange in self.stats_providers:
+            self.logger.debug("Exchange %s" % exchange)
             for currency in self.currencies:
+                self.logger.debug("\tCurrency %s" % currency)
                 cell = self._generate_cell(exchange, currency)
                 self.stats_matrix.set(exchange, currency, cell)
 
