@@ -11,11 +11,13 @@ class KrakenTradeProvider(PrivateKrakenProvider,
                           LoggableMixin):
     def __init__(self,
                  key_uri,
-                 api=krakenex.API()):
+                 api=krakenex.API(),
+                 pause_dt=1):
 
         PrivateKrakenProvider.__init__(self,
                                        key_uri=key_uri,
-                                       api=api)
+                                       api=api,
+                                       pause_dt=pause_dt)
 
         LoggableMixin.__init__(self, KrakenTradeProvider)
 

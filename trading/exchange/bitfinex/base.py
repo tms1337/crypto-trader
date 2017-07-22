@@ -15,7 +15,7 @@ class BitfinexProvider(CurrencyMixin, Provider, LoggableMixin):
                  pause_dt=1):
 
         self.api = api
-        self.pause_dt = pause_dt
+        Provider.__init__(self, pause_dt)
 
         CurrencyMixin.__init__(self)
         LoggableMixin.__init__(self, BitfinexProvider)
@@ -48,7 +48,7 @@ class BitfinexProvider(CurrencyMixin, Provider, LoggableMixin):
         return CurrencyMixin.form_pair(self)
 
     def _check_response(self, response):
-        time.sleep(self.pause_dt)
+        super(BitfinexProvider, self)._check_response(response)
         self.logger.debug("Checking response: %s" % str(response)[1:100])
 
         if not isinstance(response, dict) and not isinstance(response, list):
@@ -64,9 +64,11 @@ class BitfinexProvider(CurrencyMixin, Provider, LoggableMixin):
 class PrivateBitfinexProvider(BitfinexProvider, LoggableMixin):
     def __init__(self,
                  key_uri,
-                 api=finex):
+                 api=finex,
+                 pause_dt=1):
 
         BitfinexProvider.__init__(self,
-                                  api)
+                                  api,
+                                  pause_dt)
         self.api.load_keys(key_uri)
         LoggableMixin.__init__(self, PrivateBitfinexProvider)

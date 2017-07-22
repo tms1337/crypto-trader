@@ -9,9 +9,10 @@ class BittrexStatsProvider(StatsProvider,
                            LoggableMixin):
 
     def __init__(self,
-                 api=bittrex.bittrex(None, None)):
+                 api=bittrex.bittrex(None, None),
+                 pause_dt=1):
 
-        BittrexProvider.__init__(self, api)
+        BittrexProvider.__init__(self, api, pause_dt)
         LoggableMixin.__init__(self, BittrexStatsProvider)
 
     def ohlc_history(self, interval=1, since=None):

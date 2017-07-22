@@ -65,12 +65,17 @@ class CurrencyMixin(ABC, LoggableMixin):
 
 
 class Provider(ABC, LoggableMixin):
-    def __init__(self):
+    def __init__(self, pause_dt=1):
+        TypeChecker.check_one_of_types(pause_dt, [float, int])
+        assert pause_dt > 0
+
+        self.pause_dt = pause_dt
+
         LoggableMixin.__init__(self, Provider)
 
     @abstractmethod
     def _check_response(self, response):
-        pass
+        time.sleep(self.pause_dt)
 
     def _handle_error(self, error):
         self.logger.error("Encountered error %s " % error)

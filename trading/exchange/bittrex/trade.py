@@ -10,10 +10,12 @@ class BittrexTradeProvider(PrivateBittrexProvider,
                            LoggableMixin):
     def __init__(self,
                  key_uri,
-                 api=bittrex.bittrex(None, None)):
+                 api=bittrex.bittrex(None, None),
+                 pause_dt=1):
         PrivateBittrexProvider.__init__(self,
                                         key_uri=key_uri,
-                                        api=api)
+                                        api=api,
+                                        pause_dt=pause_dt)
         LoggableMixin.__init__(self, BittrexTradeProvider)
 
     def total_balance(self, currency=None):

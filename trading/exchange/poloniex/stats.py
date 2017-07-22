@@ -12,13 +12,13 @@ class PoloniexStatsProvider(StatsProvider,
                             LoggableMixin):
 
     def __init__(self,
-                 api=Poloniex()):
+                 api=Poloniex(),
+                 pause_dt=1):
 
         self.last_ticker_response = None
         self.last_time = None
 
-        PoloniexProvider.__init__(self, api)
-
+        PoloniexProvider.__init__(self, api, pause_dt)
         LoggableMixin.__init__(self, PoloniexStatsProvider)
 
     def ohlc_history(self, interval=1, since=None):

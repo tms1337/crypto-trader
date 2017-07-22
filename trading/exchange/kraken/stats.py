@@ -11,9 +11,10 @@ class KrakenStatsProvider(StatsProvider,
                           LoggableMixin):
 
     def __init__(self,
-                 api=krakenex.API()):
+                 api=krakenex.API(),
+                 pause_dt=1):
 
-        KrakenProvider.__init__(self, api)
+        KrakenProvider.__init__(self, api, pause_dt)
         LoggableMixin.__init__(self, KrakenStatsProvider)
 
     def ohlc_history(self, interval=1, since=None):

@@ -17,8 +17,7 @@ class PoloniexProvider(CurrencyMixin,
         self._check_api(api)
         self.api = api
 
-        self.pause_dt = pause_dt
-
+        Provider.__init__(self, pause_dt)
         CurrencyMixin.__init__(self)
         LoggableMixin.__init__(self, PoloniexProvider)
 
@@ -73,10 +72,12 @@ class PrivatePoloniexProvider(PoloniexProvider,
                               LoggableMixin):
     def __init__(self,
                  key_uri,
-                 api=Poloniex()):
+                 api=Poloniex(),
+                 pause_dt=1):
 
         PoloniexProvider.__init__(self,
-                                  api)
+                                  api,
+                                  pause_dt)
 
         KeyLoaderMixin.__init__(self, key_uri)
         self.api.key = self.key

@@ -13,11 +13,11 @@ class KrakenProvider(CurrencyMixin,
                      LoggableMixin):
     def __init__(self,
                  api=krakenex.API(),
-                 pause_dt=2):
+                 pause_dt=1):
 
         self.k = api
-        self.pause_dt = pause_dt
 
+        Provider.__init__(self, pause_dt)
         CurrencyMixin.__init__(self)
         LoggableMixin.__init__(self, KrakenProvider)
 
@@ -82,11 +82,16 @@ class KrakenProvider(CurrencyMixin,
         self.set_currencies(base_currency, quote_currency)
 
 class PrivateKrakenProvider(KrakenProvider, LoggableMixin):
-    def __init__(self, key_uri, api=krakenex.API()):
+    def __init__(self,
+                 key_uri,
+                 api=krakenex.API(),
+                 pause_dt=1):
+
         KrakenProvider.__init__(self, api)
         self.key_uri = key_uri
         self.k.load_key(key_uri)
 
+        KrakenProvider.__init__(self, pause_dt)
         LoggableMixin.__init__(self, PrivateKrakenProvider)
 
     def _check_response(self, server_response):

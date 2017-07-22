@@ -12,10 +12,11 @@ class BitfinexTradeProvider(PrivateBitfinexProvider,
     def __init__(self,
                  key_uri,
                  api=finex,
-                 verbose=1):
+                 pause_dt=1):
         PrivateBitfinexProvider.__init__(self,
                                          key_uri,
-                                         api)
+                                         api,
+                                         pause_dt)
         TradeProvider.__init__(self)
         LoggableMixin.__init__(self, BitfinexTradeProvider)
 

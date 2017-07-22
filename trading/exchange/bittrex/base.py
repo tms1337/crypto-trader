@@ -49,7 +49,7 @@ class BittrexProvider(CurrencyMixin, Provider, LoggableMixin):
                           self.base_currency)
 
     def _check_response(self, server_response):
-        time.sleep(self.pause_dt)
+        super(BittrexProvider, self)._check_response(server_response)
 
         self.logger.debug("Checking response: %s" % str(server_response)[1:100])
 

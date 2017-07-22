@@ -14,11 +14,13 @@ class PoloniexTradeProvider(PrivatePoloniexProvider,
                             LoggableMixin):
     def __init__(self,
                  key_uri,
-                 api=Poloniex()):
+                 api=Poloniex(),
+                 pause_dt=1):
 
         PrivatePoloniexProvider.__init__(self,
                                          key_uri,
-                                         api)
+                                         api,
+                                         pause_dt)
 
         TradeProvider.__init__(self)
         LoggableMixin.__init__(self, PoloniexTradeProvider)
