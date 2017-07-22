@@ -39,10 +39,10 @@ ch.setFormatter(formatter)
 logger.addHandler(fh)
 logger.addHandler(ch)
 
-currencies = ["ETH"]
-trading_currency = "BTC"
+currencies = ["BTC"]
+trading_currency = "USD"
 
-daemon_dt = 5
+daemon_dt = 60
 providers_pause_dt = 0.25
 
 keys_path = sys.argv[1]
@@ -76,7 +76,7 @@ percent_decider = SimpleCompositeDecider(trade_providers=trade_providers,
 diff_decider = SimpleCompositeDecider(trade_providers=trade_providers,
                                       offer_decider=ExchangeDiffOfferDecider(currencies=currencies,
                                                                              trading_currency=trading_currency),
-                                      volume_decider=FixedValueVolumeDecider(values={"ETH": 0.2}))
+                                      volume_decider=FixedValueVolumeDecider(values={"BTC": 0.05}))
 
 # he's gonna kill you !!!
 executor = TransactionExecutor(trade_providers=trade_providers)

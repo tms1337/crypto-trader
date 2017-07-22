@@ -15,6 +15,9 @@ class BittrexStatsProvider(StatsProvider,
         BittrexProvider.__init__(self, api, pause_dt)
         LoggableMixin.__init__(self, BittrexStatsProvider)
 
+        self.cached_ticker_last = None
+        self.cache_time = None
+
     def ohlc_history(self, interval=1, since=None):
         raise NotImplementedError()
 

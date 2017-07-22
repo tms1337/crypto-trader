@@ -28,7 +28,7 @@ class PoloniexProvider(CurrencyMixin,
             "BTC": "BTC",
             "DASH": "DASH",
             "XRP": "XRP",
-            "USD": "USD",
+            "USD": "USDT",
             "ETC": "ETC",
             "LTC": "LTC"
         }
@@ -41,7 +41,7 @@ class PoloniexProvider(CurrencyMixin,
             "BTC": "BTC",
             "DASH": "DASH",
             "XRP": "XRP",
-            "USD": "USD",
+            "USD": "USDT",
             "ETC": "ETC",
             "LTC": "LTC"
         }
