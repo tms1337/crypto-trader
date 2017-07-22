@@ -1,27 +1,22 @@
 from trading.exchange.kraken.trade import KrakenTradeProvider
-from .base import KrakenProvider
-from ..base import CurrencyMixin, TradeProvider
+from trading.exchange.kraken.base import KrakenProvider
+from trading.exchange.base import CurrencyMixin, TradeProvider, StatsProvider
 
-from .stats import KrakenStatsProvider
-
-
-class PrivateKrakenProviderMock(KrakenProvider):
-    def __init__(self, base_currency, quote_currency):
-        super(PrivateKrakenProviderMock, self).__init__(base_currency, quote_currency)
+from trading.exchange.kraken.stats import KrakenStatsProvider
 
 
-class StatsProviderMock(KrakenStatsProvider):
+class StatsProviderMock(StatsProvider):
     def __init__(self,
                  high_array,
                  low_array,
                  last_array):
-        KrakenStatsProvider.__init__(self)
-
         self.low_array = low_array
         self.high_array = high_array
         self.last_array = last_array
 
         self.i = 0
+
+        StatsProvider.__init__(self)
 
     def ticker_high(self):
         result = self.high_array[self.i]
@@ -40,9 +35,9 @@ class StatsProviderMock(KrakenStatsProvider):
         return result
 
 
-class TradeProviderMock(KrakenTradeProvider):
-    def __init__(self, key_uri=None, base_currency=None, quote_currency=None, api=None):
-        pass
+class TradeProviderMock(TradeProvider):
+    def __init__(self):
+        TradeProvider.__init__(self)
 
     def total_balance(self, currency=None):
         return 100.0

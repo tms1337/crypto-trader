@@ -1,5 +1,5 @@
 from trading.exchange.base import ExchangeWrapper, ExchangeWrapperContainer
-from trading.exchange.kraken.mocks import StatsProviderMock, TradeProviderMock
+from trading.exchange.mocks import StatsProviderMock, TradeProviderMock
 from trading.strategy.deciders.simple.offer import PercentBasedTransactionDecider
 
 last_array = [1, 1, 1, 1.05, 0.95, 1.1, 1.1, 1.1, 0.95, 0.95, 0.95, 2, 1.95, 1.95]
