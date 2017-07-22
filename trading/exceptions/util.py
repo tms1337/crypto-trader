@@ -1,4 +1,4 @@
-from trading.exceptions.servererror import ServerError
+from .servererror import ServerError
 
 
 def is_provider_error(error):

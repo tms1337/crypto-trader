@@ -1,8 +1,4 @@
-from trading.exchange.kraken.trade import KrakenTradeProvider
-from trading.exchange.kraken.base import KrakenProvider
-from trading.exchange.base import CurrencyMixin, TradeProvider, StatsProvider
-
-from trading.exchange.kraken.stats import KrakenStatsProvider
+from .base import TradeProvider, StatsProvider
 
 
 class StatsProviderMock(StatsProvider):
