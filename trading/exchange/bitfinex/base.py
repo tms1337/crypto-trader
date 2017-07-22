@@ -2,6 +2,7 @@ import logging
 
 import time
 
+from trading.exceptions.servererror import ServerError
 from trading.exchange.base import CurrencyMixin, Provider
 import FinexAPI.FinexAPI as finex
 
@@ -54,7 +55,7 @@ class BitfinexProvider(CurrencyMixin, Provider, LoggableMixin):
             error_message = "Error during connecting to Bitfinex"
 
             self.logger.error("%s\n\t%s" % (error_message, response))
-            raise RuntimeError(error_message)
+            raise ServerError(error_message)
 
     def prepare_currencies(self, base_currency, quote_currency):
         self.set_currencies(base_currency, quote_currency)

@@ -64,10 +64,18 @@ class CurrencyMixin(ABC, LoggableMixin):
             raise ValueError(error_message)
 
 
-class Provider(ABC):
+class Provider(ABC, LoggableMixin):
+    def __init__(self):
+        LoggableMixin.__init__(self, Provider)
+
     @abstractmethod
     def _check_response(self, response):
         pass
+
+    def _handle_error(self, error):
+        self.logger.error("Encountered error %s " % error)
+        self.logger.debug("Raising ConnectionError")
+        raise ConnectionError()
 
     @abstractmethod
     def prepare_currencies(self, base_currency, quote_currency):

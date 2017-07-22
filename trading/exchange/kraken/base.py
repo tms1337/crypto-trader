@@ -3,6 +3,7 @@ import logging
 import krakenex
 import time
 
+from trading.exceptions.servererror import ServerError
 from trading.exchange.base import CurrencyMixin, Provider
 from trading.util.logging import LoggableMixin
 
@@ -60,14 +61,14 @@ class KrakenProvider(CurrencyMixin,
         if "error" not in server_response:
             error_message = "Server responded with invalid response"
 
-            self.logger.error("%s\n\t%s" % (error_message, server_response))
-            raise ValueError(error_message)
+            self.logger.error("%s\t%s" % (error_message, server_response))
+            raise ServerError(error_message)
 
         if len(server_response["error"]) != 0:
             error_message = "Server responded with error %s" % server_response["error"]
 
             self.logger.error(error_message)
-            raise RuntimeError(error_message)
+            raise ServerError(error_message)
 
     def _get_timestamp_period_before(self, period):
         time_response = self.k.query_public("Time")

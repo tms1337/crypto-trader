@@ -16,19 +16,35 @@ class BitfinexStatsProvider(BitfinexProvider,
         BitfinexProvider.__init__(self, api, pause_dt)
 
     def ticker_last(self):
-        ticker_response = self.api.ticker(symbol=self.form_pair())
+        try:
+            ticker_response = self.api.ticker(symbol=self.form_pair())
+        except Exception as error:
+            self._handle_error(error)
+
         self._check_response(ticker_response)
 
         return float(ticker_response["last_price"])
 
     def ticker_low(self):
-        ticker_response = self.api.ticker(symbol=self.form_pair())
+        try:
+            ticker_response = self.api.ticker(symbol=self.form_pair())
+        except Exception as error:
+            self.logger.error("Encountered error %s " % error)
+            self.logger.debug("Raising ConnectionError")
+            raise ConnectionError()
+
         self._check_response(ticker_response)
 
         return float(ticker_response["low"])
 
     def ticker_high(self):
-        ticker_response = self.api.ticker(symbol=self.form_pair())
+        try:
+            ticker_response = self.api.ticker(symbol=self.form_pair())
+        except Exception as error:
+            self.logger.error("Encountered error %s " % error)
+            self.logger.debug("Raising ConnectionError")
+            raise ConnectionError()
+
         self._check_response(ticker_response)
 
         return float(ticker_response["high"])

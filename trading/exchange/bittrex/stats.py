@@ -18,19 +18,31 @@ class BittrexStatsProvider(StatsProvider,
         raise NotImplementedError()
 
     def ticker_high(self):
-        ticker_response = self.api.getticker(market=self.form_pair())
-        self._check_response(ticker_response)
+        try:
+            ticker_response = self.api.getticker(market=self.form_pair())
+        except Exception as error:
+            self._handle_error(error)
+        else:
+            self._check_response(ticker_response)
 
-        return ticker_response["Ask"]
+            return ticker_response["Ask"]
 
     def ticker_low(self):
-        ticker_response = self.api.getticker(market=self.form_pair())
-        self._check_response(ticker_response)
+        try:
+            ticker_response = self.api.getticker(market=self.form_pair())
+        except Exception as error:
+            self._handle_error(error)
+        else:
+            self._check_response(ticker_response)
 
-        return ticker_response["Bid"]
+            return ticker_response["Bid"]
 
     def ticker_last(self):
-        ticker_response = self.api.getticker(market=self.form_pair())
-        self._check_response(ticker_response)
+        try:
+            ticker_response = self.api.getticker(market=self.form_pair())
+        except Exception as error:
+            self._handle_error(error)
+        else:
+            self._check_response(ticker_response)
 
-        return ticker_response["Last"]
+            return ticker_response["Last"]

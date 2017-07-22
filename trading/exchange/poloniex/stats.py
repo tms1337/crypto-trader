@@ -49,13 +49,17 @@ class PoloniexStatsProvider(StatsProvider,
         return float(price)
 
     def _ticker_price(self):
-        ticker_response = self.api.returnTicker()
-        self._check_response(ticker_response)
+        try:
+            ticker_response = self.api.returnTicker()
+        except Exception as error:
+            self._handle_error(error)
+        else:
+            self._check_response(ticker_response)
 
-        self.last_ticker_response = ticker_response
-        self.last_time = time.time()
+            self.last_ticker_response = ticker_response
+            self.last_time = time.time()
 
-        return ticker_response
+            return ticker_response
 
 
 

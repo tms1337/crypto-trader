@@ -2,6 +2,7 @@ import logging
 
 import time
 
+from trading.exceptions.servererror import ServerError
 from trading.exchange.base import CurrencyMixin, KeyLoaderMixin, Provider
 from trading.util.logging import LoggableMixin
 from .client import bittrex
@@ -56,7 +57,7 @@ class BittrexProvider(CurrencyMixin, Provider, LoggableMixin):
             error_message = "Bittrex response failure %s" % server_response
 
             self.logger.error(error_message)
-            raise RuntimeError(error_message)
+            raise ServerError(error_message)
 
     def prepare_currencies(self, base_currency, quote_currency):
         self.set_currencies(base_currency, quote_currency)

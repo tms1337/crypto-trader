@@ -1,5 +1,6 @@
 import krakenex
 
+from trading.exceptions.servererror import ServerError
 from trading.util.logging import LoggableMixin
 from .base import KrakenProvider
 from ..base import CurrencyMixin, StatsProvider
@@ -49,10 +50,20 @@ class KrakenStatsProvider(StatsProvider,
         return float(ticker_response["result"][pair_key]["c"][0])
 
     def _ticker_price(self):
-        ticker_response = self.k.query_public("Ticker", {"pair": self.form_pair()})
-        self._check_response(ticker_response)
+        try:
+            ticker_response = self.k.query_public("Ticker", {"pair": self.form_pair()})
+        except Exception as error:
+            self._handle_error(error)
+        else:
+            self._check_response(ticker_response)
 
-        return ticker_response
+            return ticker_response
+
+    def _check_response(self, server_response):
+        super(KrakenStatsProvider, self)._check_response(server_response)
+
+        if not "result" in server_response:
+            raise ServerError()
 
 
 

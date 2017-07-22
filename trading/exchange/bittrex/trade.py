@@ -17,37 +17,53 @@ class BittrexTradeProvider(PrivateBittrexProvider,
         LoggableMixin.__init__(self, BittrexTradeProvider)
 
     def total_balance(self, currency=None):
-        balance_response = self.api.getbalances()
-        self._check_response(balance_response)
-
-        if not currency is None:
-            currency_balance = [b for b in balance_response if b["Currency"] == self.currency_mapping_for_balance(currency)]
-
-            if len(currency_balance) == 0:
-                return 0.0
-
-            currency_balance = currency_balance[0]
-
-            return float(currency_balance["Balance"])
+        try:
+            balance_response = self.api.getbalances()
+        except Exception as error:
+            self._handle_error(error)
         else:
-            return {b["Currency"]: float(b["Balance"]) for b in balance_response}
+            self._check_response(balance_response)
+
+            if not currency is None:
+                currency_balance = [b for b in balance_response if b["Currency"] == self.currency_mapping_for_balance(currency)]
+
+                if len(currency_balance) == 0:
+                    return 0.0
+
+                currency_balance = currency_balance[0]
+
+                return float(currency_balance["Balance"])
+            else:
+                return {b["Currency"]: float(b["Balance"]) for b in balance_response}
 
     def create_buy_offer(self, volume, price=None):
-        offer_response = self.api.buylimit(self.form_pair(),
-                                           volume,
-                                           price)
-        self._check_response(offer_response)
+        try:
+            offer_response = self.api.buylimit(self.form_pair(),
+                                               volume,
+                                               price)
+        except Exception as error:
+            self._handle_error(error)
+        else:
+            self._check_response(offer_response)
 
-        return offer_response["uuid"]
+            return offer_response["uuid"]
 
     def create_sell_offer(self, volume, price=None):
-        offer_response = self.api.selllimit(self.form_pair(),
-                                            volume,
-                                            price)
-        self._check_response(offer_response)
+        try:
+            offer_response = self.api.selllimit(self.form_pair(),
+                                                volume,
+                                                price)
+        except Exception as error:
+            self._handle_error(error)
+        else:
+            self._check_response(offer_response)
 
-        return offer_response["uuid"]
+            return offer_response["uuid"]
 
     def cancel_offer(self, offer_id):
-        cancel_response = self.api.cancel(offer_id)
-        self._check_response(cancel_response)
+        try:
+            cancel_response = self.api.cancel(offer_id)
+        except Exception as error:
+            self._handle_error(error)
+        else:
+            self._check_response(cancel_response)
