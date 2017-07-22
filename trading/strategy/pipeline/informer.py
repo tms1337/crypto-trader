@@ -2,8 +2,8 @@ from retrying import retry
 
 from trading.exceptions.servererror import ServerError
 from trading.exceptions.util import is_provider_error
-from trading.exchange.base import StatsProvider
-from trading.strategy.pipeline.statsmatrix import StatsMatrix, StatsCell
+from trading.exchange.base import StatsProvider, TradeProvider
+from trading.strategy.pipeline.data.statsmatrix import StatsMatrix, StatsCell
 from trading.util.asserting import TypeChecker
 from trading.util.logging import LoggableMixin
 
@@ -16,6 +16,7 @@ class Informer(LoggableMixin):
 
     def __init__(self,
                  stats_providers,
+                 trade_providers,
                  currencies,
                  base_currency,
                  retry_attempts=3):
@@ -24,6 +25,10 @@ class Informer(LoggableMixin):
         for k in stats_providers:
             TypeChecker.check_type(stats_providers[k], StatsProvider)
         TypeChecker.check_type(currencies, list)
+
+        TypeChecker.check_type(trade_providers, dict)
+        for k in trade_providers:
+            TypeChecker.check_type(trade_providers[k], TradeProvider)
 
         for currency in currencies:
             TypeChecker.check_type(currency, str)
@@ -51,6 +56,9 @@ class Informer(LoggableMixin):
                 self.stats_matrix.set(exchange, currency, cell)
 
         return self.stats_matrix
+
+    def get_balances(self):
+        self.logger.debug("Getting balance info")
 
     def _generate_cell(self, exchange, currency):
         try:

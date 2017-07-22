@@ -1,7 +1,8 @@
 import copy
+
 from trading.strategy.deciders.simple.offer.base import OfferDecider
 from trading.strategy.decision import Decision, OfferType
-from trading.strategy.pipeline.statsmatrix import StatsMatrix
+from trading.strategy.pipeline.data.statsmatrix import StatsMatrix
 from trading.strategy.transaction import Transaction
 from trading.util.asserting import TypeChecker
 from trading.util.logging import LoggableMixin

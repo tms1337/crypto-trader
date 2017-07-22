@@ -1,17 +1,10 @@
+from abc import ABC
+
 from trading.util.asserting import TypeChecker
 
 
-class StatsCell:
-    low = None
-    high = None
-    last = None
-    open = None
-    close = None
-    price = None
-
-
-class StatsMatrix:
-    def __init__(self, exchanges, currencies):
+class InfoMatrix(ABC):
+    def __init__(self, exchanges, currencies, cell_type):
         TypeChecker.check_type(exchanges, list)
         for e in exchanges:
             TypeChecker.check_type(e, str)
@@ -20,10 +13,14 @@ class StatsMatrix:
         for c in currencies:
             TypeChecker.check_type(c, str)
 
+        TypeChecker.check_type(cell_type, type)
+
         self.matrix = {e: {c: None for c in currencies} for e in exchanges}
 
         self.exchanges = exchanges
         self.currencies = currencies
+
+        self.cell_type = cell_type
 
     def get(self, exchange, currency):
         return self.matrix[exchange][currency]
@@ -31,7 +28,7 @@ class StatsMatrix:
     def set(self, exchange, currency, cell):
         TypeChecker.check_type(exchange, str)
         TypeChecker.check_type(currency, str)
-        TypeChecker.check_type(cell, StatsCell)
+        TypeChecker.check_type(cell, self.cell_type)
 
         self.matrix[exchange][currency] = cell
 
