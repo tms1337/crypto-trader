@@ -1,6 +1,7 @@
 from abc import ABC, abstractmethod
 
 from trading.exchange.base import TradeProvider
+from trading.strategy.pipeline.informer import Informer
 from trading.util.asserting import TypeChecker
 
 
@@ -12,8 +13,8 @@ class Decider(ABC):
         self.trade_providers = trade_providers
 
     @abstractmethod
-    def decide(self, stats_matrix):
-        pass
+    def decide(self, informer):
+        TypeChecker.check_type(informer, Informer)
 
     @abstractmethod
     def apply_last(self):

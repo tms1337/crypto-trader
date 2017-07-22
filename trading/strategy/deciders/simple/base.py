@@ -17,13 +17,18 @@ class SimpleCompositeDecider(Decider):
 
         Decider.__init__(self, trade_providers)
 
-    def decide(self, stats_matrix):
-        transactions = self.offer_decider.decide(stats_matrix)
-        transactions = self.volume_decider.decide(transactions)
+    def decide(self, informer):
+        Decider.decide(self, informer)
+
+        transactions = self.offer_decider.decide(informer)
+        transactions = self.volume_decider.decide(transactions, informer)
 
         return transactions
 
     def apply_last(self):
+        assert not self.offer_decider is None, "offer_decider should not be None"
+        assert not self.volume_decider is None, "volume_decider should not be None"
+
         self.offer_decider.apply_last()
         self.volume_decider.apply_last()
 

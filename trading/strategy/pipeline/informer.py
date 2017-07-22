@@ -27,7 +27,6 @@ class Informer(LoggableMixin):
 
         for currency in currencies:
             TypeChecker.check_type(currency, str)
-
         TypeChecker.check_type(base_currency, str)
 
         self.stats_providers = stats_providers
@@ -91,7 +90,6 @@ class Informer(LoggableMixin):
            stop_max_attempt_number=max_retry_attempts)
     def _set_last(self, cell, stats):
         cell.last = stats.ticker_last()
-        pass
 
     @retry(retry_on_exception=is_provider_error,
            stop_max_attempt_number=max_retry_attempts)

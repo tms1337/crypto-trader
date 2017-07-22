@@ -11,10 +11,15 @@ class FixedValueVolumeDecider(VolumeDecider):
 
         self.values = values
 
-    def decide(self, transactions):
+    def decide(self, transactions, informer):
         for transaction in transactions:
             for decision in transaction.decisions:
                 decision.volume = self.values[decision.base_currency]
 
         return transactions
+
+    def apply_last(self):
+        pass
+
+
 

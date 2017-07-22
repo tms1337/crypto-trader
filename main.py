@@ -72,17 +72,17 @@ percent_decider = SimpleCompositeDecider(trade_providers=trade_providers,
 diff_decider = SimpleCompositeDecider(trade_providers=trade_providers,
                                       offer_decider=ExchangeDiffOfferDecider(currencies=currencies,
                                                                              trading_currency=trading_currency),
-                                      volume_decider=FixedValueVolumeDecider(values={"ETH": 0.01}))
+                                      volume_decider=FixedValueVolumeDecider(values={"ETH": 0.2}))
 
 # he's gonna kill you !!!
 executor = TransactionExecutor(trade_providers=trade_providers)
 
-block = Block(decider_pipeline=DeciderPipeline(deciders=[percent_decider, diff_decider]),
+block = Block(decider_pipeline=DeciderPipeline(deciders=[diff_decider]),
               informer=informer,
               transaction_executor=executor)
 
 daemon = Daemon(blocks=[block],
-                dt_seconds=15)
+                dt_seconds=5)
 
 
 if daemon is not None:
