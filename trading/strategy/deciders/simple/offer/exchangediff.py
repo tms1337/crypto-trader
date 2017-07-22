@@ -24,7 +24,7 @@ class ExchangeDiffOfferDecider(OfferDecider, LoggableMixin):
         OfferDecider.__init__(self)
 
     def decide(self, informer):
-        OfferDecider.decide(self, informer)
+        super(ExchangeDiffOfferDecider, self).decide(informer)
 
         stats_matrix = informer.get_stats_matrix()
         TypeChecker.check_type(stats_matrix, StatsMatrix)

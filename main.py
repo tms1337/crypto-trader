@@ -59,6 +59,7 @@ trade_providers = {
 
 informer = Informer(base_currency=trading_currency,
                     stats_providers=stats_providers,
+                    trade_providers=trade_providers,
                     currencies=currencies)
 
 percent_decider = SimpleCompositeDecider(trade_providers=trade_providers,

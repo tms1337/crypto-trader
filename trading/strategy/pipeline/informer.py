@@ -3,6 +3,7 @@ from retrying import retry
 from trading.exceptions.servererror import ServerError
 from trading.exceptions.util import is_provider_error
 from trading.exchange.base import StatsProvider, TradeProvider
+from trading.strategy.pipeline.data.balancematrix import BalanceMatrix
 from trading.strategy.pipeline.data.statsmatrix import StatsMatrix, StatsCell
 from trading.util.asserting import TypeChecker
 from trading.util.logging import LoggableMixin
@@ -35,11 +36,14 @@ class Informer(LoggableMixin):
         TypeChecker.check_type(base_currency, str)
 
         self.stats_providers = stats_providers
+        self.trade_providers = trade_providers
         self.currencies = currencies
         self.base_currency = base_currency
 
         self.stats_matrix = StatsMatrix([e for e in stats_providers],
                                         currencies)
+        self.balances_matrix = BalanceMatrix([e for e in trade_providers],
+                                             currencies)
 
         global max_retry_attempts
         max_retry_attempts = retry_attempts
@@ -49,10 +53,10 @@ class Informer(LoggableMixin):
     def get_stats_matrix(self):
         self.logger.debug("Getting stats matrix")
         for exchange in self.stats_providers:
-            self.logger.debug("Exchange %s" % exchange)
+            self.logger.debug("\tExchange %s" % exchange)
             for currency in self.currencies:
-                self.logger.debug("\tCurrency %s" % currency)
-                cell = self._generate_cell(exchange, currency)
+                self.logger.debug("\t\tCurrency %s" % currency)
+                cell = self._generate_stats_cell(exchange, currency)
                 self.stats_matrix.set(exchange, currency, cell)
 
         return self.stats_matrix
@@ -60,11 +64,23 @@ class Informer(LoggableMixin):
     def get_balances(self):
         self.logger.debug("Getting balance info")
 
-    def _generate_cell(self, exchange, currency):
-        try:
-            stats = self.stats_providers[exchange]
-        except KeyError:
-            raise ValueError("Exchange %s not in a list" % exchange)
+        for exchange in self.trade_providers:
+            self.logger.debug("\tExchange %s" % exchange)
+            for currency in self.currencies:
+                self.logger.debug("\t\tCurrency %s" % currency)
+                cell = self._generate_balance_cell(exchange, currency)
+                self.balances_matrix.set(exchange, currency, cell)
+
+        return self.balances_matrix
+
+    def _generate_stats_cell(self, exchange, currency):
+        assert exchange in self.stats_providers, \
+            "Exchange %s not in a list" % exchange
+
+        assert currency in self.currencies, \
+            "Currency %s not in a list" % currency
+
+        stats = self.stats_providers[exchange]
 
         stats.set_currencies(currency,
                              self.base_currency)
@@ -108,3 +124,14 @@ class Informer(LoggableMixin):
            stop_max_attempt_number=max_retry_attempts)
     def _set_high(self, cell, stats):
         cell.high = stats.ticker_high()
+
+    def _generate_balance_cell(self, exchange, currency):
+        assert exchange in self.trade_providers, \
+            "Exchange %s not in list" % exchange
+
+        assert currency in self.trade_providers, \
+            "Currency %s not in list" % currency
+
+        trader = self.trade_providers[exchange]
+
+        trader.set_currencies()

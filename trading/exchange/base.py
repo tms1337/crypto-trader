@@ -69,8 +69,12 @@ class Provider(ABC):
     def _check_response(self, response):
         pass
 
+    @abstractmethod
+    def prepare_currencies(self, base_currency, quote_currency):
+        pass
 
-class StatsProvider(ABC):
+
+class StatsProvider(Provider):
     @abstractmethod
     def ohlc_history(self, interval=1, since=None):
         pass
@@ -107,7 +111,7 @@ class StatsProvider(ABC):
         return float(self.last_ohlc(interval)[4])
 
 
-class TradeProvider(ABC, LoggableMixin):
+class TradeProvider(Provider, LoggableMixin):
     def __init__(self):
         LoggableMixin.__init__(self, TradeProvider)
 
@@ -160,10 +164,6 @@ class TradeProvider(ABC, LoggableMixin):
         else:
             decision.decider.apply_last()
             return id
-
-    @abstractmethod
-    def prepare_currencies(self, base_currency, quote_currency):
-        pass
 
 
 class KeyLoaderMixin(ABC):

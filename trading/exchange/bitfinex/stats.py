@@ -35,3 +35,5 @@ class BitfinexStatsProvider(BitfinexProvider,
 
     def ohlc_history(self, interval=1, since=None):
         raise NotImplementedError()
+
+

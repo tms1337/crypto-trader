@@ -63,6 +63,3 @@ class PoloniexTradeProvider(PrivatePoloniexProvider,
         if "orderNumber" not in response:
             self.logger.error("Poloniex failed with response %s" % response)
             raise RuntimeError("Trade did not go trough")
-
-    def prepare_currencies(self, base_currency, quote_currency):
-        self.set_currencies(base_currency, quote_currency)

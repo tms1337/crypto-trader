@@ -3,11 +3,13 @@ import logging
 import time
 from poloniex import Poloniex
 
-from trading.exchange.base import CurrencyMixin, KeyLoaderMixin
+from trading.exchange.base import CurrencyMixin, KeyLoaderMixin, Provider
 from trading.util.logging import LoggableMixin
 
 
-class PoloniexProvider(CurrencyMixin, LoggableMixin):
+class PoloniexProvider(CurrencyMixin,
+                       Provider,
+                       LoggableMixin):
     def __init__(self,
                  api=Poloniex(),
                  pause_dt=1):
@@ -62,8 +64,13 @@ class PoloniexProvider(CurrencyMixin, LoggableMixin):
         time.sleep(self.pause_dt)
         self.logger.debug("Checking response: %s" % str(response)[1:100])
 
+    def prepare_currencies(self, base_currency, quote_currency):
+        self.set_currencies(base_currency, quote_currency)
 
-class PrivatePoloniexProvider(PoloniexProvider, KeyLoaderMixin, LoggableMixin):
+
+class PrivatePoloniexProvider(PoloniexProvider,
+                              KeyLoaderMixin,
+                              LoggableMixin):
     def __init__(self,
                  key_uri,
                  api=Poloniex()):

@@ -51,6 +51,3 @@ class BittrexTradeProvider(PrivateBittrexProvider,
     def cancel_offer(self, offer_id):
         cancel_response = self.api.cancel(offer_id)
         self._check_response(cancel_response)
-
-    def prepare_currencies(self, base_currency, quote_currency):
-        self.set_currencies(base_currency, quote_currency)

@@ -3,11 +3,12 @@ import logging
 import krakenex
 import time
 
-from trading.exchange.base import CurrencyMixin
+from trading.exchange.base import CurrencyMixin, Provider
 from trading.util.logging import LoggableMixin
 
 
 class KrakenProvider(CurrencyMixin,
+                     Provider,
                      LoggableMixin):
     def __init__(self,
                  api=krakenex.API(),
@@ -76,6 +77,8 @@ class KrakenProvider(CurrencyMixin,
 
         return time_minus_period
 
+    def prepare_currencies(self, base_currency, quote_currency):
+        self.set_currencies(base_currency, quote_currency)
 
 class PrivateKrakenProvider(KrakenProvider, LoggableMixin):
     def __init__(self, key_uri, api=krakenex.API()):

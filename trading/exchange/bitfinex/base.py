@@ -56,6 +56,9 @@ class BitfinexProvider(CurrencyMixin, Provider, LoggableMixin):
             self.logger.error("%s\n\t%s" % (error_message, response))
             raise RuntimeError(error_message)
 
+    def prepare_currencies(self, base_currency, quote_currency):
+        self.set_currencies(base_currency, quote_currency)
+
 
 class PrivateBitfinexProvider(BitfinexProvider, LoggableMixin):
     def __init__(self,
@@ -66,6 +69,3 @@ class PrivateBitfinexProvider(BitfinexProvider, LoggableMixin):
                                   api)
         self.api.load_keys(key_uri)
         LoggableMixin.__init__(self, PrivateBitfinexProvider)
-
-    def prepare_currencies(self, base_currency, quote_currency):
-        self.set_currencies(base_currency, quote_currency)

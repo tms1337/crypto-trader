@@ -84,9 +84,6 @@ class KrakenTradeProvider(PrivateKrakenProvider,
 
         return offer_response["result"]["txid"][0]
 
-    def prepare_currencies(self, base_currency, quote_currency):
-        self.set_currencies(base_currency, quote_currency)
-
 
 
 

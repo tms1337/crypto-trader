@@ -23,10 +23,9 @@ class Block(LoggableMixin):
 
     def run(self):
         self.logger.debug("Starting information retrieval")
-        stats_matrix = self.informer.get_stats_matrix()
         try:
             self.logger.info("Starting decision pipeline")
-            transactions = self.decider_pipeline.decide(stats_matrix)
+            transactions = self.decider_pipeline.decide(self.informer)
             self.logger.debug("Decided transactions %s" % transactions)
         except AssertionError as error:
             self.logger.error("Assertion error while executing transaction: %s" % error)

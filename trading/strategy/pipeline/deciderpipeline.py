@@ -17,10 +17,10 @@ class DeciderPipeline:
         TypeChecker.check_type(decider, Decider)
         self.deciders.append(decider)
 
-    def decide(self, stats_matrix):
+    def decide(self, informer):
         all_transactions = []
         for d in self.deciders:
-            transactions = d.decide(stats_matrix)
+            transactions = d.decide(informer)
             assert not transactions is None, \
                 "Decided transaction list should not be None"
             all_transactions.extend(transactions)

@@ -58,6 +58,9 @@ class BittrexProvider(CurrencyMixin, Provider, LoggableMixin):
             self.logger.error(error_message)
             raise RuntimeError(error_message)
 
+    def prepare_currencies(self, base_currency, quote_currency):
+        self.set_currencies(base_currency, quote_currency)
+
 
 class PrivateBittrexProvider(BittrexProvider, KeyLoaderMixin, LoggableMixin):
     def __init__(self,
