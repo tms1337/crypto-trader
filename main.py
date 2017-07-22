@@ -3,12 +3,14 @@ import sys
 
 from trading.daemon import Daemon
 from trading.exchange.bitfinex.trade import BitfinexTradeProvider
+from trading.exchange.bittrex.stats import BittrexStatsProvider
 from trading.exchange.bittrex.trade import BittrexTradeProvider
 from trading.exchange.kraken.stats import KrakenStatsProvider
 from trading.exchange.kraken.trade import KrakenTradeProvider
 from trading.exchange.poloniex.stats import PoloniexStatsProvider
 from trading.exchange.poloniex.trade import PoloniexTradeProvider
 from trading.strategy.deciders.simple.base import SimpleCompositeDecider
+from trading.strategy.deciders.simple.offer.exchangediff import ExchangeDiffOfferDecider
 from trading.strategy.deciders.simple.offer.percentbased import PercentBasedOfferDecider
 from trading.strategy.deciders.simple.volume.fixedvalue import FixedValueVolumeDecider
 from trading.strategy.pipeline.block import Block
@@ -44,15 +46,15 @@ keys_path = sys.argv[1]
 
 stats_providers = {
     "poloniex": PoloniexStatsProvider(),
-    # "bittrex": BittrexStatsProvider(),
+    "bittrex": BittrexStatsProvider(),
     # "bitfinex": BitfinexStatsProvider(),
-    "kraken": KrakenStatsProvider()
+    # "kraken": KrakenStatsProvider()
 }
 trade_providers = {
     "poloniex": PoloniexTradeProvider(key_uri=("%s/poloniex" % keys_path)),
-    # "bittrex": BittrexTradeProvider(key_uri=("%s/bittrex" % keys_path)),
+    "bittrex": BittrexTradeProvider(key_uri=("%s/bittrex" % keys_path)),
     # "bitfinex": BitfinexTradeProvider(key_uri=("%s/bitfinex" % keys_path)),
-    "kraken": KrakenTradeProvider(key_uri=("%s/kraken" % keys_path))
+    # "kraken": KrakenTradeProvider(key_uri=("%s/kraken" % keys_path))
 }
 
 informer = Informer(base_currency=trading_currency,
@@ -67,10 +69,15 @@ percent_decider = SimpleCompositeDecider(trade_providers=trade_providers,
                                                                                 trading_currency=trading_currency),
                                          volume_decider=FixedValueVolumeDecider(values={"ETH": 0.1}))
 
+diff_decider = SimpleCompositeDecider(trade_providers=trade_providers,
+                                      offer_decider=ExchangeDiffOfferDecider(currencies=currencies,
+                                                                             trading_currency=trading_currency),
+                                      volume_decider=FixedValueVolumeDecider(values={"ETH": 0.01}))
+
 # he's gonna kill you !!!
 executor = TransactionExecutor(trade_providers=trade_providers)
 
-block = Block(decider_pipeline=DeciderPipeline(deciders=[percent_decider]),
+block = Block(decider_pipeline=DeciderPipeline(deciders=[percent_decider, diff_decider]),
               informer=informer,
               transaction_executor=executor)
 

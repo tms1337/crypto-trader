@@ -82,7 +82,7 @@ class ExchangeDiffOfferDecider(OfferDecider, LoggableMixin):
             high_decision.exchange = best_exchanges["buy"]
             high_decision.price = stats_matrix[best_exchanges["buy"]][currency].high
 
-            self.logger.debug("High decision chosen %s" % high_decision)
+            self.logger.debug("High decision chosen %s " % high_decision)
 
             transaction.append(low_decision)
             transaction.append(high_decision)
