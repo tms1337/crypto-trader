@@ -42,17 +42,20 @@ logger.addHandler(ch)
 currencies = ["ETH"]
 trading_currency = "BTC"
 
+daemon_dt = 5
+providers_pause_dt = 0.25
+
 keys_path = sys.argv[1]
 
 stats_providers = {
-    "poloniex": PoloniexStatsProvider(),
-    "bittrex": BittrexStatsProvider(),
+    "poloniex": PoloniexStatsProvider(pause_dt=providers_pause_dt),
+    "bittrex": BittrexStatsProvider(pause_dt=providers_pause_dt),
     # "bitfinex": BitfinexStatsProvider(),
     # "kraken": KrakenStatsProvider()
 }
 trade_providers = {
-    "poloniex": PoloniexTradeProvider(key_uri=("%s/poloniex" % keys_path)),
-    "bittrex": BittrexTradeProvider(key_uri=("%s/bittrex" % keys_path)),
+    "poloniex": PoloniexTradeProvider(key_uri=("%s/poloniex" % keys_path), pause_dt=providers_pause_dt),
+    "bittrex": BittrexTradeProvider(key_uri=("%s/bittrex" % keys_path), pause_dt=providers_pause_dt),
     # "bitfinex": BitfinexTradeProvider(key_uri=("%s/bitfinex" % keys_path)),
     # "kraken": KrakenTradeProvider(key_uri=("%s/kraken" % keys_path))
 }
@@ -83,8 +86,7 @@ block = Block(decider_pipeline=DeciderPipeline(deciders=[diff_decider]),
               transaction_executor=executor)
 
 daemon = Daemon(blocks=[block],
-                dt_seconds=5)
-
+                dt_seconds=daemon_dt)
 
 if daemon is not None:
     daemon.run()

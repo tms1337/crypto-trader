@@ -11,7 +11,7 @@ from .client import bittrex
 class BittrexProvider(CurrencyMixin, Provider, LoggableMixin):
     def __init__(self,
                  api=bittrex.bittrex(None, None),
-                 pause_dt=2):
+                 pause_dt=1):
         self.api = api
         self.pause_dt = pause_dt
 
@@ -66,9 +66,11 @@ class BittrexProvider(CurrencyMixin, Provider, LoggableMixin):
 class PrivateBittrexProvider(BittrexProvider, KeyLoaderMixin, LoggableMixin):
     def __init__(self,
                  key_uri,
-                 api=bittrex.bittrex(None, None)):
+                 api=bittrex.bittrex(None, None),
+                 pause_dt=1):
         BittrexProvider.__init__(self,
-                                 api)
+                                 api,
+                                 pause_dt)
 
         KeyLoaderMixin.__init__(self, key_uri)
 

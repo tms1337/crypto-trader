@@ -1,6 +1,8 @@
 import logging
 from abc import ABC, abstractmethod
 
+import time
+
 from trading.strategy.decision import OfferType, Decision
 from trading.util.asserting import TypeChecker
 from trading.util.logging import LoggableMixin
