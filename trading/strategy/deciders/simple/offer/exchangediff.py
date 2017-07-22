@@ -2,16 +2,15 @@ import logging
 
 from trading.strategy.decision import Decision, OfferType
 from trading.exchange.base import CurrencyMixin
+from trading.util.logging import LoggableMixin
 from .base import OfferDecider
 import math
 
 
-class ExchangeDiffOfferDecider(OfferDecider):
+class ExchangeDiffOfferDecider(OfferDecider, LoggableMixin):
     def __init__(self,
                  currencies,
-                 trading_currency,
-                 wrapper_container,
-                 logger_name="app"):
+                 trading_currency):
 
         self.trading_currency = trading_currency
         CurrencyMixin.check_currency(trading_currency)
@@ -21,36 +20,24 @@ class ExchangeDiffOfferDecider(OfferDecider):
         self.currencies = currencies
         self.current_currency_index = 0
 
-        self.logger_name = logger_name
-        self.logger = logging.getLogger("%s.ExchangeDiffDecider" % logger_name)
+        LoggableMixin.__init__(self, ExchangeDiffOfferDecider)
+        OfferDecider.__init__(self)
 
-        OfferDecider.__init__(self,
-                              wrapper_container)
+    def decide(self, stats_matrix):
+        transaction = []
 
-    def decide(self, prev_decisions):
         currency = self.currencies[self.current_currency_index]
         self.current_currency_index = (self.current_currency_index + 1) % \
                                       len(self.currencies)
 
-        high_low_per_exchange = {}
-        for exchange in self.wrapper_container.wrappers:
-            wrapper = self.wrapper_container.wrappers[exchange]
-            wrapper.stats_provider.set_currencies(currency,
-                                                  self.trading_currency)
-
-            high = wrapper.stats_provider.ticker_high()
-            low = wrapper.stats_provider.ticker_low()
-
-            high_low_per_exchange[exchange] = {"low": low, "high": high}
-
         max_margin = float("-Inf")
         best_exchanges = {}
-        for first in high_low_per_exchange:
-            for second in high_low_per_exchange:
+        for first in stats_matrix.all_exchanges():
+            for second in stats_matrix.all_exchanges():
                 if first != second:
                     self.logger.debug("Checking exchange pair (%s, %s)" % (first, second))
 
-                    margin = high_low_per_exchange[first]["low"] - high_low_per_exchange[second]["high"]
+                    margin = stats_matrix[first][currency].low - stats_matrix[second][currency].high
                     self.logger.debug("\tMargin in order %f", margin)
 
                     if margin > max_margin:
@@ -59,25 +46,32 @@ class ExchangeDiffOfferDecider(OfferDecider):
                         best_exchanges["sell"] = first
                         self.logger.debug("Found new max margin %f" % max_margin)
 
-                    margin = high_low_per_exchange[second]["low"] - high_low_per_exchange[first]["high"]
-                    self.logger.debug("\tMargin in revrsed order %f", margin)
-
-                    if margin > max_margin:
-                        max_margin = margin
-                        best_exchanges["buy"] = first
-                        best_exchanges["sell"] = second
-                        self.logger.debug("Found new max margin %f" % max_margin)
-
         if max_margin < 0:
-            self.logger.debug("No suitable difference to chose :(")
-            return []
-        else:
+            self.logger.debug("No suitable difference to chose, going to backup method")
+
+            max_margin = float("-Inf")
+            best_exchanges = {}
+            for first in stats_matrix.all_exchanges():
+                for second in stats_matrix.all_exchanges():
+                    if first != second:
+                        self.logger.debug("Checking exchange pair (%s, %s)" % (first, second))
+
+                        margin = stats_matrix[first][currency].last - stats_matrix[second][currency].last
+                        self.logger.debug("\tMargin in order %f", margin)
+
+                        if margin > max_margin:
+                            max_margin = margin
+                            best_exchanges["buy"] = second
+                            best_exchanges["sell"] = first
+                            self.logger.debug("Found new max margin %f" % max_margin)
+
+        if max_margin > 0:
             low_decision = Decision()
             low_decision.base_currency = currency
             low_decision.quote_currency = self.trading_currency
             low_decision.transaction_type = OfferType.SELL
             low_decision.exchange = best_exchanges["sell"]
-            low_decision.price = high_low_per_exchange[best_exchanges["sell"]]["low"]
+            low_decision.price = stats_matrix[best_exchanges["sell"]][currency].low
 
             self.logger.debug("Low decision chosen %s" % low_decision)
 
@@ -86,13 +80,14 @@ class ExchangeDiffOfferDecider(OfferDecider):
             high_decision.quote_currency = self.trading_currency
             high_decision.transaction_type = OfferType.BUY
             high_decision.exchange = best_exchanges["buy"]
-            high_decision.price = high_low_per_exchange[best_exchanges["buy"]]["high"]
+            high_decision.price = stats_matrix[best_exchanges["buy"]][currency].high
 
             self.logger.debug("High decision chosen %s" % high_decision)
 
-            prev_decisions.append((high_decision, low_decision))
+            transaction.append(low_decision)
+            transaction.append(high_decision)
 
-            return prev_decisions
+        return [transaction]
 
     def apply_last(self):
         pass

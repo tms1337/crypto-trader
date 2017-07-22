@@ -2,8 +2,12 @@ import logging
 import sys
 
 from trading.daemon import Daemon
+from trading.exchange.bitfinex.trade import BitfinexTradeProvider
+from trading.exchange.bittrex.trade import BittrexTradeProvider
 from trading.exchange.kraken.stats import KrakenStatsProvider
 from trading.exchange.kraken.trade import KrakenTradeProvider
+from trading.exchange.poloniex.stats import PoloniexStatsProvider
+from trading.exchange.poloniex.trade import PoloniexTradeProvider
 from trading.strategy.deciders.simple.base import SimpleCompositeDecider
 from trading.strategy.deciders.simple.offer.percentbased import PercentBasedOfferDecider
 from trading.strategy.deciders.simple.volume.fixedvalue import FixedValueVolumeDecider
@@ -36,17 +40,19 @@ logger.addHandler(ch)
 currencies = ["ETH"]
 trading_currency = "BTC"
 
+keys_path = sys.argv[1]
+
 stats_providers = {
-    # "poloniex": PoloniexStatsProvider(),
+    "poloniex": PoloniexStatsProvider(),
     # "bittrex": BittrexStatsProvider(),
     # "bitfinex": BitfinexStatsProvider(),
     "kraken": KrakenStatsProvider()
 }
 trade_providers = {
-    # "poloniex": PoloniexTradeProvider(key_uri="/home/faruk/Desktop/poloniex_key"),
-    # "bittrex": BittrexTradeProvider(key_uri="/home/faruk/Desktop/bittrex_key"),
-    # "bitfinex": BitfinexTradeProvider(key_uri="/home/faruk/Desktop/bitfinex_key"),
-    "kraken": KrakenTradeProvider(key_uri="/home/faruk/Desktop/kraken_key")
+    "poloniex": PoloniexTradeProvider(key_uri=("%s/poloniex" % keys_path)),
+    # "bittrex": BittrexTradeProvider(key_uri=("%s/bittrex" % keys_path)),
+    # "bitfinex": BitfinexTradeProvider(key_uri=("%s/bitfinex" % keys_path)),
+    "kraken": KrakenTradeProvider(key_uri=("%s/kraken" % keys_path))
 }
 
 informer = Informer(base_currency=trading_currency,

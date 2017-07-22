@@ -2,6 +2,7 @@ import logging
 from abc import ABC, abstractmethod
 
 from trading.strategy.decision import OfferType, Decision
+from trading.util.asserting import TypeChecker
 from trading.util.logging import LoggableMixin
 
 
@@ -39,13 +40,16 @@ class CurrencyMixin(ABC, LoggableMixin):
 
     def inverse_map_currency(self, currency):
         currency_map = self.currency_mapping()
-        inverse_currency_map = {currency_map[k]:k for k in currency_map}
+        inverse_currency_map = {currency_map[k]: k for k in currency_map}
 
         return inverse_currency_map[currency]
 
     @staticmethod
     def check_currency(currency):
-        currency_list = ["BTC", "ETH", "XRP", "DASH", "LTC"]
+        TypeChecker.check_type(currency, str)
+
+        currency_list = ["BTC", "ETH", "XRP", "DASH",
+                         "LTC", "USD", "EUR", "XRP"]
 
         return currency in currency_list
 
