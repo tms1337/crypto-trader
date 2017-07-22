@@ -27,9 +27,9 @@ class Daemon(LoggableMixin):
 
             for i in range(len(self.blocks)):
                 b = self.blocks[i]
-                self.logger.debug("Running block number %d" % i)
+                self.logger.info("Running block number %d" % i)
                 b.run()
 
             self.logger.debug("Waiting %f seconds" % self.dt_seconds)
-            self.logger.debug()
+            self.logger.debug("")
             time.sleep(self.dt_seconds)
