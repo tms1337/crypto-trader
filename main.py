@@ -2,14 +2,8 @@ import logging
 import sys
 
 from trading.daemon import Daemon
-from trading.exchange.bitfinex.stats import BitfinexStatsProvider
-from trading.exchange.bitfinex.trade import BitfinexTradeProvider
-from trading.exchange.bittrex.stats import BittrexStatsProvider
-from trading.exchange.bittrex.trade import BittrexTradeProvider
 from trading.exchange.kraken.stats import KrakenStatsProvider
 from trading.exchange.kraken.trade import KrakenTradeProvider
-from trading.exchange.poloniex.stats import PoloniexStatsProvider
-from trading.exchange.poloniex.trade import PoloniexTradeProvider
 from trading.strategy.deciders.simple.base import SimpleCompositeDecider
 from trading.strategy.deciders.simple.offer.percentbased import PercentBasedOfferDecider
 from trading.strategy.deciders.simple.volume.fixedvalue import FixedValueVolumeDecider

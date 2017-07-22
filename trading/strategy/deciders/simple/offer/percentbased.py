@@ -95,50 +95,52 @@ class PercentBasedOfferDecider(OfferDecider, LoggableMixin):
             self.last_decision_record.stats_matrix = stats_matrix
 
         for exchange in stats_matrix.all_exchanges():
+            skip_exchange = False
             for currency in stats_matrix.all_currencies():
                 if stats_matrix.get(exchange, currency).low is None or \
                         stats_matrix.get(exchange, currency).high is None:
                     self.logger.warn("Skipping exchange %s bacause of missing info" % exchange)
-                    continue
+                    skip_exchange = True
 
-            for currency in stats_matrix.all_currencies():
-                low = stats_matrix.get(exchange, currency).low
-                high = stats_matrix.get(exchange, currency).high
-                last_applied_price = self.last_applied_decision_record.stats_matrix.get(exchange, currency).price
-                last_applied_decision = self.last_applied_decision_record.offer_type_matrix.get(exchange, currency)
+            if not skip_exchange:
+                for currency in stats_matrix.all_currencies():
+                    low = stats_matrix.get(exchange, currency).low
+                    high = stats_matrix.get(exchange, currency).high
+                    last_applied_price = self.last_applied_decision_record.stats_matrix.get(exchange, currency).price
+                    last_applied_decision = self.last_applied_decision_record.offer_type_matrix.get(exchange, currency)
 
-                buy_margin = (last_applied_price - high) / last_applied_price
-                sell_margin = (low - last_applied_price) / last_applied_price
+                    buy_margin = (last_applied_price - high) / last_applied_price
+                    sell_margin = (low - last_applied_price) / last_applied_price
 
-                if (last_applied_decision == OfferType.BUY and sell_margin >= self.sell_threshold) or \
-                        (last_applied_decision == OfferType.BUY and sell_margin < -self.security_loss_threshold):
+                    if (last_applied_decision == OfferType.BUY and sell_margin >= self.sell_threshold) or \
+                            (last_applied_decision == OfferType.BUY and sell_margin < -self.security_loss_threshold):
 
-                    decision = Decision()
-                    decision.exchange = exchange
-                    decision.base_currency = currency
-                    decision.quote_currency = self.trading_currency
-                    decision.transaction_type = OfferType.SELL
-                    decision.price = low
-                    decision.decider = self
+                        decision = Decision()
+                        decision.exchange = exchange
+                        decision.base_currency = currency
+                        decision.quote_currency = self.trading_currency
+                        decision.transaction_type = OfferType.SELL
+                        decision.price = low
+                        decision.decider = self
 
-                    self.logger.debug("Made decision %s" % decision)
-                    transaction.add_decision(decision)
+                        self.logger.debug("Made decision %s" % decision)
+                        transaction.add_decision(decision)
 
-                    self.last_decision_record.offer_type_matrix.set(exchange, currency, OfferType.SELL)
-                elif (last_applied_decision == OfferType.SELL or last_applied_decision is None) and \
-                                buy_margin >= self.buy_threshold:
-                    decision = Decision()
-                    decision.exchange = exchange
-                    decision.base_currency = currency
-                    decision.quote_currency = self.trading_currency
-                    decision.transaction_type = OfferType.BUY
-                    decision.price = high
-                    decision.decider = self
+                        self.last_decision_record.offer_type_matrix.set(exchange, currency, OfferType.SELL)
+                    elif (last_applied_decision == OfferType.SELL or last_applied_decision is None) and \
+                                    buy_margin >= self.buy_threshold:
+                        decision = Decision()
+                        decision.exchange = exchange
+                        decision.base_currency = currency
+                        decision.quote_currency = self.trading_currency
+                        decision.transaction_type = OfferType.BUY
+                        decision.price = high
+                        decision.decider = self
 
-                    self.logger.debug("Made decision %s" % decision)
-                    transaction.add_decision(decision)
+                        self.logger.debug("Made decision %s" % decision)
+                        transaction.add_decision(decision)
 
-                    self.last_decision_record.offer_type_matrix.set(exchange, currency, OfferType.BUY)
+                        self.last_decision_record.offer_type_matrix.set(exchange, currency, OfferType.BUY)
 
         return [transaction]
 

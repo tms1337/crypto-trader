@@ -31,4 +31,5 @@ class Daemon(LoggableMixin):
                 b.run()
 
             self.logger.debug("Waiting %f seconds" % self.dt_seconds)
+            self.logger.debug()
             time.sleep(self.dt_seconds)
