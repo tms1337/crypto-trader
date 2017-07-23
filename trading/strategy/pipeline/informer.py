@@ -8,7 +8,7 @@ from trading.strategy.pipeline.data.statsmatrix import StatsMatrix, StatsCell
 from trading.util.asserting import TypeChecker
 from trading.util.logging import LoggableMixin
 
-max_retry_attempts = None
+transactionexecutor_max_retry_attempts = None
 
 
 class Informer(LoggableMixin):
@@ -48,12 +48,14 @@ class Informer(LoggableMixin):
         self.balances_matrix = BalanceMatrix([e for e in trade_providers],
                                              currencies)
 
-        global max_retry_attempts
-        max_retry_attempts = retry_attempts
+        global transactionexecutor_max_retry_attempts
+        transactionexecutor_max_retry_attempts = retry_attempts
 
         LoggableMixin.__init__(self, Informer)
 
-    def get_stats_matrix(self):
+        self.set_stats_matrix()
+
+    def set_stats_matrix(self):
         self.logger.debug("Getting stats matrix")
         for exchange in self.stats_providers:
             self.logger.debug("\tExchange %s" % exchange)
@@ -65,9 +67,10 @@ class Informer(LoggableMixin):
                     cell = self._generate_stats_cell(exchange, currency)
                 self.stats_matrix.set(exchange, currency, cell)
 
+    def get_stats_matrix(self):
         return self.stats_matrix
 
-    def get_balances_matrix(self):
+    def set_balances_matrix(self):
         self.logger.debug("Getting balance info")
 
         for exchange in self.trade_providers:
@@ -77,7 +80,12 @@ class Informer(LoggableMixin):
                 cell = self._generate_balance_cell(exchange, currency)
                 self.balances_matrix.set(exchange, currency, cell)
 
+    def get_balances_matrix(self):
         return self.balances_matrix
+
+    def set_all(self):
+        self.set_stats_matrix()
+        self.set_balances_matrix()
 
     def _generate_stats_cell(self, exchange, currency):
         assert exchange in self.stats_providers, \
@@ -117,22 +125,22 @@ class Informer(LoggableMixin):
         return cell
 
     @retry(retry_on_exception=is_provider_error,
-           stop_max_attempt_number=max_retry_attempts)
+           stop_max_attempt_number=transactionexecutor_max_retry_attempts)
     def _set_last(self, cell, stats):
         cell.last = stats.ticker_last()
 
     @retry(retry_on_exception=is_provider_error,
-           stop_max_attempt_number=max_retry_attempts)
+           stop_max_attempt_number=transactionexecutor_max_retry_attempts)
     def _set_low(self, cell, stats):
         cell.low = stats.ticker_low()
 
     @retry(retry_on_exception=is_provider_error,
-           stop_max_attempt_number=max_retry_attempts)
+           stop_max_attempt_number=transactionexecutor_max_retry_attempts)
     def _set_high(self, cell, stats):
         cell.high = stats.ticker_high()
 
     @retry(retry_on_exception=is_provider_error,
-           stop_max_attempt_number=max_retry_attempts)
+           stop_max_attempt_number=transactionexecutor_max_retry_attempts)
     def _generate_balance_cell(self, exchange, currency):
         assert exchange in self.trade_providers, \
             "Exchange %s not in list" % exchange

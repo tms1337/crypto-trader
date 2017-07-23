@@ -14,7 +14,7 @@ class Block(LoggableMixin, MonitoredMixin):
                  informer,
                  decider_pipeline,
                  transaction_executor,
-                 monitors):
+                 monitors=None):
         TypeChecker.check_type(informer, Informer)
         self.informer = informer
 
@@ -27,12 +27,14 @@ class Block(LoggableMixin, MonitoredMixin):
         TypeChecker.check_type(monitors, list)
         for m in monitors:
             TypeChecker.check_type(m, MonitorMixin)
-        self.monitors = monitors
+        MonitoredMixin.__init__(self, monitors)
 
         LoggableMixin.__init__(self, Block)
 
     def run(self):
         self.logger.debug("Starting information retrieval")
+        self.informer.set_all()
+
         try:
             self.logger.info("Starting decision pipeline")
             transactions = self.decider_pipeline.decide(self.informer)

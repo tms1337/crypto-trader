@@ -12,3 +12,8 @@ class TypeChecker:
 
         raise TypeError("Object %s should be one of the types %s" %
                         (x, asserted_types))
+
+    @staticmethod
+    def check_is_function(f):
+        if not hasattr(f, "__call__"):
+            raise TypeError("Object %s is not a function" % x)

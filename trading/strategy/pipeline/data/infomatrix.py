@@ -23,6 +23,9 @@ class InfoMatrix(ABC):
         self.cell_type = cell_type
 
     def get(self, exchange, currency):
+        assert exchange in self.matrix, "Exchange %s not in matrix" % exchange
+        assert currency in self.matrix[exchange], "Currency %s not in matrix" % currency
+
         return self.matrix[exchange][currency]
 
     def set(self, exchange, currency, cell):

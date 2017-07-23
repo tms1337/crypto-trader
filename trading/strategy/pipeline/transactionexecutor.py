@@ -11,7 +11,7 @@ from trading.util.asserting import TypeChecker
 # hacky
 from trading.util.logging import LoggableMixin
 
-max_retry_attempts = None
+transactionexecutor_max_retry_attempts = None
 
 
 class TransactionExecutor(LoggableMixin):
@@ -27,8 +27,8 @@ class TransactionExecutor(LoggableMixin):
         self.trade_providers = trade_providers
 
         # hacky contd. :D
-        global max_retry_attempts
-        max_retry_attempts = retry_attempts
+        global transactionexecutor_max_retry_attempts
+        transactionexecutor_max_retry_attempts = retry_attempts
 
         LoggableMixin.__init__(self, TransactionExecutor)
 
@@ -66,7 +66,7 @@ class TransactionExecutor(LoggableMixin):
                 raise TransactionNotExecutedError()
 
     @retry(retry_on_exception=is_provider_error,
-           stop_max_attempt_number=max_retry_attempts)
+           stop_max_attempt_number=transactionexecutor_max_retry_attempts)
     def _execute_single_decision(self, decision):
         self.logger.debug("Executing decision %s" % decision)
         exchange = decision.exchange

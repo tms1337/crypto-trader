@@ -16,6 +16,7 @@ from trading.strategy.deciders.simple.volume.fixedvalue import FixedValueVolumeD
 from trading.strategy.pipeline.block import Block
 from trading.strategy.pipeline.deciderpipeline import DeciderPipeline
 from trading.strategy.pipeline.informer import Informer
+from trading.strategy.pipeline.monitoring.mongobalancemonitor import MongoBalanceMonitor
 from trading.strategy.pipeline.transactionexecutor import TransactionExecutor
 
 logger = logging.getLogger('app')
@@ -42,7 +43,7 @@ logger.addHandler(ch)
 currencies = ["BTC"]
 trading_currency = "USD"
 
-daemon_dt = 60
+daemon_dt = 15
 providers_pause_dt = 0.1
 
 keys_path = sys.argv[1]
@@ -91,7 +92,9 @@ executor = TransactionExecutor(trade_providers=trade_providers)
 
 block = Block(decider_pipeline=DeciderPipeline(deciders=[diff_decider]),
               informer=informer,
-              transaction_executor=executor)
+              transaction_executor=executor,
+              monitors=[MongoBalanceMonitor(currencies=currencies,
+                                            name="diff_bot")])
 
 daemon = Daemon(blocks=[block],
                 dt_seconds=daemon_dt)

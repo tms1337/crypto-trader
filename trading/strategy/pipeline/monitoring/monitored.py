@@ -3,16 +3,16 @@ from trading.util.asserting import TypeChecker
 
 
 class MonitoredMixin:
-    def __init__(self, observers=None):
-        if observers is None:
-            observers = []
+    def __init__(self, monitors=None):
+        if monitors is None:
+            monitors = []
 
-        TypeChecker.check_type(observers, list)
-        for observer in observers:
+        TypeChecker.check_type(monitors, list)
+        for observer in monitors:
             TypeChecker.check_type(observer, MonitorMixin)
 
-        self.observers = observers
+        self.monitors = monitors
 
     def notify(self, data):
-        for observer in self.observers:
-            observer.notify(data)
+        for monitor in self.monitors:
+            monitor.notify(data)
