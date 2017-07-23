@@ -1,23 +1,33 @@
 from trading.strategy.pipeline.deciderpipeline import DeciderPipeline
 from trading.strategy.pipeline.informer import Informer
+from trading.strategy.pipeline.monitoring.infomonitor import InfoMonitor
+from trading.strategy.pipeline.monitoring.monitor import MonitorMixin
+from trading.strategy.pipeline.monitoring.monitored import MonitoredMixin
 from trading.strategy.pipeline.transactionexecutor import TransactionExecutor
 from trading.util.asserting import TypeChecker
 
 from trading.util.logging import LoggableMixin
 
 
-class Block(LoggableMixin):
+class Block(LoggableMixin, MonitoredMixin):
     def __init__(self,
                  informer,
                  decider_pipeline,
-                 transaction_executor):
+                 transaction_executor,
+                 monitors):
         TypeChecker.check_type(informer, Informer)
-        TypeChecker.check_type(decider_pipeline, DeciderPipeline)
-        TypeChecker.check_type(transaction_executor, TransactionExecutor)
-
         self.informer = informer
+
+        TypeChecker.check_type(decider_pipeline, DeciderPipeline)
         self.decider_pipeline = decider_pipeline
+
+        TypeChecker.check_type(transaction_executor, TransactionExecutor)
         self.transaction_executor = transaction_executor
+
+        TypeChecker.check_type(monitors, list)
+        for m in monitors:
+            TypeChecker.check_type(m, MonitorMixin)
+        self.monitors = monitors
 
         LoggableMixin.__init__(self, Block)
 
@@ -37,6 +47,9 @@ class Block(LoggableMixin):
                 self.logger.warn("Failed transactions %s" % failed_transactions)
             else:
                 self.logger.info("All transactions successful")
+
+                self.logger.debug("Notifying monitors")
+                self.notify(self.informer)
 
                 # TODO: refactor into monitors
                 total_balance = {}
