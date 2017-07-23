@@ -43,7 +43,7 @@ currencies = ["BTC"]
 trading_currency = "USD"
 
 daemon_dt = 60
-providers_pause_dt = 0.25
+providers_pause_dt = 0.1
 
 keys_path = sys.argv[1]
 
@@ -84,12 +84,12 @@ long_percent_decider = SimpleCompositeDecider(trade_providers=trade_providers,
 diff_decider = SimpleCompositeDecider(trade_providers=trade_providers,
                                       offer_decider=ExchangeDiffOfferDecider(currencies=currencies,
                                                                              trading_currency=trading_currency),
-                                      volume_decider=FixedValueVolumeDecider(values={"BTC": 0.05}))
+                                      volume_decider=FixedValueVolumeDecider(values={"BTC": 0.01}))
 
 # he's gonna kill you !!!
 executor = TransactionExecutor(trade_providers=trade_providers)
 
-block = Block(decider_pipeline=DeciderPipeline(deciders=[diff_decider, short_percent_decider, long_percent_decider]),
+block = Block(decider_pipeline=DeciderPipeline(deciders=[diff_decider]),
               informer=informer,
               transaction_executor=executor)
 

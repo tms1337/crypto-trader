@@ -15,7 +15,7 @@ while True:
         after_usd = line[start_usd + 2:]
         usd_value = float(after_usd[:after_usd.find("}")])
 
-        values.append(btc_value * 2851 + usd_value)
+        values.append(btc_value * 2705.26001197 + usd_value)
     except:
         break
 
