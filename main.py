@@ -67,11 +67,11 @@ informer = Informer(base_currency=trading_currency,
 
 percent_decider = SimpleCompositeDecider(trade_providers=trade_providers,
                                          offer_decider=PercentBasedOfferDecider(currencies=currencies,
-                                                                                buy_threshold=0.1,
-                                                                                sell_threshold=0.1,
-                                                                                security_loss_threshold=0.1,
+                                                                                buy_threshold=0.02,
+                                                                                sell_threshold=0.005,
+                                                                                security_loss_threshold=0.05,
                                                                                 trading_currency=trading_currency),
-                                         volume_decider=FixedValueVolumeDecider(values={"ETH": 0.1}))
+                                         volume_decider=FixedValueVolumeDecider(values={"BTC": 0.3}))
 
 diff_decider = SimpleCompositeDecider(trade_providers=trade_providers,
                                       offer_decider=ExchangeDiffOfferDecider(currencies=currencies,
@@ -81,7 +81,7 @@ diff_decider = SimpleCompositeDecider(trade_providers=trade_providers,
 # he's gonna kill you !!!
 executor = TransactionExecutor(trade_providers=trade_providers)
 
-block = Block(decider_pipeline=DeciderPipeline(deciders=[diff_decider]),
+block = Block(decider_pipeline=DeciderPipeline(deciders=[diff_decider, percent_decider]),
               informer=informer,
               transaction_executor=executor)
 

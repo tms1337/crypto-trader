@@ -32,7 +32,8 @@ class PoloniexTradeProvider(PrivatePoloniexProvider,
             self._handle_error(error)
         else:
             if not currency is None:
-                return float(balance[currency])
+                currency = self.map_currency_balance(currency)
+                return float(balance[currency]["available"]) + float(balance[currency]["onOrders"])
             else:
                 return {b:float(balance[b]["available"]) + float(balance[b]["onOrders"]) for b in balance}
 

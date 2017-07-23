@@ -37,3 +37,16 @@ class Block(LoggableMixin):
                 self.logger.warn("Failed transactions %s" % failed_transactions)
             else:
                 self.logger.info("All transactions successful")
+
+                # TODO: refactor into monitors
+                total_balance = {}
+
+                balances_matrix = self.informer.get_balances_matrix()
+                for e in balances_matrix.all_exchanges():
+                    for c in balances_matrix.all_currencies():
+                        if c not in total_balance:
+                            total_balance[c] = 0
+
+                        total_balance[c] += balances_matrix.get(e, c).value
+
+                self.logger.debug(total_balance)

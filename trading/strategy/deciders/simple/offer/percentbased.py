@@ -71,7 +71,7 @@ class PercentBasedOfferDecider(OfferDecider, LoggableMixin):
         LoggableMixin.__init__(self, PercentBasedOfferDecider)
 
     def decide(self, informer):
-        OfferDecider.decide(self, informer)
+        super(PercentBasedOfferDecider, self).decide(informer)
 
         stats_matrix = informer.get_stats_matrix()
         TypeChecker.check_type(stats_matrix, StatsMatrix)

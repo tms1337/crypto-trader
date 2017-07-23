@@ -27,7 +27,7 @@ class BittrexTradeProvider(PrivateBittrexProvider,
             self._check_response(balance_response)
 
             if not currency is None:
-                currency_balance = [b for b in balance_response if b["Currency"] == self.currency_mapping_for_balance(currency)]
+                currency_balance = [b for b in balance_response if b["Currency"] == self.map_currency_balance(currency)]
 
                 if len(currency_balance) == 0:
                     return 0.0
