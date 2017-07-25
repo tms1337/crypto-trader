@@ -2,11 +2,11 @@ import logging
 
 from poloniex import Poloniex
 
-from trading.exceptions.servererror import ServerError
-from trading.strategy.decision import OfferType
-from trading.exchange.base import TradeProvider
-from trading.exchange.poloniex.base import PrivatePoloniexProvider
-from trading.util.logging import LoggableMixin
+from bot.exceptions.servererror import ServerError
+from bot.strategy.decision import OfferType
+from bot.exchange.base import TradeProvider
+from bot.exchange.poloniex.base import PrivatePoloniexProvider
+from bot.util.logging import LoggableMixin
 
 
 class PoloniexTradeProvider(PrivatePoloniexProvider,

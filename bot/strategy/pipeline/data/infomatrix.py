@@ -1,6 +1,6 @@
 from abc import ABC
 
-from trading.util.asserting import TypeChecker
+from bot.util.asserting import TypeChecker
 
 
 class InfoMatrix(ABC):

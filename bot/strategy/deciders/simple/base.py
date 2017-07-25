@@ -1,7 +1,7 @@
-from trading.strategy.deciders.decider import Decider
-from trading.strategy.deciders.simple.offer.base import OfferDecider
-from trading.strategy.deciders.simple.volume.base import VolumeDecider
-from trading.util.asserting import TypeChecker
+from bot.strategy.deciders.decider import Decider
+from bot.strategy.deciders.simple.offer.base import OfferDecider
+from bot.strategy.deciders.simple.volume.base import VolumeDecider
+from bot.util.asserting import TypeChecker
 
 
 class SimpleCompositeDecider(Decider):

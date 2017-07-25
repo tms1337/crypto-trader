@@ -3,9 +3,9 @@ import logging
 import krakenex
 import time
 
-from trading.exceptions.servererror import ServerError
-from trading.exchange.base import CurrencyMixin, Provider
-from trading.util.logging import LoggableMixin
+from bot.exceptions.servererror import ServerError
+from bot.exchange.base import CurrencyMixin, Provider
+from bot.util.logging import LoggableMixin
 
 
 class KrakenProvider(CurrencyMixin,

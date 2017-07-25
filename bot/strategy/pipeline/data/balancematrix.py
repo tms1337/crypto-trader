@@ -1,4 +1,4 @@
-from trading.strategy.pipeline.data.infomatrix import InfoMatrix
+from bot.strategy.pipeline.data.infomatrix import InfoMatrix
 
 
 class BalanceCell:

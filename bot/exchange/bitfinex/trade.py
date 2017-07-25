@@ -1,9 +1,9 @@
-from trading.strategy.decision import OfferType
-from trading.exchange.base import TradeProvider
-from trading.exchange.bitfinex.base import PrivateBitfinexProvider
+from bot.strategy.decision import OfferType
+from bot.exchange.base import TradeProvider
+from bot.exchange.bitfinex.base import PrivateBitfinexProvider
 import FinexAPI.FinexAPI as finex
 
-from trading.util.logging import LoggableMixin
+from bot.util.logging import LoggableMixin
 
 
 class BitfinexTradeProvider(PrivateBitfinexProvider,

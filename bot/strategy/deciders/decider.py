@@ -1,8 +1,8 @@
 from abc import ABC, abstractmethod
 
-from trading.exchange.base import TradeProvider
-from trading.strategy.pipeline.informer import Informer
-from trading.util.asserting import TypeChecker
+from bot.exchange.base import TradeProvider
+from bot.strategy.pipeline.informer import Informer
+from bot.util.asserting import TypeChecker
 
 
 class Decider(ABC):

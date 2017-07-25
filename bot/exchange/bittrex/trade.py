@@ -1,4 +1,4 @@
-from trading.util.logging import LoggableMixin
+from bot.util.logging import LoggableMixin
 from .client import bittrex
 
 from .base import PrivateBittrexProvider

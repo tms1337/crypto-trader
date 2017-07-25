@@ -1,11 +1,11 @@
 import copy
 
-from trading.strategy.deciders.simple.offer.base import OfferDecider
-from trading.strategy.decision import Decision, OfferType
-from trading.strategy.pipeline.data.statsmatrix import StatsMatrix
-from trading.strategy.transaction import Transaction
-from trading.util.asserting import TypeChecker
-from trading.util.logging import LoggableMixin
+from bot.strategy.deciders.simple.offer.base import OfferDecider
+from bot.strategy.decision import Decision, OfferType
+from bot.strategy.pipeline.data.statsmatrix import StatsMatrix
+from bot.strategy.transaction import Transaction
+from bot.util.asserting import TypeChecker
+from bot.util.logging import LoggableMixin
 
 
 class OfferTypeMatrix:

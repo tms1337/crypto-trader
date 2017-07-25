@@ -2,11 +2,11 @@ import logging
 
 import time
 
-from trading.exceptions.servererror import ServerError
-from trading.exchange.base import CurrencyMixin, Provider
+from bot.exceptions.servererror import ServerError
+from bot.exchange.base import CurrencyMixin, Provider
 import FinexAPI.FinexAPI as finex
 
-from trading.util.logging import LoggableMixin
+from bot.util.logging import LoggableMixin
 
 
 class BitfinexProvider(CurrencyMixin, Provider, LoggableMixin):

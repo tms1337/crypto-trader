@@ -1,7 +1,7 @@
 import logging
 from enum import Enum, unique
 
-from trading.util.logging import LoggableMixin
+from bot.util.logging import LoggableMixin
 
 
 @unique

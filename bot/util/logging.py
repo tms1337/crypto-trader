@@ -1,6 +1,6 @@
 import logging
 
-from trading.util.asserting import TypeChecker
+from bot.util.asserting import TypeChecker
 
 logger_name = "app"
 

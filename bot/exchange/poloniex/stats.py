@@ -2,11 +2,11 @@ import time
 
 from cachetools import TTLCache
 
-from trading.exchange.base import StatsProvider
+from bot.exchange.base import StatsProvider
 from poloniex import Poloniex
 
-from trading.util.asserting import TypeChecker
-from trading.util.logging import LoggableMixin
+from bot.util.asserting import TypeChecker
+from bot.util.logging import LoggableMixin
 from .base import PoloniexProvider
 
 

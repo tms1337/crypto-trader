@@ -2,9 +2,9 @@ import time
 from pymongo import MongoClient
 from retrying import retry
 
-from trading.strategy.pipeline.monitoring.infomonitor import InfoMonitor
-from trading.util.asserting import TypeChecker
-from trading.util.logging import LoggableMixin
+from bot.strategy.pipeline.monitoring.infomonitor import InfoMonitor
+from bot.util.asserting import TypeChecker
+from bot.util.logging import LoggableMixin
 
 mongo_balance_monitor_max_retry_attempts = None
 

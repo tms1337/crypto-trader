@@ -1,8 +1,8 @@
 from abc import ABC
 
-from trading.strategy.pipeline.informer import Informer
-from trading.strategy.pipeline.monitoring.monitor import MonitorMixin
-from trading.util.asserting import TypeChecker
+from bot.strategy.pipeline.informer import Informer
+from bot.strategy.pipeline.monitoring.monitor import MonitorMixin
+from bot.util.asserting import TypeChecker
 
 
 class InfoMonitor(MonitorMixin, ABC):

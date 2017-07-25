@@ -1,8 +1,8 @@
 import time
 
-from trading.strategy.pipeline.block import Block
-from trading.util.asserting import TypeChecker
-from trading.util.logging import LoggableMixin
+from bot.strategy.pipeline.block import Block
+from bot.util.asserting import TypeChecker
+from bot.util.logging import LoggableMixin
 
 
 class Daemon(LoggableMixin):
