@@ -31,8 +31,8 @@ ch = logging.StreamHandler(sys.stdout)
 ch.setLevel(logging.DEBUG)
 
 # create formatter and add it to the handlers
-formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - '
-                              '%(message)s')
+formatter = logging.Formatter(fmt="[%(asctime)s / %(name)s / %(levelname)s / %(funcName)s]\t"
+                              "%(message)s", datefmt="%Y-%m-%d,%H:%M")
 fh.setFormatter(formatter)
 ch.setFormatter(formatter)
 
