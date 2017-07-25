@@ -7,7 +7,9 @@ from trading.util.logging import LoggableMixin
 
 
 class FixedValueVolumeDecider(VolumeDecider, LoggableMixin):
-    def __init__(self, values, iceberg_n=5):
+    def __init__(self,
+                 values,
+                 iceberg_n=5):
         TypeChecker.check_type(values, dict)
         for k in values:
             TypeChecker.check_type(k, str)

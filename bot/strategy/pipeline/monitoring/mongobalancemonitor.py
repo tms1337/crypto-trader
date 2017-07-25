@@ -8,7 +8,6 @@ from trading.util.logging import LoggableMixin
 
 mongo_balance_monitor_max_retry_attempts = None
 
-
 class MongoBalanceMonitor(InfoMonitor, LoggableMixin):
     def __init__(self,
                  currencies,
@@ -57,6 +56,8 @@ class MongoBalanceMonitor(InfoMonitor, LoggableMixin):
             for c in balance_matrix.all_currencies():
                 if c not in record:
                     record[c] = 0
-                record[c] += balance_matrix.get(e, c).value
+                value = balance_matrix.get(e, c).value
+
+                record[c] += value
 
         balance_records.insert_one(record)
