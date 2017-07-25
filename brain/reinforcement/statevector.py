@@ -26,3 +26,6 @@ class StateVector:
             "Value must be vector of length %d" % self.dimension_n
 
         self.value = tuple(value)
+
+    def set_random_value(self):
+        pass
