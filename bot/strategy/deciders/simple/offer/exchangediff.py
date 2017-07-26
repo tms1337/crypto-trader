@@ -60,7 +60,7 @@ class ExchangeDiffOfferDecider(OfferDecider, LoggableMixin):
 
                     margin = stats_matrix.get(first, currency).low - stats_matrix.get(second, currency).high - \
                              self.max_fee * \
-                             (stats_matrix.get(first, currency).low - stats_matrix.get(second, currency).high)
+                             (stats_matrix.get(first, currency).low + stats_matrix.get(second, currency).high)
                     self.logger.debug("\tMargin in order %f", margin)
 
                     if margin > max_margin:
