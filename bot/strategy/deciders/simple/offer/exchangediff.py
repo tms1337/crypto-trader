@@ -11,7 +11,8 @@ class ExchangeDiffOfferDecider(OfferDecider, LoggableMixin):
     def __init__(self,
                  currencies,
                  trading_currency,
-                 safety_percentage=0.02):
+                 safety_percentage=0.05,
+                 max_fee=0.0025):
 
         self.trading_currency = trading_currency
         CurrencyMixin.check_currency(trading_currency)
@@ -24,6 +25,10 @@ class ExchangeDiffOfferDecider(OfferDecider, LoggableMixin):
         TypeChecker.check_type(safety_percentage, float)
         assert 0 <= safety_percentage < 1
         self.safety_percentage = safety_percentage
+
+        TypeChecker.check_type(max_fee, float)
+        assert 0 <= max_fee < 1
+        self.max_fee = max_fee
 
         LoggableMixin.__init__(self, ExchangeDiffOfferDecider)
         OfferDecider.__init__(self)
@@ -53,7 +58,9 @@ class ExchangeDiffOfferDecider(OfferDecider, LoggableMixin):
                 if first != second:
                     self.logger.debug("Checking exchange pair (%s, %s)" % (first, second))
 
-                    margin = stats_matrix.get(first, currency).low - stats_matrix.get(second, currency).high
+                    margin = stats_matrix.get(first, currency).low - stats_matrix.get(second, currency).high - \
+                             self.max_fee * \
+                             (stats_matrix.get(first, currency).low - stats_matrix.get(second, currency).high)
                     self.logger.debug("\tMargin in order %f", margin)
 
                     if margin > max_margin:
@@ -74,7 +81,9 @@ class ExchangeDiffOfferDecider(OfferDecider, LoggableMixin):
                     if first != second:
                         self.logger.debug("Checking exchange pair (%s, %s)" % (first, second))
 
-                        margin = stats_matrix.get(first, currency).last - stats_matrix.get(second, currency).last
+                        margin = stats_matrix.get(first, currency).last - stats_matrix.get(second, currency).last - \
+                                 self.max_fee * \
+                                 (stats_matrix.get(first, currency).last + stats_matrix.get(second, currency).last)
                         self.logger.debug("\tMargin in order %f", margin)
 
                         if margin > max_margin:
