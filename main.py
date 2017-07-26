@@ -43,7 +43,7 @@ logger.addHandler(ch)
 currencies = ["BTC"]
 trading_currency = "USD"
 
-daemon_dt = 15
+daemon_dt = float(sys.argv[3])
 providers_pause_dt = 0.1
 
 keys_path = sys.argv[1]
