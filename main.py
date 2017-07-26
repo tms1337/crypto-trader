@@ -1,23 +1,23 @@
 import logging
 import sys
 
-from trading.daemon import Daemon
-from trading.exchange.bitfinex.trade import BitfinexTradeProvider
-from trading.exchange.bittrex.stats import BittrexStatsProvider
-from trading.exchange.bittrex.trade import BittrexTradeProvider
-from trading.exchange.kraken.stats import KrakenStatsProvider
-from trading.exchange.kraken.trade import KrakenTradeProvider
-from trading.exchange.poloniex.stats import PoloniexStatsProvider
-from trading.exchange.poloniex.trade import PoloniexTradeProvider
-from trading.strategy.deciders.simple.base import SimpleCompositeDecider
-from trading.strategy.deciders.simple.offer.exchangediff import ExchangeDiffOfferDecider
-from trading.strategy.deciders.simple.offer.percentbased import PercentBasedOfferDecider
-from trading.strategy.deciders.simple.volume.fixedvalue import FixedValueVolumeDecider
-from trading.strategy.pipeline.block import Block
-from trading.strategy.pipeline.deciderpipeline import DeciderPipeline
-from trading.strategy.pipeline.informer import Informer
-from trading.strategy.pipeline.monitoring.mongobalancemonitor import MongoBalanceMonitor
-from trading.strategy.pipeline.transactionexecutor import TransactionExecutor
+from bot.daemon import Daemon
+from bot.exchange.bitfinex.trade import BitfinexTradeProvider
+from bot.exchange.bittrex.stats import BittrexStatsProvider
+from bot.exchange.bittrex.trade import BittrexTradeProvider
+from bot.exchange.kraken.stats import KrakenStatsProvider
+from bot.exchange.kraken.trade import KrakenTradeProvider
+from bot.exchange.poloniex.stats import PoloniexStatsProvider
+from bot.exchange.poloniex.trade import PoloniexTradeProvider
+from bot.strategy.deciders.simple.base import SimpleCompositeDecider
+from bot.strategy.deciders.simple.offer.exchangediff import ExchangeDiffOfferDecider
+from bot.strategy.deciders.simple.offer.percentbased import PercentBasedOfferDecider
+from bot.strategy.deciders.simple.volume.fixedvalue import FixedValueVolumeDecider
+from bot.strategy.pipeline.block import Block
+from bot.strategy.pipeline.deciderpipeline import DeciderPipeline
+from bot.strategy.pipeline.informer import Informer
+from bot.strategy.pipeline.monitoring.mongobalancemonitor import MongoBalanceMonitor
+from bot.strategy.pipeline.transactionexecutor import TransactionExecutor
 
 logger = logging.getLogger('app')
 logger.setLevel(logging.DEBUG)
@@ -31,8 +31,8 @@ ch = logging.StreamHandler(sys.stdout)
 ch.setLevel(logging.DEBUG)
 
 # create formatter and add it to the handlers
-formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - '
-                              '%(message)s')
+formatter = logging.Formatter(fmt="[%(asctime)s / %(name)s / %(levelname)s / %(funcName)s]\t"
+                              "%(message)s", datefmt="%Y-%m-%d,%H:%M")
 fh.setFormatter(formatter)
 ch.setFormatter(formatter)
 
@@ -43,10 +43,11 @@ logger.addHandler(ch)
 currencies = ["BTC"]
 trading_currency = "USD"
 
-daemon_dt = 15
+daemon_dt = float(sys.argv[3])
 providers_pause_dt = 0.1
 
 keys_path = sys.argv[1]
+btc_value = float(sys.argv[2])
 
 stats_providers = {
     "poloniex": PoloniexStatsProvider(pause_dt=providers_pause_dt),
@@ -85,7 +86,7 @@ long_percent_decider = SimpleCompositeDecider(trade_providers=trade_providers,
 diff_decider = SimpleCompositeDecider(trade_providers=trade_providers,
                                       offer_decider=ExchangeDiffOfferDecider(currencies=currencies,
                                                                              trading_currency=trading_currency),
-                                      volume_decider=FixedValueVolumeDecider(values={"BTC": 0.01}))
+                                      volume_decider=FixedValueVolumeDecider(values={"BTC": btc_value}))
 
 # he's gonna kill you !!!
 executor = TransactionExecutor(trade_providers=trade_providers)

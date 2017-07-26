@@ -1,4 +1,4 @@
-from trading.strategy.pipeline.monitoring.infomonitor import InfoMonitor
+from bot.strategy.pipeline.monitoring.infomonitor import InfoMonitor
 
 
 class OpenOffersMonitor(InfoMonitor):

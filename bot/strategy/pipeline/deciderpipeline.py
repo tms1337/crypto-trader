@@ -1,5 +1,5 @@
-from trading.strategy.deciders.decider import Decider
-from trading.util.asserting import TypeChecker
+from bot.strategy.deciders.decider import Decider
+from bot.util.asserting import TypeChecker
 
 
 class DeciderPipeline:

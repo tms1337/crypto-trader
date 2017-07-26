@@ -1,12 +1,12 @@
-from trading.strategy.pipeline.deciderpipeline import DeciderPipeline
-from trading.strategy.pipeline.informer import Informer
-from trading.strategy.pipeline.monitoring.infomonitor import InfoMonitor
-from trading.strategy.pipeline.monitoring.monitor import MonitorMixin
-from trading.strategy.pipeline.monitoring.monitored import MonitoredMixin
-from trading.strategy.pipeline.transactionexecutor import TransactionExecutor
-from trading.util.asserting import TypeChecker
+from bot.strategy.pipeline.deciderpipeline import DeciderPipeline
+from bot.strategy.pipeline.informer import Informer
+from bot.strategy.pipeline.monitoring.infomonitor import InfoMonitor
+from bot.strategy.pipeline.monitoring.monitor import MonitorMixin
+from bot.strategy.pipeline.monitoring.monitored import MonitoredMixin
+from bot.strategy.pipeline.transactionexecutor import TransactionExecutor
+from bot.util.asserting import TypeChecker
 
-from trading.util.logging import LoggableMixin
+from bot.util.logging import LoggableMixin
 
 
 class Block(LoggableMixin, MonitoredMixin):

@@ -1,7 +1,7 @@
 import krakenex
 
-from trading.exceptions.servererror import ServerError
-from trading.util.logging import LoggableMixin
+from bot.exceptions.servererror import ServerError
+from bot.util.logging import LoggableMixin
 from .base import KrakenProvider
 from ..base import CurrencyMixin, StatsProvider
 

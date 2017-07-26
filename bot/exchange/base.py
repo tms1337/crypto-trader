@@ -3,9 +3,9 @@ from abc import ABC, abstractmethod
 
 import time
 
-from trading.strategy.decision import OfferType, Decision
-from trading.util.asserting import TypeChecker
-from trading.util.logging import LoggableMixin
+from bot.strategy.decision import OfferType, Decision
+from bot.util.asserting import TypeChecker
+from bot.util.logging import LoggableMixin
 
 
 class CurrencyMixin(ABC, LoggableMixin):

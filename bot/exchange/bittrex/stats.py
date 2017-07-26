@@ -1,4 +1,4 @@
-from trading.util.logging import LoggableMixin
+from bot.util.logging import LoggableMixin
 from .base import BittrexProvider
 from ..base import CurrencyMixin, StatsProvider
 from .client import bittrex

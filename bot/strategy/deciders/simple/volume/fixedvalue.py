@@ -1,9 +1,9 @@
 import copy
 
-from trading.strategy.deciders.simple.volume.base import VolumeDecider
-from trading.strategy.decision import OfferType
-from trading.util.asserting import TypeChecker
-from trading.util.logging import LoggableMixin
+from bot.strategy.deciders.simple.volume.base import VolumeDecider
+from bot.strategy.decision import OfferType
+from bot.util.asserting import TypeChecker
+from bot.util.logging import LoggableMixin
 
 
 class FixedValueVolumeDecider(VolumeDecider, LoggableMixin):

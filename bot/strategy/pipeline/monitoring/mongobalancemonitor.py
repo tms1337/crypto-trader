@@ -2,9 +2,9 @@ import time
 from pymongo import MongoClient
 from retrying import retry
 
-from trading.strategy.pipeline.monitoring.infomonitor import InfoMonitor
-from trading.util.asserting import TypeChecker
-from trading.util.logging import LoggableMixin
+from bot.strategy.pipeline.monitoring.infomonitor import InfoMonitor
+from bot.util.asserting import TypeChecker
+from bot.util.logging import LoggableMixin
 
 mongo_balance_monitor_max_retry_attempts = None
 
@@ -52,8 +52,12 @@ class MongoBalanceMonitor(InfoMonitor, LoggableMixin):
         record = {"time": time.time()}
 
         balance_matrix = informer.get_balances_matrix()
+        stats_matrix = informer.get_stats_matrix()
         for e in balance_matrix.all_exchanges():
             for c in balance_matrix.all_currencies():
+                assert e in stats_matrix.all_exchanges(), "Exchange %s not in "
+                assert c in stats_matrix.all_currencies()
+
                 if c not in record:
                     record[c] = 0
                 value = balance_matrix.get(e, c).value

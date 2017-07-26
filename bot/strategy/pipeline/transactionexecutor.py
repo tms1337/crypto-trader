@@ -1,15 +1,15 @@
 from retrying import retry
 
-from trading.exceptions.servererror import ServerError
-from trading.exceptions.transactionnotexecuted import TransactionNotExecutedError
-from trading.exceptions.util import is_provider_error
-from trading.exchange.base import TradeProvider
-from trading.strategy.decision import ExecutedDecision
-from trading.strategy.transaction import Transaction
-from trading.util.asserting import TypeChecker
+from bot.exceptions.servererror import ServerError
+from bot.exceptions.transactionnotexecuted import TransactionNotExecutedError
+from bot.exceptions.util import is_provider_error
+from bot.exchange.base import TradeProvider
+from bot.strategy.decision import ExecutedDecision
+from bot.strategy.transaction import Transaction
+from bot.util.asserting import TypeChecker
 
 # hacky
-from trading.util.logging import LoggableMixin
+from bot.util.logging import LoggableMixin
 
 transactionexecutor_max_retry_attempts = None
 
