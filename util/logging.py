@@ -1,7 +1,5 @@
 import logging
 
-from bot.util.asserting import TypeChecker
-
 logger_name = "app"
 
 

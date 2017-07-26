@@ -1,11 +1,10 @@
-import logging
+import time
 from abc import ABC, abstractmethod
 
-import time
+from bot.util.asserting import TypeChecker
 
 from bot.strategy.decision import OfferType, Decision
-from bot.util.asserting import TypeChecker
-from bot.util.logging import LoggableMixin
+from util.logging import LoggableMixin
 
 
 class CurrencyMixin(ABC, LoggableMixin):

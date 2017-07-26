@@ -1,7 +1,7 @@
-from bot.util.logging import LoggableMixin
+from util.logging import LoggableMixin
 from .base import BittrexProvider
-from ..base import CurrencyMixin, StatsProvider
 from .client import bittrex
+from ..base import StatsProvider
 
 
 class BittrexStatsProvider(StatsProvider,

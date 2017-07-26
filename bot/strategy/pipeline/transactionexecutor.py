@@ -1,3 +1,4 @@
+from bot.util.asserting import TypeChecker
 from retrying import retry
 
 from bot.exceptions.servererror import ServerError
@@ -6,10 +7,7 @@ from bot.exceptions.util import is_provider_error
 from bot.exchange.base import TradeProvider
 from bot.strategy.decision import ExecutedDecision
 from bot.strategy.transaction import Transaction
-from bot.util.asserting import TypeChecker
-
-# hacky
-from bot.util.logging import LoggableMixin
+from util.logging import LoggableMixin
 
 transactionexecutor_max_retry_attempts = None
 

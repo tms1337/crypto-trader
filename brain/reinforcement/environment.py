@@ -1,7 +1,7 @@
 from abc import ABC, abstractclassmethod
 
-from bot.util.asserting import TypeChecker
 from brain.reinforcement.statevector import StateVector
+from util.asserting import TypeChecker
 
 
 class Environment(ABC):

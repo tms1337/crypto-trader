@@ -1,9 +1,10 @@
+from bot.util.asserting import TypeChecker
+
 from bot.exchange.base import CurrencyMixin
 from bot.strategy.decision import Decision, OfferType
 from bot.strategy.pipeline.data.statsmatrix import StatsMatrix
 from bot.strategy.transaction import Transaction
-from bot.util.asserting import TypeChecker
-from bot.util.logging import LoggableMixin
+from util.logging import LoggableMixin
 from .base import OfferDecider
 
 

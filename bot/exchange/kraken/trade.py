@@ -1,9 +1,9 @@
 import krakenex
 
 from bot.exceptions.servererror import ServerError
-from bot.util.logging import LoggableMixin
+from util.logging import LoggableMixin
 from .base import PrivateKrakenProvider
-from ..base import CurrencyMixin, TradeProvider
+from ..base import TradeProvider
 
 
 class KrakenTradeProvider(PrivateKrakenProvider,

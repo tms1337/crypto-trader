@@ -1,7 +1,6 @@
-import logging
 from enum import Enum, unique
 
-from bot.util.logging import LoggableMixin
+from util.logging import LoggableMixin
 
 
 @unique

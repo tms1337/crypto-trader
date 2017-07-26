@@ -1,12 +1,9 @@
-import time
-
+from bot.util.asserting import TypeChecker
 from cachetools import TTLCache
-
-from bot.exchange.base import StatsProvider
 from poloniex import Poloniex
 
-from bot.util.asserting import TypeChecker
-from bot.util.logging import LoggableMixin
+from bot.exchange.base import StatsProvider
+from util.logging import LoggableMixin
 from .base import PoloniexProvider
 
 

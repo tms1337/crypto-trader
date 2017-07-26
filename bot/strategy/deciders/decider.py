@@ -2,7 +2,7 @@ from abc import ABC, abstractmethod
 
 from bot.exchange.base import TradeProvider
 from bot.strategy.pipeline.informer import Informer
-from bot.util.asserting import TypeChecker
+from util.asserting import TypeChecker
 
 
 class Decider(ABC):

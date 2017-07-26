@@ -1,12 +1,11 @@
+from bot.util.asserting import TypeChecker
+
 from bot.strategy.pipeline.deciderpipeline import DeciderPipeline
 from bot.strategy.pipeline.informer import Informer
-from bot.strategy.pipeline.monitoring.infomonitor import InfoMonitor
 from bot.strategy.pipeline.monitoring.monitor import MonitorMixin
 from bot.strategy.pipeline.monitoring.monitored import MonitoredMixin
 from bot.strategy.pipeline.transactionexecutor import TransactionExecutor
-from bot.util.asserting import TypeChecker
-
-from bot.util.logging import LoggableMixin
+from util.logging import LoggableMixin
 
 
 class Block(LoggableMixin, MonitoredMixin):

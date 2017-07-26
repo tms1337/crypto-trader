@@ -1,10 +1,6 @@
-import logging
-
-import time
-
 from bot.exceptions.servererror import ServerError
 from bot.exchange.base import CurrencyMixin, KeyLoaderMixin, Provider
-from bot.util.logging import LoggableMixin
+from util.logging import LoggableMixin
 from .client import bittrex
 
 

@@ -1,6 +1,7 @@
-from bot.strategy.deciders.simple.volume.base import VolumeDecider
 from bot.util.asserting import TypeChecker
-from bot.util.logging import LoggableMixin
+
+from bot.strategy.deciders.simple.volume.base import VolumeDecider
+from util.logging import LoggableMixin
 
 
 class FixedPercentVolumeDecider(VolumeDecider, LoggableMixin):

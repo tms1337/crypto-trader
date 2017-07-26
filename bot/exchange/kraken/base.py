@@ -1,11 +1,10 @@
-import logging
+import time
 
 import krakenex
-import time
 
 from bot.exceptions.servererror import ServerError
 from bot.exchange.base import CurrencyMixin, Provider
-from bot.util.logging import LoggableMixin
+from util.logging import LoggableMixin
 
 
 class KrakenProvider(CurrencyMixin,

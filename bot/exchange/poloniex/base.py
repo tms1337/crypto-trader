@@ -1,10 +1,9 @@
-import logging
-
 import time
+
 from poloniex import Poloniex
 
 from bot.exchange.base import CurrencyMixin, KeyLoaderMixin, Provider
-from bot.util.logging import LoggableMixin
+from util.logging import LoggableMixin
 
 
 class PoloniexProvider(CurrencyMixin,

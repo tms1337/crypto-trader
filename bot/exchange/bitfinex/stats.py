@@ -1,8 +1,8 @@
-from bot.exchange.base import StatsProvider
-from bot.exchange.bitfinex.base import BitfinexProvider
 import FinexAPI.FinexAPI as finex
 
-from bot.util.logging import LoggableMixin
+from bot.exchange.base import StatsProvider
+from bot.exchange.bitfinex.base import BitfinexProvider
+from util.logging import LoggableMixin
 
 
 class BitfinexStatsProvider(BitfinexProvider,

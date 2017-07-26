@@ -1,8 +1,7 @@
-from bot.util.logging import LoggableMixin
-from .client import bittrex
-
+from util.logging import LoggableMixin
 from .base import PrivateBittrexProvider
-from ..base import CurrencyMixin, TradeProvider
+from .client import bittrex
+from ..base import TradeProvider
 
 
 class BittrexTradeProvider(PrivateBittrexProvider,

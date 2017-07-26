@@ -1,3 +1,4 @@
+from bot.util.asserting import TypeChecker
 from retrying import retry
 
 from bot.exceptions.servererror import ServerError
@@ -5,8 +6,7 @@ from bot.exceptions.util import is_provider_error
 from bot.exchange.base import StatsProvider, TradeProvider
 from bot.strategy.pipeline.data.balancematrix import BalanceMatrix, BalanceCell
 from bot.strategy.pipeline.data.statsmatrix import StatsMatrix, StatsCell
-from bot.util.asserting import TypeChecker
-from bot.util.logging import LoggableMixin
+from util.logging import LoggableMixin
 
 transactionexecutor_max_retry_attempts = None
 

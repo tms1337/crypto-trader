@@ -1,5 +1,5 @@
 from bot.strategy.decision import Decision
-from bot.util.asserting import TypeChecker
+from util.asserting import TypeChecker
 
 
 class Transaction:

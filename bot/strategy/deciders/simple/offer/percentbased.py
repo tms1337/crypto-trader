@@ -1,11 +1,12 @@
 import copy
 
+from bot.util.asserting import TypeChecker
+
 from bot.strategy.deciders.simple.offer.base import OfferDecider
 from bot.strategy.decision import Decision, OfferType
 from bot.strategy.pipeline.data.statsmatrix import StatsMatrix
 from bot.strategy.transaction import Transaction
-from bot.util.asserting import TypeChecker
-from bot.util.logging import LoggableMixin
+from util.logging import LoggableMixin
 
 
 class OfferTypeMatrix:

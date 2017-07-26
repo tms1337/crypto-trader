@@ -2,7 +2,7 @@ from abc import ABC
 
 from bot.strategy.pipeline.informer import Informer
 from bot.strategy.pipeline.monitoring.monitor import MonitorMixin
-from bot.util.asserting import TypeChecker
+from util.asserting import TypeChecker
 
 
 class InfoMonitor(MonitorMixin, ABC):
