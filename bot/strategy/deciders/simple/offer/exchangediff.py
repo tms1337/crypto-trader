@@ -11,7 +11,7 @@ class ExchangeDiffOfferDecider(OfferDecider, LoggableMixin):
     def __init__(self,
                  currencies,
                  trading_currency,
-                 safety_percentage=0.2):
+                 safety_percentage=0.02):
 
         self.trading_currency = trading_currency
         CurrencyMixin.check_currency(trading_currency)
