@@ -15,3 +15,6 @@ class Environment(ABC):
 
     def get_state(self):
         return self.state
+
+    def get_dimension_n(self):
+        return self.state.get_dimension_n()

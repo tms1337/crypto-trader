@@ -29,3 +29,6 @@ class StateVector:
 
     def set_random_value(self):
         pass
+
+    def get_dimension_n(self):
+        return len(self.value)
