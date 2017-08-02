@@ -15,7 +15,8 @@ class QLearner:
         TypeChecker.check_type(environment, Environment)
         self.environment = environment
 
-        assert approximator.get_dimension_n() == environment.get_dimension_n()
+        assert approximator.get_dimension_n() == environment.get_dimension_n(), \
+            "Approximator and environment need to have same dimensions"
 
     def train(self, step_n):
         TypeChecker.check_type(step_n, int)
