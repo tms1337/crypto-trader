@@ -1,4 +1,4 @@
-from bot.util.asserting import TypeChecker
+from util.asserting import TypeChecker
 
 from bot.strategy.pipeline.deciderpipeline import DeciderPipeline
 from bot.strategy.pipeline.informer import Informer

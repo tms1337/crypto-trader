@@ -1,4 +1,4 @@
-from bot.util.asserting import TypeChecker
+from util.asserting import TypeChecker
 from retrying import retry
 
 from bot.exceptions.servererror import ServerError

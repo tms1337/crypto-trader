@@ -1,7 +1,7 @@
 import time
 from abc import ABC, abstractmethod
 
-from bot.util.asserting import TypeChecker
+from util.asserting import TypeChecker
 
 from bot.strategy.decision import OfferType, Decision
 from util.logging import LoggableMixin

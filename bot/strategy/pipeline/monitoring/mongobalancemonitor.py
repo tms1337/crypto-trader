@@ -1,6 +1,6 @@
 import time
 
-from bot.util.asserting import TypeChecker
+from util.asserting import TypeChecker
 from pymongo import MongoClient
 from retrying import retry
 

@@ -1,6 +1,6 @@
 import copy
 
-from bot.util.asserting import TypeChecker
+from util.asserting import TypeChecker
 
 from bot.strategy.deciders.simple.offer.base import OfferDecider
 from bot.strategy.decision import Decision, OfferType
@@ -62,8 +62,23 @@ class PercentBasedOfferDecider(OfferDecider, LoggableMixin):
                  security_loss_threshold):
         self.currencies = currencies
         self.trading_currency = trading_currency
+
+        TypeChecker.check_type(buy_threshold, float)
+        assert 0 <= buy_threshold < 1, \
+            "Buy threshold must be in [0, 1) interval, value of %f given" % buy_threshold
         self.buy_threshold = buy_threshold
+
+        TypeChecker.check_one_of_types(sell_threshold, [float, int])
+        assert sell_threshold > 0, \
+            "Sell threshold must be greater than 0, value of %f given" % buy_threshold
         self.sell_threshold = sell_threshold
+
+        TypeChecker.check_type(security_loss_threshold, float)
+        assert security_loss_threshold > 0, \
+            "Security loss threshold must be greater than 0, value of %f given" % security_loss_threshold
+        assert security_loss_threshold > buy_threshold, \
+            "Security loss threshold must be greater than buy threshold, value of %f <= %f given" \
+            % (security_loss_threshold, buy_threshold)
         self.security_loss_threshold = security_loss_threshold
 
         self.last_decision_record = None
@@ -97,7 +112,7 @@ class PercentBasedOfferDecider(OfferDecider, LoggableMixin):
                     cell.price = cell.last
 
                     self.last_applied_decision_record.stats_matrix.set(exchange, currency, cell)
-
+                    self.last_decision_record.stats_matrix.set(exchange, currency, cell)
         else:
             self.last_decision_record.stats_matrix = stats_matrix
 
@@ -105,7 +120,7 @@ class PercentBasedOfferDecider(OfferDecider, LoggableMixin):
             skip_exchange = False
             for currency in stats_matrix.all_currencies():
                 if stats_matrix.get(exchange, currency).low is None or \
-                        stats_matrix.get(exchange, currency).high is None:
+                                stats_matrix.get(exchange, currency).high is None:
                     self.logger.warn("Skipping exchange %s bacause of missing info" % exchange)
                     skip_exchange = True
 
@@ -134,6 +149,10 @@ class PercentBasedOfferDecider(OfferDecider, LoggableMixin):
                         transaction.add_decision(decision)
 
                         self.last_decision_record.offer_type_matrix.set(exchange, currency, OfferType.SELL)
+
+                        cell = self.last_decision_record.stats_matrix.get(exchange, currency)
+                        cell.price = low
+                        self.last_decision_record.stats_matrix.set(exchange, currency, cell)
                     elif (last_applied_decision == OfferType.SELL or last_applied_decision is None) and \
                                     buy_margin >= self.buy_threshold:
                         decision = Decision()
@@ -148,9 +167,13 @@ class PercentBasedOfferDecider(OfferDecider, LoggableMixin):
                         transaction.add_decision(decision)
 
                         self.last_decision_record.offer_type_matrix.set(exchange, currency, OfferType.BUY)
+                        cell = self.last_decision_record.stats_matrix.get(exchange, currency)
+                        cell.price = high
+                        self.last_decision_record.stats_matrix.set(exchange, currency, cell)
 
         return [transaction]
 
     def apply_last(self):
         self.logger.debug("Applying last transaction list")
+
         self.last_applied_decision_record = copy.deepcopy(self.last_decision_record)

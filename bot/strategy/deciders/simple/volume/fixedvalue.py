@@ -1,4 +1,4 @@
-from bot.util.asserting import TypeChecker
+from util.asserting import TypeChecker
 
 from bot.strategy.deciders.simple.volume.base import VolumeDecider
 from bot.strategy.decision import OfferType

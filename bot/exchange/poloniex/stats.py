@@ -1,4 +1,4 @@
-from bot.util.asserting import TypeChecker
+from util.asserting import TypeChecker
 from cachetools import TTLCache
 from poloniex import Poloniex
 
