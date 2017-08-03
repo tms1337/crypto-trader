@@ -28,105 +28,104 @@ class InformerMock(Informer):
         return self.stats_matrix
 
 
-class MyTestCase(unittest.TestCase):
-    def test_ctor(self):
-        pass
+class PercentBasedDeciderTests(unittest.TestCase):
+    def setUp(self):
+        self.currencies = ["ETH"]
+        self.exchanges = ["bittrex"]
 
     def test_single_buy_zero_threshold(self):
-        currencies = ["ETH"]
-        exchanges = ["bittrex"]
-        decider = PercentBasedOfferDecider(buy_threshold=0,
-                                           sell_threshold=0.1,
-                                           currencies=currencies,
-                                           trading_currency="BTC",
-                                           security_loss_threshold=0.2)
+        self.decider = PercentBasedOfferDecider(buy_threshold=0,
+                                                sell_threshold=0.1,
+                                                currencies=self.currencies,
+                                                trading_currency="BTC",
+                                                security_loss_threshold=0.2)
 
-        informer = InformerMock([1, 1, 1], exchanges, currencies)
-        transactions = decider.decide(informer)
+        self.informer = InformerMock([1, 1, 1, 1.11, 1.11],
+                                     self.exchanges,
+                                     self.currencies)
 
-        self.assertEqual(len(transactions), 1)
-        decision = transactions[0].decisions[0]
-
-        self.assertEqual(decision.transaction_type, OfferType.BUY)
+        self._assert_buy()
+        self._assert_none()
+        self._assert_none()
+        self._assert_sell()
+        self._assert_buy()
 
     def test_single_buy_nonzero_threshold(self):
-        currencies = ["ETH"]
-        exchanges = ["bittrex"]
-        decider = PercentBasedOfferDecider(buy_threshold=0.1,
-                                           sell_threshold=0.1,
-                                           currencies=currencies,
-                                           trading_currency="BTC",
-                                           security_loss_threshold=0.2)
+        self.decider = PercentBasedOfferDecider(buy_threshold=0.1,
+                                                sell_threshold=0.1,
+                                                currencies=self.currencies,
+                                                trading_currency="BTC",
+                                                security_loss_threshold=0.2)
 
-        informer = InformerMock([1, 1, 0.89], exchanges, currencies)
+        self.informer = InformerMock([1, 1, 0.89, 0.91, 0.99, 0.99, 0.99, 0.89],
+                                     self.exchanges,
+                                     self.currencies)
 
-        transactions = decider.decide(informer)
+        self._assert_none()
+        self._assert_none()
+        self._assert_buy()
+        self._assert_none()
+        self._assert_sell()
+        self._assert_none()
+        self._assert_none()
+        self._assert_buy()
+
+    def test_single_cycle_nonzero_buy(self):
+        self.decider = PercentBasedOfferDecider(buy_threshold=0.1,
+                                                sell_threshold=0.1,
+                                                currencies=self.currencies,
+                                                trading_currency="BTC",
+                                                security_loss_threshold=0.2)
+
+        self.informer = InformerMock([1, 1, 0.89, 0.9, 0.91,
+                                      0.92, 0.93, 0.98, 1],
+                                     self.exchanges,
+                                     self.currencies)
+
+        self._assert_none()
+        self._assert_none()
+        self._assert_buy()
+        self._assert_none()
+        self._assert_none()
+
+        self._assert_none()
+        self._assert_none()
+        self._assert_sell()
+        self._assert_none()
+
+    def test_security_loss(self):
+        self.decider = PercentBasedOfferDecider(buy_threshold=0.1,
+                                                sell_threshold=0.1,
+                                                currencies=self.currencies,
+                                                trading_currency="BTC",
+                                                security_loss_threshold=0.2)
+
+        self.informer = InformerMock([1, 1, 0.89, 0.9, 0.91,
+                                      0.92, 0.93, 0.98, 1],
+                                     self.exchanges,
+                                     self.currencies)
+
+        self._assert_none()
+
+    def _assert_sell(self):
+        self._assert_type(OfferType.SELL)
+
+    def _assert_buy(self):
+        self._assert_type(OfferType.BUY)
+
+    def _assert_type(self, type):
+        transactions = self.decider.decide(self.informer)
+        self.assertEqual(len(transactions), 1)
+        decision = transactions[0].decisions[0]
+        self.assertEqual(decision.transaction_type, type)
+        self.decider.apply_last()
+
+    def _assert_none(self):
+        transactions = self.decider.decide(self.informer)
         self.assertEqual(len(transactions), 1)
         decisions = transactions[0].decisions
         self.assertEqual(len(decisions), 0)
-
-        transactions = decider.decide(informer)
-        self.assertEqual(len(transactions), 1)
-        decisions = transactions[0].decisions
-        self.assertEqual(len(decisions), 0)
-
-        transactions = decider.decide(informer)
-        self.assertEqual(len(transactions), 1)
-        decisions = transactions[0].decisions
-        self.assertEqual(len(decisions), 1)
-        decision = decisions[0]
-        self.assertEqual(decision.transaction_type, OfferType.BUY)
-
-    def test_single_cycle(self):
-        currencies = ["ETH"]
-        exchanges = ["bittrex"]
-        decider = PercentBasedOfferDecider(buy_threshold=0.1,
-                                           sell_threshold=0.1,
-                                           currencies=currencies,
-                                           trading_currency="BTC",
-                                           security_loss_threshold=0.2)
-
-        informer = InformerMock([1, 1, 0.89, 0.9, 0.97, 1], exchanges, currencies)
-
-        transactions = decider.decide(informer)
-        self.assertEqual(len(transactions), 1)
-        decisions = transactions[0].decisions
-        self.assertEqual(len(decisions), 0)
-        decider.apply_last()
-
-        transactions = decider.decide(informer)
-        self.assertEqual(len(transactions), 1)
-        decisions = transactions[0].decisions
-        self.assertEqual(len(decisions), 0)
-        decider.apply_last()
-
-        transactions = decider.decide(informer)
-        self.assertEqual(len(transactions), 1)
-        decisions = transactions[0].decisions
-        self.assertEqual(len(decisions), 1)
-        decision = decisions[0]
-        self.assertEqual(decision.transaction_type, OfferType.BUY)
-        decider.apply_last()
-
-        transactions = decider.decide(informer)
-        self.assertEqual(len(transactions), 1)
-        decisions = transactions[0].decisions
-        self.assertEqual(len(decisions), 0)
-        decider.apply_last()
-
-        transactions = decider.decide(informer)
-        self.assertEqual(len(transactions), 1)
-        decisions = transactions[0].decisions
-        self.assertEqual(len(decisions), 0)
-        decider.apply_last()
-
-        transactions = decider.decide(informer)
-        self.assertEqual(len(transactions), 1)
-        decisions = transactions[0].decisions
-        self.assertEqual(len(decisions), 1)
-        decision = decisions[0]
-        self.assertEqual(decision.transaction_type, OfferType.SELL)
-
+        self.decider.apply_last()
 
 
 if __name__ == '__main__':
