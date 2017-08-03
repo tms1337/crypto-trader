@@ -91,6 +91,9 @@ class PercentBasedOfferDecider(OfferDecider, LoggableMixin):
 
             if not skip_exchange:
                 for currency in stats_matrix.all_currencies():
+                    if currency == self.trading_currency:
+                        continue
+
                     low = stats_matrix.get(exchange, currency).low
                     high = stats_matrix.get(exchange, currency).high
                     last = stats_matrix.get(exchange, currency).last

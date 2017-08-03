@@ -23,6 +23,8 @@ class Block(LoggableMixin, MonitoredMixin):
         TypeChecker.check_type(transaction_executor, TransactionExecutor)
         self.transaction_executor = transaction_executor
 
+        if monitors is None:
+            monitors = []
         TypeChecker.check_type(monitors, list)
         for m in monitors:
             TypeChecker.check_type(m, MonitorMixin)
