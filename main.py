@@ -44,7 +44,7 @@ currencies_for_fiat = ["BTC", "ETH"]
 trading_currency_for_fiat = "USD"
 
 daemon_dt = float(sys.argv[2])
-providers_pause_dt = 0.25
+providers_pause_dt = 0.5
 
 keys_path = sys.argv[1]
 
@@ -121,7 +121,7 @@ fiat_block = Block(decider_pipeline=DeciderPipeline(deciders=[short_percent_fiat
                                                               long_percent_fiat_decider]),
                    informer=fiat_informer,
                    transaction_executor=executor,
-                   monitors=[MongoBalanceMonitor(currencies=currencies_for_fiat,
+                   monitors=[MongoBalanceMonitor(currencies=["ETH", "BTC", "USD", "DASH", "LTC"],
                                                  name="weekly_test_000")])
 
 crypto_block = Block(decider_pipeline=DeciderPipeline(deciders=[short_percent_crypto_decider,
