@@ -59,7 +59,7 @@ class CurrencyMixin(ABC, LoggableMixin):
         only_quote_none = base_currency is not None and quote_currency is None
 
         if only_base_none or only_quote_none:
-            error_message = "Either none or both currencies must be specified"
+            error_message = "Either none or both currencies_for_fiat must be specified"
 
             self.logger.error(error_message)
             raise ValueError(error_message)

@@ -16,7 +16,8 @@ class MongoBalanceMonitor(InfoMonitor, LoggableMixin):
                  host="localhost",
                  port=27017,
                  db_name="db",
-                 retry_attempts=3):
+                 retry_attempts=3,
+                 every_n=10):
         TypeChecker.check_type(currencies, list)
         for c in currencies:
             TypeChecker.check_type(c, str)
@@ -34,15 +35,23 @@ class MongoBalanceMonitor(InfoMonitor, LoggableMixin):
         global mongo_balance_monitor_max_retry_attempts
         mongo_balance_monitor_max_retry_attempts = retry_attempts
 
+        TypeChecker.check_type(every_n, int)
+        assert every_n > 0
+        self.every_n = every_n
+        self.i = 0
+
         LoggableMixin.__init__(self, MongoBalanceMonitor)
 
     def notify(self, monitored_data):
-        super(MongoBalanceMonitor, self).notify(monitored_data)
+        if self.i % self.every_n == 0:
+            super(MongoBalanceMonitor, self).notify(monitored_data)
 
-        try:
-            self._save_balance_record()
-        except:
-            self.logger.error("Could not save record")
+            try:
+                self._save_balance_record()
+            except:
+                self.logger.error("Could not save record")
+
+        self.i = (self.i + 1) % self.every_n
 
     @retry(stop_max_attempt_number=mongo_balance_monitor_max_retry_attempts)
     def _save_balance_record(self):

@@ -100,12 +100,37 @@ class PercentBasedDeciderTests(unittest.TestCase):
                                                 trading_currency="BTC",
                                                 security_loss_threshold=0.2)
 
-        self.informer = InformerMock([1, 1, 0.89, 0.9, 0.91,
-                                      0.92, 0.93, 0.98, 1],
+        self.informer = InformerMock([1, 1, 1, 0.79, 0.57],
                                      self.exchanges,
                                      self.currencies)
 
         self._assert_none()
+        self._assert_none()
+        self._assert_none()
+        self._assert_buy()
+        self._assert_sell()
+
+    def test_multiple_cycles_zero_buy_threshold(self):
+        self.decider = PercentBasedOfferDecider(buy_threshold=0,
+                                                sell_threshold=0.01,
+                                                currencies=self.currencies,
+                                                trading_currency="BTC",
+                                                security_loss_threshold=0.05)
+
+        self.informer = InformerMock([1, 1, 1, 1, 1.01, 1.01, 1.015, 1.03, 1.03, 0.96],
+                                     self.exchanges,
+                                     self.currencies)
+
+        self._assert_buy()
+        self._assert_none()
+        self._assert_none()
+        self._assert_none()
+        self._assert_sell()
+        self._assert_buy()
+        self._assert_none()
+        self._assert_sell()
+        self._assert_buy()
+        self._assert_sell()
 
     def _assert_sell(self):
         self._assert_type(OfferType.SELL)
