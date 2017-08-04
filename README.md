@@ -1,2 +1,2 @@
-# kraken-trader
-Automatic trader for Kraken exchange coded in Python3.
+# crypto-trader
+Framework for automatic trading with cryptocurrencies
