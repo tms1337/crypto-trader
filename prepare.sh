@@ -28,7 +28,9 @@ pip3 install pymongo==3.4.0
 pip3 install tensorflow=1.2.1
 pip3 install Keras==2.0.6
 pip3 install tensorflow==1.2.1
-pip3 install pandas=0.20.3
+pip3 install pandas==0.20.3
+pip3 install matplotlib==2.0.2
+pip3 install sklearn==0.18.2
 
 pip3 install git+https://github.com/tms1337/python3-krakenex.git
 pip3 install git+https://github.com/s4w3d0ff/python-poloniex

@@ -103,6 +103,9 @@ class PercentBasedOfferDecider(OfferDecider, LoggableMixin):
                     buy_margin = (last_applied_price - high) / last_applied_price
                     sell_margin = (low - last_applied_price) / last_applied_price
 
+                    self.logger.debug("Buy margin %f / %f" % (buy_margin, self.buy_threshold))
+                    self.logger.debug("Sell margin %f / %f" % (sell_margin, self.sell_threshold))
+
                     if (last_applied_decision == OfferType.BUY and sell_margin >= self.sell_threshold) or \
                             (last_applied_decision == OfferType.BUY and sell_margin <= -self.security_loss_threshold):
 
