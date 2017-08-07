@@ -117,7 +117,7 @@ class PercentBasedOfferDecider(OfferDecider, LoggableMixin):
                         decision.price = low
                         decision.decider = self
 
-                        self.logger.debug("Made decision %s with sell margin %f" % (decision, sell_margin))
+                        self.logger.debug("Made %s decision %s with sell margin %f" % (currency, decision, sell_margin))
                         transaction.add_decision(decision)
 
                         cell = DecisionCell()
@@ -134,7 +134,7 @@ class PercentBasedOfferDecider(OfferDecider, LoggableMixin):
                         decision.price = high
                         decision.decider = self
 
-                        self.logger.debug("Made decision %s with buy margin % f" % (decision, buy_margin))
+                        self.logger.debug("Made %s decision %s with buy margin % f" % (currency, decision, buy_margin))
                         transaction.add_decision(decision)
 
                         cell = DecisionCell()
