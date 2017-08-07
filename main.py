@@ -66,25 +66,26 @@ fiat_informer = Informer(base_currency=trading_currency_for_fiat,
                          trade_providers=trade_providers,
                          currencies=currencies_for_fiat)
 
+fiat_values = {"BTC": 0.25, "ETH": 1.5}
 short_percent_fiat_decider = SimpleCompositeDecider(trade_providers=trade_providers,
                                                     offer_decider=PercentBasedOfferDecider(
                                                         currencies=currencies_for_fiat,
                                                         buy_threshold=0,
-                                                        sell_threshold=0.005,
-                                                        security_loss_threshold=0.03,
+                                                        sell_threshold=0.01,
+                                                        security_loss_threshold=0.1,
                                                         trading_currency=trading_currency_for_fiat),
                                                     volume_decider=FixedValueVolumeDecider(
-                                                        values={"BTC": 0.25, "ETH": 1.5}))
+                                                        values=fiat_values))
 
 long_percent_fiat_decider = SimpleCompositeDecider(trade_providers=trade_providers,
                                                    offer_decider=PercentBasedOfferDecider(
                                                        currencies=currencies_for_fiat,
                                                        buy_threshold=0,
-                                                       sell_threshold=0.01,
-                                                       security_loss_threshold=0.05,
+                                                       sell_threshold=0.05,
+                                                       security_loss_threshold=0.1,
                                                        trading_currency=trading_currency_for_fiat),
                                                    volume_decider=FixedValueVolumeDecider(
-                                                       values={"BTC": 0.25, "ETH": 1.5}))
+                                                       values=fiat_values))
 
 currencies_for_crypto = ["ETH", "DASH", "LTC"]
 trading_currency_for_crypto = "BTC"
@@ -94,25 +95,26 @@ crypto_informer = Informer(base_currency=trading_currency_for_crypto,
                            trade_providers=trade_providers,
                            currencies=currencies_for_crypto)
 
+crypto_values = {"ETH": 1.5, "DASH": 1, "LTC": 2}
 short_percent_crypto_decider = SimpleCompositeDecider(trade_providers=trade_providers,
                                                       offer_decider=PercentBasedOfferDecider(
                                                           currencies=currencies_for_crypto,
                                                           buy_threshold=0,
-                                                          sell_threshold=0.005,
-                                                          security_loss_threshold=0.03,
+                                                          sell_threshold=0.01,
+                                                          security_loss_threshold=0.1,
                                                           trading_currency=trading_currency_for_crypto),
                                                       volume_decider=FixedValueVolumeDecider(
-                                                          values={"ETH": 1.5, "DASH": 1.5, "LTC": 4}))
+                                                          values=crypto_values))
 
 long_percent_crypto_decider = SimpleCompositeDecider(trade_providers=trade_providers,
                                                      offer_decider=PercentBasedOfferDecider(
                                                          currencies=currencies_for_crypto,
                                                          buy_threshold=0,
-                                                         sell_threshold=0.01,
-                                                         security_loss_threshold=0.05,
+                                                         sell_threshold=0.05,
+                                                         security_loss_threshold=0.1,
                                                          trading_currency=trading_currency_for_crypto),
                                                      volume_decider=FixedValueVolumeDecider(
-                                                         values={"ETH": 1.5, "DASH": 1.5, "LTC": 4}))
+                                                         values=crypto_values))
 
 # he's gonna kill you !!!
 executor = TransactionExecutor(trade_providers=trade_providers)
