@@ -44,7 +44,7 @@ currencies_for_fiat = ["BTC", "ETH", "LTC"]
 trading_currency_for_fiat = "USD"
 
 daemon_dt = float(sys.argv[2])
-providers_pause_dt = 1
+providers_pause_dt = 0.5
 
 keys_path = sys.argv[1]
 
