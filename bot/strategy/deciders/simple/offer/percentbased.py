@@ -31,7 +31,7 @@ class PercentBasedOfferDecider(OfferDecider, LoggableMixin):
         self.trading_currency = trading_currency
 
         TypeChecker.check_type(buy_threshold, float)
-        assert 0 <= buy_threshold < 1, \
+        assert 0 <= buy_threshold < 1 or buy_threshold == float("-inf"), \
             "Buy threshold must be in [0, 1) interval, value of %f given" % buy_threshold
         self.buy_threshold = buy_threshold
 
