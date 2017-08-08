@@ -1,63 +1,76 @@
-from keras.layers import LSTM, Dense
+from keras.layers import LSTM, Dense, Dropout
 from keras.models import Sequential
 from keras.losses import categorical_crossentropy
+from keras.optimizers import Adam
 import pandas as pd
 import matplotlib.pyplot as plt
 from sklearn import preprocessing
 from sklearn.model_selection import KFold
 import numpy as np
+import sys
+
+def load_data(data, seq_len, test_perc):
+    sequence_length = seq_len + 1
+    x = []
+    y= []
+    for i in range(len(data) - sequence_length - 1):
+        x.append(data[i: i + sequence_length])
+        # will it increase
+        if data[i + sequence_length] > data[i + sequence_length - 1]:
+            y.append([0, 1])
+        else:
+            y.append([1, 0])
+
+    x = np.array(x)
+    y = np.array(y)
+
+    print(x, y)
+
+    test_n = int(test_perc * x.shape[0])
+    x_train, x_test = x[:-test_n], x[test_n:]
+    y_train, y_test = y[:-test_n], y[test_n:]
+
+    return [x_train, y_train, x_test, y_test]
 
 df = pd.read_csv(header=None,
                  usecols=[1],
-                 filepath_or_buffer="/home/faruk/Desktop/.krakenUSD.csv",
-                 nrows=100)
+                 filepath_or_buffer="/data/krakenUSD.csv",
+                 nrows=int(2e6))
+
 print("Data loaded")
-plt.plot(df)
-plt.show()
-
 scaler = preprocessing.MinMaxScaler(feature_range=(0, 1))
-data = pd.DataFrame(scaler.fit_transform(df.values))
 
+data = scaler.fit_transform(df.values)
 
-def generate_dataset(data):
-    data = np.append(data, np.zeros((data.shape[0], 1), dtype=float), axis=1)
-    for i in range(data.shape[0] - 1):
-        if data[i + 1, 1] > data[i, 0]:
-            data[i, 1] = 1
-        else:
-            data[i, 1] = 0
+seq_len = 50
+test_perc = 0.3
 
-    return data[0:-1,:]
+x_train, y_train, x_test, y_test = load_data(data, seq_len, test_perc)
 
-
-data = generate_dataset(data)
-x = data[:, 0]
-print(x.shape)
-x = np.reshape(x, (x.shape[0], 1, 1))
-y = data[:, 1]
-label_binarizer = preprocessing.LabelBinarizer()
-label_binarizer.fit(range(2))
-y = label_binarizer.transform(y.astype(int))
-print(x, y)
 
 predictor = Sequential()
-predictor.add(LSTM(activation="linear", units=5, input_shape=(None, 1), return_sequences=False))
-predictor.add(Dense(12, activation="linear"))
+predictor.add(LSTM(activation="linear",
+                   input_dim=1,
+                   output_dim=50,
+                   return_sequences=True,
+                   dropout=0.2))
+predictor.add(LSTM(100, activation="linear", return_sequences=False, dropout=0.2))
+predictor.add(Dense(20, activation="linear"))
+predictor.add(Dropout(0.4))
 predictor.add(Dense(2, activation="softmax"))
 
-kf = KFold(n_splits=10)
+epochs = 5
+batch_size = 100
 
-for train_index, test_index in kf.split(data):
-    train_x, train_y = x[train_index], y[train_index]
-    test_x, test_y = x[test_index], y[test_index]
+predictor.compile(optimizer=Adam(lr=0.006),
+                  loss=categorical_crossentropy,
+                  metrics=["accuracy"])
 
-    predictor.compile(optimizer="adam",
-                      loss=categorical_crossentropy)
+predictor.fit(x_train,
+              y_train,
+              epochs=epochs,
+              batch_size=batch_size)
 
-    predictor.fit(train_x,
-                  train_y,
-                  epochs=100,
-                  batch_size=10)
+predictor.evaluate(x_test,
+                   y_test)
 
-    predictor.evaluate(test_x,
-                       test_y)
