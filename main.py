@@ -40,11 +40,11 @@ ch.setFormatter(formatter)
 logger.addHandler(fh)
 logger.addHandler(ch)
 
-currencies_for_fiat = ["BTC", "ETH"]
+currencies_for_fiat = ["BTC", "ETH", "LTC"]
 trading_currency_for_fiat = "USD"
 
 daemon_dt = float(sys.argv[2])
-providers_pause_dt = 1
+providers_pause_dt = 0.5
 
 keys_path = sys.argv[1]
 
@@ -66,11 +66,11 @@ fiat_informer = Informer(base_currency=trading_currency_for_fiat,
                          trade_providers=trade_providers,
                          currencies=currencies_for_fiat)
 
-fiat_values = {"BTC": 0.25, "ETH": 1.5}
+fiat_values = {"BTC": 0.5, "ETH": 5, "LTC": 6}
 short_percent_fiat_decider = SimpleCompositeDecider(trade_providers=trade_providers,
                                                     offer_decider=PercentBasedOfferDecider(
                                                         currencies=currencies_for_fiat,
-                                                        buy_threshold=0,
+                                                        buy_threshold=float("-inf"),
                                                         sell_threshold=0.01,
                                                         security_loss_threshold=0.1,
                                                         trading_currency=trading_currency_for_fiat),
@@ -80,14 +80,14 @@ short_percent_fiat_decider = SimpleCompositeDecider(trade_providers=trade_provid
 long_percent_fiat_decider = SimpleCompositeDecider(trade_providers=trade_providers,
                                                    offer_decider=PercentBasedOfferDecider(
                                                        currencies=currencies_for_fiat,
-                                                       buy_threshold=0,
+                                                       buy_threshold=float("-inf"),
                                                        sell_threshold=0.05,
                                                        security_loss_threshold=0.1,
                                                        trading_currency=trading_currency_for_fiat),
                                                    volume_decider=FixedValueVolumeDecider(
                                                        values=fiat_values))
 
-currencies_for_crypto = ["ETH", "DASH", "LTC"]
+currencies_for_crypto = ["ETH", "XRP", "DASH"]
 trading_currency_for_crypto = "BTC"
 
 crypto_informer = Informer(base_currency=trading_currency_for_crypto,
@@ -95,11 +95,11 @@ crypto_informer = Informer(base_currency=trading_currency_for_crypto,
                            trade_providers=trade_providers,
                            currencies=currencies_for_crypto)
 
-crypto_values = {"ETH": 1.5, "DASH": 1, "LTC": 2}
+crypto_values = {"ETH": 5, "XRP": 4000, "DASH": 4}
 short_percent_crypto_decider = SimpleCompositeDecider(trade_providers=trade_providers,
                                                       offer_decider=PercentBasedOfferDecider(
                                                           currencies=currencies_for_crypto,
-                                                          buy_threshold=0,
+                                                          buy_threshold=float("-inf"),
                                                           sell_threshold=0.01,
                                                           security_loss_threshold=0.1,
                                                           trading_currency=trading_currency_for_crypto),
@@ -109,7 +109,7 @@ short_percent_crypto_decider = SimpleCompositeDecider(trade_providers=trade_prov
 long_percent_crypto_decider = SimpleCompositeDecider(trade_providers=trade_providers,
                                                      offer_decider=PercentBasedOfferDecider(
                                                          currencies=currencies_for_crypto,
-                                                         buy_threshold=0,
+                                                         buy_threshold=float("-inf"),
                                                          sell_threshold=0.05,
                                                          security_loss_threshold=0.1,
                                                          trading_currency=trading_currency_for_crypto),
@@ -124,7 +124,7 @@ fiat_block = Block(decider_pipeline=DeciderPipeline(deciders=[short_percent_fiat
                    informer=fiat_informer,
                    transaction_executor=executor,
                    monitors=[MongoBalanceMonitor(currencies=["ETH", "BTC", "USD", "DASH", "LTC"],
-                                                 name="weekly_test_000")])
+                                                 name="weekly_test_001")])
 
 crypto_block = Block(decider_pipeline=DeciderPipeline(deciders=[short_percent_crypto_decider,
                                                                 long_percent_crypto_decider]),
