@@ -87,7 +87,7 @@ long_percent_fiat_decider = SimpleCompositeDecider(trade_providers=trade_provide
                                                    volume_decider=FixedValueVolumeDecider(
                                                        values=fiat_values))
 
-currencies_for_crypto = ["ETH", "XRP", "DASH"]
+currencies_for_crypto = ["ETH"]
 trading_currency_for_crypto = "BTC"
 
 crypto_informer = Informer(base_currency=trading_currency_for_crypto,
