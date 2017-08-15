@@ -21,22 +21,24 @@ def load_data(data, seq_len, test_perc):
     sequence_length = seq_len + 1
     x = []
     y = []
+    yes = 0
+    no = 0
     for i in range(len(data) - sequence_length - 1):
         x.append(data[i: i + sequence_length])
         # will high price increse compared to last day's close price?
-        if data[i + sequence_length][1] >= 0.05:
+        if data[i + sequence_length][1] >= 1.01 * data[i + sequence_length - 1][3]:
             y.append([0, 1])
+            yes += 1
         else:
             y.append([1, 0])
+            no += 1
+
+    print("Yes %d\tNo %d" % (yes, no))
 
     x = np.array(x)
     y = np.array(y)
 
     x, y = shuffle(x, y)
-
-    np.set_printoptions(precision=3)
-    print(x)
-    print(y)
 
     divisible_n = 100 * int(x.shape[0] / 100)
     x = x[:divisible_n]
@@ -56,10 +58,10 @@ data = df.values
 
 print("Data loaded")
 
-seq_len = 10
+seq_len = 5
 test_perc = 0.3
 
-epochs = 20
+epochs = 40
 batch_size = 10
 
 x_train, y_train, x_test, y_test = load_data(data, seq_len, test_perc)
@@ -71,20 +73,23 @@ predictor = Sequential()
 predictor.add(LSTM(activation="sigmoid",
                    batch_input_shape=(batch_size, x_train.shape[1], x_train.shape[2]),
                    stateful=False,
-                   units=50,
-                   return_sequences=True,
+                   units=30,
+                   return_sequences=False,
                    dropout=0.2,
                    recurrent_dropout=0.2))
-predictor.add(LSTM(activation="sigmoid",
-                   return_sequences=False,
-                   units=20,
-                   dropout=0.2))
-predictor.add(Dense(30, activation="linear"))
+# predictor.add(LSTM(activation="sigmoid",
+#                    return_sequences=True,
+#                    units=30,
+#                    dropout=0.4))
+# predictor.add(LSTM(activation="sigmoid",
+#                    return_sequences=False,
+#                    units=30,
+#                    dropout=0.4))
+predictor.add(Dense(50, activation="linear"))
 predictor.add(Dropout(0.2))
-predictor.add(Dense(20, activation="linear"))
 predictor.add(Dense(2, activation="softmax"))
 
-predictor.compile(optimizer=Adam(lr=0.00003),
+predictor.compile(optimizer=Adam(lr=0.0000001),
                   loss=categorical_crossentropy,
                   metrics=["accuracy"])
 
@@ -99,6 +104,14 @@ acc = predictor.evaluate(x_test,
                          batch_size=batch_size)
 
 print(acc)
-# print(x_test[-batch_size:])
-# print(predictor.predict_proba(x_test, batch_size=batch_size))
-# print(predictor.predict_on_batch(x_test[-batch_size:]))
+
+eth_pd = pd.read_csv(sep=" ",
+                     filepath_or_buffer="/data/full_daily_ohlc.csv.reversed")
+
+eth_data = eth_pd.values
+
+_, _, test_x, test_y = load_data(eth_data, seq_len, 1)
+acc = predictor.evaluate(test_x,
+                         test_y,
+                         batch_size=batch_size)
+print("eth acc: %s" % acc)
