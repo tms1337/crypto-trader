@@ -40,9 +40,6 @@ ch.setFormatter(formatter)
 logger.addHandler(fh)
 logger.addHandler(ch)
 
-currencies_for_fiat = ["BTC", "ETH"]
-trading_currency_for_fiat = "USD"
-
 daemon_dt = float(sys.argv[2])
 providers_pause_dt = 0.5
 
@@ -61,33 +58,7 @@ trade_providers = {
     # "kraken": KrakenTradeProvider(key_uri=("%s/kraken" % keys_path))
 }
 
-fiat_informer = Informer(base_currency=trading_currency_for_fiat,
-                         stats_providers=stats_providers,
-                         trade_providers=trade_providers,
-                         currencies=currencies_for_fiat)
-
-fiat_values = {"BTC": 0.9, "ETH": 10}
-short_percent_fiat_decider = SimpleCompositeDecider(trade_providers=trade_providers,
-                                                    offer_decider=PercentBasedOfferDecider(
-                                                        currencies=currencies_for_fiat,
-                                                        buy_threshold=0.005,
-                                                        sell_threshold=0.01,
-                                                        security_loss_threshold=0.2,
-                                                        trading_currency=trading_currency_for_fiat),
-                                                    volume_decider=FixedValueVolumeDecider(
-                                                        values=fiat_values))
-
-long_percent_fiat_decider = SimpleCompositeDecider(trade_providers=trade_providers,
-                                                   offer_decider=PercentBasedOfferDecider(
-                                                       currencies=currencies_for_fiat,
-                                                       buy_threshold=0.01,
-                                                       sell_threshold=0.05,
-                                                       security_loss_threshold=0.2,
-                                                       trading_currency=trading_currency_for_fiat),
-                                                   volume_decider=FixedValueVolumeDecider(
-                                                       values=fiat_values))
-
-currencies_for_crypto = ["ETH"]
+currencies_for_crypto = ["ETH", "LTC", "XRP", "DASH"]
 trading_currency_for_crypto = "BTC"
 
 crypto_informer = Informer(base_currency=trading_currency_for_crypto,
@@ -95,7 +66,7 @@ crypto_informer = Informer(base_currency=trading_currency_for_crypto,
                            trade_providers=trade_providers,
                            currencies=currencies_for_crypto)
 
-crypto_values = {"ETH": 10}
+crypto_values = {"ETH": 20, "LTC": 60, "XRP": 4000, "DASH": 15}
 short_percent_crypto_decider = SimpleCompositeDecider(trade_providers=trade_providers,
                                                       offer_decider=PercentBasedOfferDecider(
                                                           currencies=currencies_for_crypto,
@@ -119,19 +90,14 @@ long_percent_crypto_decider = SimpleCompositeDecider(trade_providers=trade_provi
 # he's gonna kill you !!!
 executor = TransactionExecutor(trade_providers=trade_providers)
 
-fiat_block = Block(decider_pipeline=DeciderPipeline(deciders=[short_percent_fiat_decider,
-                                                              long_percent_fiat_decider]),
-                   informer=fiat_informer,
-                   transaction_executor=executor,
-                   monitors=[MongoBalanceMonitor(currencies=["ETH", "BTC", "USD"],
-                                                 name="weekly_test_002")])
-
 crypto_block = Block(decider_pipeline=DeciderPipeline(deciders=[short_percent_crypto_decider,
                                                                 long_percent_crypto_decider]),
                      informer=crypto_informer,
-                     transaction_executor=executor)
+                     transaction_executor=executor,
+                     monitors=[MongoBalanceMonitor(currencies=["ETH", "LTC", "XRP", "DASH", "USD"],
+                                                   name="weekly_test_003")])
 
-daemon = Daemon(blocks=[fiat_block, crypto_block],
+daemon = Daemon(blocks=[crypto_block],
                 dt_seconds=daemon_dt)
 
 if daemon is not None:
