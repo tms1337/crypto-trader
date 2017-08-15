@@ -109,7 +109,7 @@ class PercentBasedOfferDecider(OfferDecider, LoggableMixin):
                     self.logger.debug("\tSell margin %f / %f" % (sell_margin, self.sell_threshold))
 
                     if last_applied_decision == OfferType.BUY:
-                        self.logger.debug("\t\tCurrent profit for last buy %f" % sell_margin * last_applied_price)
+                        self.logger.debug("\t\tCurrent profit for last buy %f" % (sell_margin * last_applied_price))
 
                     if (last_applied_decision == OfferType.BUY and sell_margin >= self.sell_threshold) or \
                             (last_applied_decision == OfferType.BUY and sell_margin <= -self.security_loss_threshold):
@@ -122,9 +122,10 @@ class PercentBasedOfferDecider(OfferDecider, LoggableMixin):
                         decision.price = low
                         decision.decider = self
 
-                        self.logger.debug("Made %s decision %s with sell margin %f" % (currency,
-                                                                                       decision,
-                                                                                       sell_margin))
+                        self.logger.debug("Made %s decision %s with sell margin %f, profit %f" % (currency,
+                                                                                                  decision,
+                                                                                                  sell_margin,
+                                                                                                  sell_margin * last_applied_price))
                         transaction.add_decision(decision)
 
                         cell = DecisionCell()
