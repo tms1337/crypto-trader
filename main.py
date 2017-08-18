@@ -40,9 +40,6 @@ ch.setFormatter(formatter)
 logger.addHandler(fh)
 logger.addHandler(ch)
 
-currencies_for_fiat = ["BTC", "ETH", "LTC"]
-trading_currency_for_fiat = "USD"
-
 daemon_dt = float(sys.argv[2])
 providers_pause_dt = 0.5
 
@@ -61,33 +58,7 @@ trade_providers = {
     # "kraken": KrakenTradeProvider(key_uri=("%s/kraken" % keys_path))
 }
 
-fiat_informer = Informer(base_currency=trading_currency_for_fiat,
-                         stats_providers=stats_providers,
-                         trade_providers=trade_providers,
-                         currencies=currencies_for_fiat)
-
-fiat_values = {"BTC": 0.5, "ETH": 5, "LTC": 6}
-short_percent_fiat_decider = SimpleCompositeDecider(trade_providers=trade_providers,
-                                                    offer_decider=PercentBasedOfferDecider(
-                                                        currencies=currencies_for_fiat,
-                                                        buy_threshold=float("-inf"),
-                                                        sell_threshold=0.01,
-                                                        security_loss_threshold=0.1,
-                                                        trading_currency=trading_currency_for_fiat),
-                                                    volume_decider=FixedValueVolumeDecider(
-                                                        values=fiat_values))
-
-long_percent_fiat_decider = SimpleCompositeDecider(trade_providers=trade_providers,
-                                                   offer_decider=PercentBasedOfferDecider(
-                                                       currencies=currencies_for_fiat,
-                                                       buy_threshold=float("-inf"),
-                                                       sell_threshold=0.05,
-                                                       security_loss_threshold=0.1,
-                                                       trading_currency=trading_currency_for_fiat),
-                                                   volume_decider=FixedValueVolumeDecider(
-                                                       values=fiat_values))
-
-currencies_for_crypto = ["ETH", "XRP", "DASH"]
+currencies_for_crypto = ["ETH", "DASH", "NEO", "QTUM"]
 trading_currency_for_crypto = "BTC"
 
 crypto_informer = Informer(base_currency=trading_currency_for_crypto,
@@ -95,13 +66,13 @@ crypto_informer = Informer(base_currency=trading_currency_for_crypto,
                            trade_providers=trade_providers,
                            currencies=currencies_for_crypto)
 
-crypto_values = {"ETH": 5, "XRP": 4000, "DASH": 4}
+crypto_values = {"ETH": 10, "DASH": 8, "NEO": 50, "QTUM": 150}
 short_percent_crypto_decider = SimpleCompositeDecider(trade_providers=trade_providers,
                                                       offer_decider=PercentBasedOfferDecider(
                                                           currencies=currencies_for_crypto,
-                                                          buy_threshold=float("-inf"),
+                                                          buy_threshold=0.005,
                                                           sell_threshold=0.01,
-                                                          security_loss_threshold=0.1,
+                                                          security_loss_threshold=0.2,
                                                           trading_currency=trading_currency_for_crypto),
                                                       volume_decider=FixedValueVolumeDecider(
                                                           values=crypto_values))
@@ -109,9 +80,9 @@ short_percent_crypto_decider = SimpleCompositeDecider(trade_providers=trade_prov
 long_percent_crypto_decider = SimpleCompositeDecider(trade_providers=trade_providers,
                                                      offer_decider=PercentBasedOfferDecider(
                                                          currencies=currencies_for_crypto,
-                                                         buy_threshold=float("-inf"),
+                                                         buy_threshold=0.01,
                                                          sell_threshold=0.05,
-                                                         security_loss_threshold=0.1,
+                                                         security_loss_threshold=0.2,
                                                          trading_currency=trading_currency_for_crypto),
                                                      volume_decider=FixedValueVolumeDecider(
                                                          values=crypto_values))
@@ -119,19 +90,14 @@ long_percent_crypto_decider = SimpleCompositeDecider(trade_providers=trade_provi
 # he's gonna kill you !!!
 executor = TransactionExecutor(trade_providers=trade_providers)
 
-fiat_block = Block(decider_pipeline=DeciderPipeline(deciders=[short_percent_fiat_decider,
-                                                              long_percent_fiat_decider]),
-                   informer=fiat_informer,
-                   transaction_executor=executor,
-                   monitors=[MongoBalanceMonitor(currencies=["ETH", "BTC", "USD", "DASH", "LTC"],
-                                                 name="weekly_test_001")])
-
 crypto_block = Block(decider_pipeline=DeciderPipeline(deciders=[short_percent_crypto_decider,
                                                                 long_percent_crypto_decider]),
                      informer=crypto_informer,
-                     transaction_executor=executor)
+                     transaction_executor=executor,
+                     monitors=[MongoBalanceMonitor(currencies=["ETH", "DASH", "NEO", "USD", "QTUM"],
+                                                   name="weekly_test_004")])
 
-daemon = Daemon(blocks=[fiat_block, crypto_block],
+daemon = Daemon(blocks=[crypto_block],
                 dt_seconds=daemon_dt)
 
 if daemon is not None:

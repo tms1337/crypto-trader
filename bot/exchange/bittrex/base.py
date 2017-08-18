@@ -22,7 +22,9 @@ class BittrexProvider(CurrencyMixin, Provider, LoggableMixin):
             "XRP": "XRP",
             "USD": "USDT",
             "ETC": "ETC",
-            "LTC": "LTC"
+            "LTC": "LTC",
+            "NEO": "NEO",
+            "QTUM": "QTUM"
         }
 
         return mapping
@@ -35,7 +37,9 @@ class BittrexProvider(CurrencyMixin, Provider, LoggableMixin):
             "XRP": "XRP",
             "USD": "USDT",
             "ETC": "ETC",
-            "LTC": "LTC"
+            "LTC": "LTC",
+            "NEO": "NEO",
+            "QTUM": "QTUM"
         }
 
         return currency_mapping
