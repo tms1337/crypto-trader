@@ -11,11 +11,11 @@ import sys
 
 
 def load_data(data, seq_len, test_perc):
-    # for i in range(1, len(data)):
-    #     for j in range(5):
-    #         data[i][j] = (data[i][j] - data[i - 1][j]) / data[i - 1][j]
-    #
-    # data = data[1:]
+    for i in range(1, len(data)):
+        for j in range(5):
+            data[i][j] = (data[i][j] - data[i - 1][j]) / data[i - 1][j]
+
+    data = data[1:]
 
     sequence_length = seq_len + 1
     x = []
@@ -41,6 +41,17 @@ def load_data(data, seq_len, test_perc):
 
     return [x_train, y_train, x_test, y_test]
 
+def autoencode(x, y, x_, y_, n_features):
+    autoencoder = Sequential()
+
+    autoencoder.add(Dense(10, input_shape=x.shape[1:],
+                          activation="linear"))
+    autoencoder.add(Dense(n_features, activation="sigmoid"))
+    autoencoder.add(Dense(10, activation="linear"))
+
+    autoencoder.fit(x, x, batch_size=10, epochs=10, validation_data=(x_, y_))
+
+    return autoencoder.predict(x), autoencoder.predict(y), autoencoder.predict(x_), autoencoder.predict(y_)
 
 df = pd.read_csv(sep=" ",
                  filepath_or_buffer="/data/full_daily_ohlc.csv.reversed")
@@ -49,13 +60,16 @@ data = df.values
 
 print("Data loaded")
 
-seq_len = 5
+seq_len = 50
 test_perc = 0.3
 
 epochs = 1
 batch_size = 10
 
+n_features = 10
 x_train, y_train, x_test, y_test = load_data(data, seq_len, test_perc)
+x_train, y_train, x_test, y_test = autoencode(x_train, y_train, x_test, y_test, n_features)
+
 
 print(x_train.shape, y_train.shape)
 print(x_test.shape, y_test.shape)
