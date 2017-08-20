@@ -1,6 +1,6 @@
 from keras.layers import LSTM, Dense, Dropout
 from keras.models import Sequential
-from keras.losses import categorical_crossentropy
+from keras.losses import categorical_crossentropy, mean_squared_error
 from keras.optimizers import Adam
 import pandas as pd
 import matplotlib.pyplot as plt
@@ -9,12 +9,14 @@ from sklearn.model_selection import KFold
 import numpy as np
 import sys
 from sklearn.utils import shuffle
-
+import keras
 
 def load_data(data, seq_len, test_perc):
     for i in range(1, len(data)):
         for j in range(4):
-            data[i][j] = (data[i][j] - data[i - 1][3]) / data[i - 1][3]
+            data[i][j] = (data[i][j] - data[i - 1][3]) / data[i][0]
+        data[i][4] = data[i][4] / np.amax(data[:, 4], axis=0)
+
 
     data = data[1:]
 
@@ -24,7 +26,7 @@ def load_data(data, seq_len, test_perc):
     yes = 0
     no = 0
     for i in range(len(data) - sequence_length - 1):
-        x.append(data[i: i + sequence_length])
+        x.append(data[i: i + sequence_length].reshape(-1))
         # will high price increse compared to last day's close price?
         if data[i + sequence_length][1] >= 1.01 * data[i + sequence_length - 1][3]:
             y.append([0, 1])
@@ -50,17 +52,27 @@ def load_data(data, seq_len, test_perc):
 
     return [x_train, y_train, x_test, y_test]
 
+
 def autoencode(x, y, x_, y_, n_features):
+    print(x.shape)
+    print(x)
+
     autoencoder = Sequential()
-
-    autoencoder.add(Dense(10, input_shape=x.shape[1:],
+    autoencoder.add(Dense(2*x.shape[1],
+                          input_shape=(x.shape[1],),
                           activation="linear"))
-    autoencoder.add(Dense(n_features, activation="sigmoid"))
-    autoencoder.add(Dense(10, activation="linear"))
+    autoencoder.add(Dense(n_features, activation="softmax"))
+    autoencoder.add(Dense(2 * x.shape[1],
+                          activation="linear"))
+    autoencoder.add(Dense(x.shape[1], activation="softsign"))
 
-    autoencoder.fit(x, x, batch_size=10, epochs=10, validation_data=(x_, y_))
+    autoencoder.compile(optimizer=Adam(lr=0.001),
+                        loss=mean_squared_error,
+                        metrics=[keras.metrics.mean_squared_error])
+    autoencoder.fit(x, x, batch_size=10, epochs=50)
 
     return autoencoder.predict(x), autoencoder.predict(y), autoencoder.predict(x_), autoencoder.predict(y_)
+
 
 df = pd.read_csv(sep=" ",
                  filepath_or_buffer="/data/full_daily_ohlc.csv.reversed")
@@ -69,16 +81,15 @@ data = df.values
 
 print("Data loaded")
 
-seq_len = 50
+seq_len = 10
 test_perc = 0.3
 
 epochs = 40
 batch_size = 10
 
-n_features = 10
+n_features = 20
 x_train, y_train, x_test, y_test = load_data(data, seq_len, test_perc)
 x_train, y_train, x_test, y_test = autoencode(x_train, y_train, x_test, y_test, n_features)
-
 
 print(x_train.shape, y_train.shape)
 print(x_test.shape, y_test.shape)

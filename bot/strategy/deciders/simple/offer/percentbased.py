@@ -51,6 +51,8 @@ class PercentBasedOfferDecider(OfferDecider, LoggableMixin):
         self.last_decision_record = None
         self.last_applied_decision_record = None
 
+        self.finished_currencies = []
+
         LoggableMixin.__init__(self, PercentBasedOfferDecider)
 
     def decide(self, informer):
@@ -91,7 +93,7 @@ class PercentBasedOfferDecider(OfferDecider, LoggableMixin):
 
             if not skip_exchange:
                 for currency in stats_matrix.all_currencies():
-                    if currency == self.trading_currency:
+                    if currency == self.trading_currency or currency in self.finished_currencies:
                         continue
 
                     self.logger.debug("Exchange %s, currency %s", (exchange, currency))
@@ -126,6 +128,9 @@ class PercentBasedOfferDecider(OfferDecider, LoggableMixin):
                                                                                                   decision,
                                                                                                   sell_margin,
                                                                                                   sell_margin * last_applied_price))
+
+                        self.finished_currencies.append(currency)
+
                         transaction.add_decision(decision)
 
                         cell = DecisionCell()
