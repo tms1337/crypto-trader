@@ -58,6 +58,52 @@ trade_providers = {
     # "kraken": KrakenTradeProvider(key_uri=("%s/kraken" % keys_path))
 }
 
+currencies_for_crypto = ["ETH", "LTC", "DASH"]
+trading_currency_for_crypto = "BTC"
+
+crypto_informer = Informer(base_currency=trading_currency_for_crypto,
+                           stats_providers=stats_providers,
+                           trade_providers=trade_providers,
+                           currencies=currencies_for_crypto)
+
+crypto_values = {"ETH": 10, "DASH": 10, "LTC": 50}
+short_percent_crypto_decider = SimpleCompositeDecider(trade_providers=trade_providers,
+                                                      offer_decider=PercentBasedOfferDecider(
+                                                          currencies=currencies_for_crypto,
+                                                          buy_threshold=0.005,
+                                                          sell_threshold=0.01,
+                                                          security_loss_threshold=0.2,
+                                                          trading_currency=trading_currency_for_crypto),
+                                                      volume_decider=FixedValueVolumeDecider(
+                                                          values=crypto_values))
+
+long_percent_crypto_decider = SimpleCompositeDecider(trade_providers=trade_providers,
+                                                     offer_decider=PercentBasedOfferDecider(
+                                                         currencies=currencies_for_crypto,
+                                                         buy_threshold=0.01,
+                                                         sell_threshold=0.05,
+                                                         security_loss_threshold=0.2,
+                                                         trading_currency=trading_currency_for_crypto),
+                                                     volume_decider=FixedValueVolumeDecider(
+                                                         values=crypto_values))
+
+# he's gonna kill you !!!
+executor = TransactionExecutor(trade_providers=trade_providers)
+
+crypto_block = Block(decider_pipeline=DeciderPipeline(deciders=[short_percent_crypto_decider,
+                                                                long_percent_crypto_decider]),
+                     informer=crypto_informer,
+                     transaction_executor=executor,
+                     monitors=[MongoBalanceMonitor(currencies=["ETH", "DASH", "NEO", "USD", "QTUM"],
+                                                   name="weekly_test_004")])
+
+daemon = Daemon(blocks=[crypto_block],
+                dt_seconds=daemon_dt)
+
+if daemon is not None:
+    daemon.run()
+
+
 # i bot se mora malo odmoriti
 """
                                                    `..`
@@ -106,47 +152,3 @@ trade_providers = {
                            ````````                             `.-::///////::::::-.
                                                                     `````...```
 """
-currencies_for_crypto = ["ETH", "LTC", "DASH"]
-trading_currency_for_crypto = "BTC"
-
-crypto_informer = Informer(base_currency=trading_currency_for_crypto,
-                           stats_providers=stats_providers,
-                           trade_providers=trade_providers,
-                           currencies=currencies_for_crypto)
-
-crypto_values = {"ETH": 10, "DASH": 10, "LTC": 50}
-short_percent_crypto_decider = SimpleCompositeDecider(trade_providers=trade_providers,
-                                                      offer_decider=PercentBasedOfferDecider(
-                                                          currencies=currencies_for_crypto,
-                                                          buy_threshold=0.005,
-                                                          sell_threshold=0.01,
-                                                          security_loss_threshold=0.2,
-                                                          trading_currency=trading_currency_for_crypto),
-                                                      volume_decider=FixedValueVolumeDecider(
-                                                          values=crypto_values))
-
-long_percent_crypto_decider = SimpleCompositeDecider(trade_providers=trade_providers,
-                                                     offer_decider=PercentBasedOfferDecider(
-                                                         currencies=currencies_for_crypto,
-                                                         buy_threshold=0.01,
-                                                         sell_threshold=0.05,
-                                                         security_loss_threshold=0.2,
-                                                         trading_currency=trading_currency_for_crypto),
-                                                     volume_decider=FixedValueVolumeDecider(
-                                                         values=crypto_values))
-
-# he's gonna kill you !!!
-executor = TransactionExecutor(trade_providers=trade_providers)
-
-crypto_block = Block(decider_pipeline=DeciderPipeline(deciders=[short_percent_crypto_decider,
-                                                                long_percent_crypto_decider]),
-                     informer=crypto_informer,
-                     transaction_executor=executor,
-                     monitors=[MongoBalanceMonitor(currencies=["ETH", "DASH", "NEO", "USD", "QTUM"],
-                                                   name="weekly_test_004")])
-
-daemon = Daemon(blocks=[crypto_block],
-                dt_seconds=daemon_dt)
-
-if daemon is not None:
-    daemon.run()
