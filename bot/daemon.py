@@ -23,14 +23,13 @@ class Daemon(LoggableMixin):
         LoggableMixin.__init__(self, Daemon)
 
     def run(self):
-        while True:
-            self.logger.debug("Starting step")
+        self.logger.debug("Starting step")
 
-            for i in range(len(self.blocks)):
-                b = self.blocks[i]
-                self.logger.info("Running block number %d" % i)
-                b.run()
+        for i in range(len(self.blocks)):
+            b = self.blocks[i]
+            self.logger.info("Running block number %d" % i)
+            b.run()
 
-            self.logger.debug("Waiting %f seconds" % self.dt_seconds)
-            self.logger.debug("")
-            time.sleep(self.dt_seconds)
+        self.logger.debug("Waiting %f seconds" % self.dt_seconds)
+        self.logger.debug("")
+        time.sleep(self.dt_seconds)

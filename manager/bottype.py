@@ -32,12 +32,14 @@ class BotType(ABC, LoggableMixin):
         self.stop = False
 
         TypeChecker.check_type(parameters, dict)
+        self.parameters = parameters
+
         LoggableMixin.__init__(self, BotType)
 
     @staticmethod
-    def name(self):
+    def name():
         # hacky :(((
-        # enforce children to implement this method
+        # enforce children to implement this static method
         raise NotImplementedError("You should implement static name method")
 
     @abstractclassmethod
@@ -45,7 +47,7 @@ class BotType(ABC, LoggableMixin):
         pass
 
     @abstractclassmethod
-    def parameters(self):
+    def get_parameters(self):
         pass
 
     @abstractclassmethod
@@ -72,9 +74,13 @@ class BotType(ABC, LoggableMixin):
             self.check_q()
 
             if not self.pause:
+                self.logger.info("Executing step")
                 self.run_step()
+            else:
+                self.logger.info("Currently paused")
 
             if self.stop:
+                self.logger.info("Stopping")
                 break
 
     def spawn(self):

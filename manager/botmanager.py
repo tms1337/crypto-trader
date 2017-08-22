@@ -20,14 +20,21 @@ class BotManager(LoggableMixin):
             type_name = bot_type.name()
 
             if type_name in self.types:
-                self.logger.warn("Trying to add already added type %s" % type_name)
+                self.logger.warn("Trying to add already added type %s, ignoring" % type_name)
             else:
+                self.logger.debug("Adding bot type %s" % type_name)
                 self.types[type_name] = bot_type
         except NotImplementedError:
             self.logger.error("Trying to add type that did not implement name method")
 
     def bot_types(self):
         return list(self.types.keys())
+
+    def get_bot_ids(self):
+        return self.bots.keys()
+
+    def get_bots(self):
+        pass
 
     def type_parameters(self, type_name):
         assert type_name in self.types, \
@@ -60,6 +67,7 @@ class BotManager(LoggableMixin):
 
     def stop(self, id):
         self._enqueue_no_parameter_action(id, BotActionType.STOP)
+        self.bots.pop(id)
 
     def _enqueue_no_parameter_action(self, id, action_type):
         TypeChecker.check_type(id, str)

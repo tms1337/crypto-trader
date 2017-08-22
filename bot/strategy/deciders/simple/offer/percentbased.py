@@ -96,7 +96,7 @@ class PercentBasedOfferDecider(OfferDecider, LoggableMixin):
                     if currency == self.trading_currency or currency in self.finished_currencies:
                         continue
 
-                    self.logger.debug("Exchange %s, currency %s", (exchange, currency))
+                    self.logger.debug("Exchange %s, currency %s" % (exchange, currency))
 
                     low = stats_matrix.get(exchange, currency).low
                     high = stats_matrix.get(exchange, currency).high
