@@ -1,4 +1,4 @@
-from manager.bottype import BotType
+from manager.bottype import BotType, BotAction, BotActionType
 from util.asserting import TypeChecker
 from util.logging import LoggableMixin
 
@@ -53,14 +53,22 @@ class BotManager(LoggableMixin):
         return id
 
     def pause(self, id):
+        self._enqueue_no_parameter_action(id, BotActionType.PAUSE)
+
+    def resume(self, id):
+        self._enqueue_no_parameter_action(id, BotActionType.RESUME)
+
+    def stop(self, id):
+        self._enqueue_no_parameter_action(id, BotActionType.STOP)
+
+    def _enqueue_no_parameter_action(self, id, action_type):
         TypeChecker.check_type(id, str)
         assert id in self.bots, \
             "Bot %s not in bot list" % id
 
-        self.bots[id].enqueue_action()
+        TypeChecker.check_type(action_type, BotActionType)
 
-    def resume(self, id):
-        pass
+        self.logger.debug("Enqueing pause action for bot %s" % id)
 
-    def stop(self, id):
-        pass
+        action = BotAction(action_type)
+        self.bots[id].enqueue_action(action)

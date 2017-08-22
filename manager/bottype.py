@@ -16,7 +16,7 @@ class BotActionType(Enum):
 
 
 class BotAction:
-    def __init__(self, action_type, parameters):
+    def __init__(self, action_type, parameters=None):
         TypeChecker.check_type(action_type, BotActionType)
         if not parameters is None:
             TypeChecker.check_type(parameters, dict)
