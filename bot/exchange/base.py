@@ -182,10 +182,14 @@ class TradeProvider(Provider, LoggableMixin):
 
 class KeyLoaderMixin(ABC):
     def __init__(self, key_uri):
-        self.key_uri = key_uri
+        if isinstance(key_uri, tuple):
+            self.key = key_uri[0]
+            self.secret = key_uri[1]
+        else:
+            self.key_uri = key_uri
 
-        self._load_key()
-        self._load_secret()
+            self._load_key()
+            self._load_secret()
 
     def _load_key(self):
         content = self._get_key_file_content()

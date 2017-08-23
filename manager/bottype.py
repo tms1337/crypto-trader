@@ -42,6 +42,10 @@ class BotType(ABC, LoggableMixin):
         # enforce children to implement this static method
         raise NotImplementedError("You should implement static name method")
 
+    @staticmethod
+    def list_parameters():
+        raise NotImplementedError("You should implement static name method")
+
     @abstractclassmethod
     def run_step(self):
         pass
@@ -76,8 +80,6 @@ class BotType(ABC, LoggableMixin):
             if not self.pause:
                 self.logger.info("Executing step")
                 self.run_step()
-            else:
-                self.logger.info("Currently paused")
 
             if self.stop:
                 self.logger.info("Stopping")

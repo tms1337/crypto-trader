@@ -28,15 +28,16 @@ class BotManager(LoggableMixin):
             self.logger.error("Trying to add type that did not implement name method")
 
     def bot_types(self):
-        return list(self.types.keys())
+        return { (k, self.types[k].list_parameters()) for k in self.types.keys() }
 
     def get_bot_ids(self):
         return self.bots.keys()
 
-    def get_bots_info(self):
-        raise NotImplementedError()
+    def is_bot_managed(self, id):
+        TypeChecker.check_type(id, str)
+        return id in self.bots
 
-    def get_bot_info(self):
+    def get_bot_info(self, id):
         raise NotImplementedError()
 
     def type_parameters(self, type_name):

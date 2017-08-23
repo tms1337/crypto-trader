@@ -1,3 +1,5 @@
+from bot.exchange.bittrex.stats import BittrexStatsProvider
+from bot.exchange.bittrex.trade import BittrexTradeProvider
 from bot.exchange.kraken.stats import KrakenStatsProvider
 from bot.exchange.kraken.trade import KrakenTradeProvider
 from bot.exchange.poloniex.stats import PoloniexStatsProvider
@@ -23,8 +25,20 @@ class PercentBotType(BotType, LoggableMixin):
     def __init__(self, parameters):
         BotType.__init__(self, parameters)
 
-        stats_providers = self.parameters["stats_providers"]
-        trade_providers = self.parameters["trade_providers"]
+        providers_pause_dt = 1
+
+        stats_providers = {
+            # "poloniex": PoloniexStatsProvider(pause_dt=providers_pause_dt),
+            "bittrex": BittrexStatsProvider(pause_dt=providers_pause_dt),
+            # "bitfinex": BitfinexStatsProvider(),
+            # "kraken": KrakenStatsProvider()
+        }
+        trade_providers = {
+            # "poloniex": PoloniexTradeProvider(key_uri=("%s/poloniex" % keys_path), pause_dt=providers_pause_dt),
+            "bittrex": BittrexTradeProvider(key_uri=("/home/faruk/Desktop/production_keys/bittrex"), pause_dt=providers_pause_dt),
+            # "bitfinex": BitfinexTradeProvider(key_uri=("%s/bitfinex" % keys_path)),
+            # "kraken": KrakenTradeProvider(key_uri=("%s/kraken" % keys_path))
+        }
 
         daemon_dt = self.parameters["daemon_dt"]
         currencies_for_crypto = self.parameters["currencies_for_crypto"]
@@ -75,6 +89,10 @@ class PercentBotType(BotType, LoggableMixin):
                         dt_seconds=daemon_dt)
 
         LoggableMixin.__init__(self, PercentBotType)
+
+    @staticmethod
+    def list_parameters():
+        pass
 
     def change_parameters(self, parameters):
         pass

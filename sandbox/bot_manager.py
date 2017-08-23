@@ -7,8 +7,12 @@ from bot.exchange.bittrex.trade import BittrexTradeProvider
 
 from manager.botmanager import BotManager
 from sandbox.percentbased import PercentBotType
+from service.app import App
+from service.mq.kafka.kafkalistener import KafkaListener
+from service.mq.kafka.kafkawriter import KafkaWriter
+from service.mq.mqdecoder import MQDecoder
+from service.mq.mqencoder import MQEncoder
 
-manager = BotManager()
 
 logger = logging.getLogger('app')
 logger.setLevel(logging.DEBUG)
@@ -60,17 +64,13 @@ parameters["long_buy_threshold"] = 0.01
 parameters["long_sell_threshold"] = 0.05
 parameters["long_security_loss_threshold"] = 0.2
 
+print(parameters)
+
+manager = BotManager()
+
 manager.add_bot_type(PercentBotType)
-id = manager.spawn("PercentBased", parameters)
 
-while True:
-    action = "stop"
-
-    if action == "pause":
-        manager.pause(id)
-    elif action == "resume":
-        manager.resume(id)
-    elif action == "stop":
-        manager.stop(id)
-    elif action == "exit":
-        break
+app = App(bot_manager=manager,
+          encoder=MQEncoder(mqwriter=KafkaWriter(topic="test")),
+          decoder=MQDecoder(mqlistener=KafkaListener(topic="test")))
+app.run()

@@ -17,7 +17,6 @@ class ServiceActionType(Enum):
     RESUME = 5
     UPDATE = 6
 
-
 class ServiceAction:
     def __init__(self,
                  msg_id,
@@ -39,6 +38,13 @@ class ServiceAction:
         self.bot_id = bot_id
         self.parameters = parameters
 
+    def __str__(self):
+        return "(Action msg_id: %s, action_type: %s, bot_id: %s, parameters: %s)" % \
+                    (self.msg_id, self.action_type, self.bot_id, self.parameters)
+
+    def __repr__(self):
+        return self.__str__()
+
 
 class MQDecoder(LoggableMixin):
     def __init__(self, mqlistener):
@@ -51,16 +57,24 @@ class MQDecoder(LoggableMixin):
 
     def next(self):
         record = self.mqlistener.next()
-        return self._decode(record)
+        if record is None:
+            return record
+        else:
+            return self._decode(record)
 
     def _decode(self, record):
+        self.logger.debug("Decoding %s" % record)
+
         TypeChecker.check_type(record, ListenerRecord)
 
         msg_id = record.key
+        self.logger.debug("Decoded msg_id: %s" % msg_id)
 
         value = record.value
+        self.logger.debug("Decoding value %s" % value)
         try:
             content = json.loads(value)
+            self.logger.debug("Decoding content %s" % content)
             TypeChecker.check_type(content, dict)
 
             assert "action_type" in content, \
@@ -70,14 +84,20 @@ class MQDecoder(LoggableMixin):
             if action_type == "info":
                 action = self._construct_action(msg_id, content, ServiceActionType.INFO)
             elif action_type == "spawn":
-                action = ServiceAction(msg_id, ServiceActionType.SPAWN)
+                assert "parameters" in content, \
+                    "parameters field not found when decoding %s" % content
+                parameters = content["parameters"]
+
+                action = ServiceAction(msg_id, ServiceActionType.SPAWN, parameters=parameters)
             elif action_type == "pause":
                 action = self._construct_action(msg_id, content, ServiceActionType.PAUSE)
+            elif action_type == "stop":
+                action = self._construct_action(msg_id, content, ServiceActionType.STOP)
             elif action_type == "resume":
                 action = self._construct_action(msg_id, content, ServiceActionType.RESUME)
             elif action_type == "update":
                 assert "parameters" in content, \
-                    "parameters not found when decoding %s" % content
+                    "parameters field not found when decoding %s" % content
                 parameters = content["parameters"]
 
                 action = self._construct_action(msg_id,
@@ -88,13 +108,15 @@ class MQDecoder(LoggableMixin):
                 self.logger.warn("Invalid action type %s" % action_type)
                 action = None
 
-        except ValueError:
-            self.logger.error("Erro while decoding %s" % value)
+        except ValueError as ex:
+            self.logger.error("Error while decoding %s, %s" % (value, ex))
 
             action = None
         except AssertionError as ex:
-            self.logger.warn("Invalid fields when decoding %s" % value)
+            self.logger.warn("Invalid fields when decoding %s, %s" % (value, ex))
             action = None
+
+        self.logger.debug("Decoded action %s" % action)
 
         return action
 
