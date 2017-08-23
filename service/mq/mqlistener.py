@@ -7,6 +7,9 @@ import time
 from util.asserting import TypeChecker
 from util.logging import LoggableMixin
 
+class ListenerRecord:
+    key = None
+    value = None
 
 class MQListener(ABC, LoggableMixin):
     def __init__(self, pause_dt):
@@ -26,10 +29,13 @@ class MQListener(ABC, LoggableMixin):
         if self.q.empty():
             return None
         else:
-            record = self.q.get()
+            raw_record = self.q.get()
             self.q.task_done()
 
-            return self._decode(record)
+            record = self._decode(raw_record)
+            TypeChecker.check_type(record, ListenerRecord)
+
+            return record
 
     def start(self):
         t = Thread(target=self._listen)

@@ -1,12 +1,13 @@
 from enum import Enum, unique
 
 from manager.botmanager import BotManager
-from service.mq.mqdecoder import MQDecoder
+from service.mq.mqdecoder import MQDecoder, ServiceAction
 from service.mq.mqencoder import MQEncoder
 from util.asserting import TypeChecker
+from util.logging import LoggableMixin
 
 
-class App:
+class App(LoggableMixin):
     def __init__(self,
                  bot_manager,
                  encoder,
@@ -19,12 +20,17 @@ class App:
         self.encoder = encoder
         self.decoder = decoder
 
+        LoggableMixin.__init__(self, App)
+
     def run(self):
         while True:
-            action = self.decoder.next()
+            try:
+                action = self.decoder.next()
 
-            if not action is None:
-                self._do(action)
+                if not action is None:
+                    self._do(action)
+            except Exception as ex:
+                self.logger.error("An error has occured %s" % ex)
 
     def _do(self, action):
         TypeChecker.check_type(action, ServiceAction)

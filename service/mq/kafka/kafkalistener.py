@@ -1,4 +1,4 @@
-from service.mq.mqlistener import MQListener
+from service.mq.mqlistener import MQListener, ListenerRecord
 from kafka import KafkaConsumer
 
 from util.asserting import TypeChecker
@@ -26,5 +26,9 @@ class KafkaListener(MQListener):
         for msg in self.consumer:
             self.q.put(msg)
 
-    def _decode(self, record):
-        return {"key": record.key, "value": str(record.value)}
+    def _decode(self, raw_record):
+        record = ListenerRecord()
+        record.key = raw_record.key
+        record.value = raw_record.value
+
+        return record
