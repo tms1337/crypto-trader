@@ -33,8 +33,11 @@ class BotManager(LoggableMixin):
     def get_bot_ids(self):
         return self.bots.keys()
 
-    def get_bots(self):
-        pass
+    def get_bots_info(self):
+        raise NotImplementedError()
+
+    def get_bot_info(self):
+        raise NotImplementedError()
 
     def type_parameters(self, type_name):
         assert type_name in self.types, \
