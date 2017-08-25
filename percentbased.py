@@ -110,7 +110,7 @@ class PercentBotType(BotType, LoggableMixin):
             },
             {
                 "name": "Base currency",
-                "alias": "base_currency_for_crypto",
+                "alias": "trading_currency_for_crypto",
                 "description": "Currency that serves as a basis for trading",
                 "type": "text"
             },
