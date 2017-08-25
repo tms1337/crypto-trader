@@ -12,8 +12,8 @@ class MQEncoder(LoggableMixin):
 
         LoggableMixin.__init__(self, MQEncoder)
 
-    def error(self, action):
-        self.logger.info("Writing error for %s" % action)
+    def error(self, action, error=None):
+        self.logger.info("Writing error for %s %s" % (action, error))
 
         self.writer.write("+" + action.msg_id, {"success": False})
 

@@ -67,6 +67,8 @@ class App(LoggableMixin):
                     self.encoder.error(action)
                     raise ex
         elif action.action_type == ServiceActionType.INFO:
+            self.logger.debug("Handling info action type")
+
             assert action.bot_id is not None, \
                 "botid for pausing needs to be specified %s" % action
 
@@ -79,5 +81,5 @@ class App(LoggableMixin):
 
                     self.encoder.success(action, data=info)
                 except Exception as ex:
-                    self.encoder.error(action)
+                    self.encoder.error(action, ex)
                     raise ex
