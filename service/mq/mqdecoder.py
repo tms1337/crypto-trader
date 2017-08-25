@@ -116,7 +116,7 @@ class MQDecoder(LoggableMixin):
             self.logger.warn("Invalid fields when decoding %s, %s" % (value, ex))
             action = None
 
-        self.logger.debug("Decoded action %s" % action)
+        self.logger.info("Decoded action %s" % action)
 
         return action
 

@@ -36,11 +36,11 @@ class App(LoggableMixin):
         TypeChecker.check_type(action, ServiceAction)
 
         if action.action_type == ServiceActionType.SPAWN:
-            assert "type_name" in action.parameters, \
-                "Bot type not supplied in %s" % action
-            type_name = action.parameters["type_name"]
-
             try:
+                assert "type_name" in action.parameters, \
+                    "Bot type not supplied in %s" % action
+                type_name = action.parameters["type_name"]
+
                 id = self.bot_manager.spawn(type_name, action.parameters)
                 self.encoder.success(action, {"id": id})
             except Exception as ex:
@@ -63,6 +63,21 @@ class App(LoggableMixin):
                         self.bot_manager.resume(bot_id)
 
                     self.encoder.success(action)
+                except Exception as ex:
+                    self.encoder.error(action)
+                    raise ex
+        elif action.action_type == ServiceActionType.INFO:
+            assert action.bot_id is not None, \
+                "botid for pausing needs to be specified %s" % action
+
+            bot_id = action.bot_id
+            TypeChecker.check_type(bot_id, str)
+
+            if self.bot_manager.is_bot_managed(bot_id):
+                try:
+                    info = self.bot_manager.get_bot_info(bot_id)
+
+                    self.encoder.success(action, data=info)
                 except Exception as ex:
                     self.encoder.error(action)
                     raise ex

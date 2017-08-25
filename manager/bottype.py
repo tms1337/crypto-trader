@@ -1,7 +1,8 @@
 from abc import ABC, abstractclassmethod
 from enum import unique, Enum
-from queue import Queue
-from threading import Thread
+from multiprocessing import Queue
+
+from multiprocessing import Process
 
 from util.asserting import TypeChecker
 from util.logging import LoggableMixin
@@ -42,6 +43,10 @@ class BotType(ABC, LoggableMixin):
         # enforce children to implement this static method
         raise NotImplementedError("You should implement static name method")
 
+    @abstractclassmethod
+    def my_name(self):
+        pass
+
     @staticmethod
     def list_parameters():
         raise NotImplementedError("You should implement static name method")
@@ -58,6 +63,10 @@ class BotType(ABC, LoggableMixin):
     def change_parameters(self, parameters):
         pass
 
+    @abstractclassmethod
+    def get_info(self):
+        pass
+
     def check_q(self):
         if not self.q.empty():
             action = self.q.get()
@@ -70,8 +79,6 @@ class BotType(ABC, LoggableMixin):
                 self.pause = False
             elif action.action_type == BotActionType.STOP:
                 self.stop = True
-
-            self.q.task_done()
 
     def run(self):
         while True:
@@ -86,8 +93,8 @@ class BotType(ABC, LoggableMixin):
                 break
 
     def spawn(self):
-        t = Thread(target=self.run)
-        t.start()
+        p = Process(target=self.run)
+        p.start()
 
     def enqueue_action(self, action):
         TypeChecker.check_type(action, BotAction)

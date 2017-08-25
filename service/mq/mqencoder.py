@@ -1,19 +1,26 @@
 from service.mq.mqwriter import MQWriter
 from util.asserting import TypeChecker
+from util.logging import LoggableMixin
 
 
-class MQEncoder:
+class MQEncoder(LoggableMixin):
     def __init__(self,
                  mqwriter):
         TypeChecker.check_type(mqwriter, MQWriter)
 
         self.writer = mqwriter
 
-    def error(self, action):
-        self.writer.write(action.msg_id, {"error": True})
+        LoggableMixin.__init__(self, MQEncoder)
 
-    def success(self, action, parameters=None):
-        if parameters is not None:
-            self.writer.write(action.msg_id, {"error": False, "parameters": parameters})
+    def error(self, action):
+        self.logger.info("Writing error for %s" % action)
+
+        self.writer.write("+" + action.msg_id, {"success": False})
+
+    def success(self, action, data=None):
+        self.logger.info("Writing success for %s" % action)
+
+        if data is not None:
+            self.writer.write("+" + action.msg_id, {"success": True, "data": data})
         else:
-            self.writer.write(action.msg_id, {"error": False})
+            self.writer.write("+" + action.msg_id, {"success": True})

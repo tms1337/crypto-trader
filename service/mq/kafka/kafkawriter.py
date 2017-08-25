@@ -1,3 +1,5 @@
+import json
+
 from kafka import KafkaProducer
 
 from service.mq.mqwriter import MQWriter
@@ -16,8 +18,9 @@ class KafkaWriter(MQWriter):
         self.topic = topic
         self.producer = KafkaProducer(bootstrap_servers="%s:%d" % (host, port),
                                       key_serializer=str.encode,
-                                      value_serializer=str.encode)
+                                      value_serializer=lambda v: json.dumps(v).encode('utf-8'))
 
     def write(self, key, value):
         super(KafkaWriter, self).write(key, value)
         self.producer.send(self.topic, key=key, value=value)
+        self.producer.flush()

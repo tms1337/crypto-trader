@@ -38,7 +38,11 @@ class BotManager(LoggableMixin):
         return id in self.bots
 
     def get_bot_info(self, id):
-        raise NotImplementedError()
+        TypeChecker.check_type(id, str)
+        assert id in self.bots, \
+            "Bot %s not in bot list" % id
+
+        return self.bots[id].get_info()
 
     def type_parameters(self, type_name):
         assert type_name in self.types, \
@@ -50,12 +54,13 @@ class BotManager(LoggableMixin):
         assert type_name in self.types, \
             "Type name %s must be in type list" % type_name
 
-        bot = self.types[type_name](parameters)
-
         hash = random.getrandbits(128)
         id = "%032x" % hash
+        parameters["id"] = id
 
-        self.logger.debug("Starting bot %s" % id)
+        bot = self.types[type_name](parameters)
+
+        self.logger.info("Starting bot %s" % id)
 
         self.bots[id] = bot
 
@@ -64,12 +69,18 @@ class BotManager(LoggableMixin):
         return id
 
     def pause(self, id):
+        self.logger.info("Pausing bot %s" % id)
+
         self._enqueue_no_parameter_action(id, BotActionType.PAUSE)
 
     def resume(self, id):
+        self.logger.info("Resuming bot %s" % id)
+
         self._enqueue_no_parameter_action(id, BotActionType.RESUME)
 
     def stop(self, id):
+        self.logger.info("Stopping bot %s" % id)
+
         self._enqueue_no_parameter_action(id, BotActionType.STOP)
         self.bots.pop(id)
 
