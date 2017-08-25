@@ -40,6 +40,6 @@ manager = BotManager()
 manager.add_bot_type(PercentBotType)
 
 app = App(bot_manager=manager,
-          encoder=MQEncoder(mqwriter=KafkaWriter(topic="bot-manager")),
-          decoder=MQDecoder(mqlistener=KafkaListener(topic="bot-manager")))
+          encoder=MQEncoder(mqwriter=KafkaWriter(topic="bot-manager", host="ec2-35-177-28-173.eu-west-2.compute.amazonaws.com")),
+          decoder=MQDecoder(mqlistener=KafkaListener(topic="bot-manager", host="ec2-35-177-28-173.eu-west-2.compute.amazonaws.com")))
 app.run()
