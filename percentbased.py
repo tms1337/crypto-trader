@@ -156,6 +156,12 @@ class PercentBotType(BotType, LoggableMixin):
                 "description": "Percent for the long bot to sell to mitigate risk",
                 "type": "number"
             },
+            {
+                "name": "Image url",
+                "alias": "image_url",
+                "description": "url of a bot image",
+                "type": "text"
+            }
         ]
 
         return parameter_objects
