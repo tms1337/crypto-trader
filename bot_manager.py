@@ -37,22 +37,7 @@ logger.addHandler(ch)
 
 providers_pause_dt = 0.5
 
-keys_path = "/home/faruk/Desktop/production_keys/"
-
 parameters = {}
-
-parameters["stats_providers"] = {
-    # "poloniex": PoloniexStatsProvider(pause_dt=providers_pause_dt),
-    "bittrex": BittrexStatsProvider(pause_dt=providers_pause_dt),
-    # "bitfinex": BitfinexStatsProvider(),
-    # "kraken": KrakenStatsProvider()
-}
-parameters["trade_providers"] = {
-    # "poloniex": PoloniexTradeProvider(key_uri=("%s/poloniex" % keys_path), pause_dt=providers_pause_dt),
-    "bittrex": BittrexTradeProvider(key_uri=("%s/bittrex" % keys_path), pause_dt=providers_pause_dt),
-    # "bitfinex": BitfinexTradeProvider(key_uri=("%s/bitfinex" % keys_path)),
-    # "kraken": KrakenTradeProvider(key_uri=("%s/kraken" % keys_path))
-}
 parameters["daemon_dt"] = 60
 parameters["currencies_for_crypto"] = ["ETH", "LTC", "DASH"]
 parameters["trading_currency_for_crypto"] = "BTC"
@@ -63,9 +48,9 @@ parameters["short_security_loss_threshold"] = 0.2
 parameters["long_buy_threshold"] = 0.01
 parameters["long_sell_threshold"] = 0.05
 parameters["long_security_loss_threshold"] = 0.2
-
 parameters["image_url"] = "asd"
 parameters["name"] = "Lingona"
+parameters["id"]= "123123123123"
 
 manager = BotManager()
 
