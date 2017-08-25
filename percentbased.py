@@ -196,3 +196,5 @@ class PercentBotType(BotType, LoggableMixin):
         status["parameters"] = parameter_objects
         status["id"] = self.id
 
+        return status
+
