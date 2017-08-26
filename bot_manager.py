@@ -1,18 +1,15 @@
 import logging
 import sys
 
-
-from bot.exchange.bittrex.stats import BittrexStatsProvider
-from bot.exchange.bittrex.trade import BittrexTradeProvider
-
 from manager.botmanager import BotManager
 from percentbased import PercentBotType
-from service.app import App
+from service.service import Service
 from service.mq.kafka.kafkalistener import KafkaListener
 from service.mq.kafka.kafkawriter import KafkaWriter
 from service.mq.mqdecoder import MQDecoder
 from service.mq.mqencoder import MQEncoder
 
+from config import config
 
 logger = logging.getLogger('app')
 logger.setLevel(logging.DEBUG)
@@ -39,7 +36,7 @@ manager = BotManager()
 
 manager.add_bot_type(PercentBotType)
 
-app = App(bot_manager=manager,
-          encoder=MQEncoder(mqwriter=KafkaWriter(topic="bot-manager", host="ec2-35-177-28-173.eu-west-2.compute.amazonaws.com")),
-          decoder=MQDecoder(mqlistener=KafkaListener(topic="bot-manager", host="ec2-35-177-28-173.eu-west-2.compute.amazonaws.com")))
+app = Service(bot_manager=manager,
+              encoder=MQEncoder(mqwriter=KafkaWriter(topic=config["kafka"]["topic"], host=config["kafka"]["host"])),
+              decoder=MQDecoder(mqlistener=KafkaListener(topic="bot-manager", host=config["kafka"]["host"])))
 app.run()

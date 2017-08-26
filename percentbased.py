@@ -184,6 +184,7 @@ class PercentBotType(BotType, LoggableMixin):
 
     def get_info(self):
         status = {}
+        self.logger.debug("Status %s" % self.pause)
         if self.pause:
             status["status"] = "paused"
         else:

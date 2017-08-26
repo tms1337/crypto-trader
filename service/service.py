@@ -7,7 +7,7 @@ from util.asserting import TypeChecker
 from util.logging import LoggableMixin
 
 
-class App(LoggableMixin):
+class Service(LoggableMixin):
     def __init__(self,
                  bot_manager,
                  encoder,
