@@ -20,7 +20,7 @@ class Service(LoggableMixin):
         self.encoder = encoder
         self.decoder = decoder
 
-        LoggableMixin.__init__(self, App)
+        LoggableMixin.__init__(self, Service)
 
     def run(self):
         while True:
