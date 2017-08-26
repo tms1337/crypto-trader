@@ -9,7 +9,7 @@ from service.mq.kafka.kafkawriter import KafkaWriter
 from service.mq.mqdecoder import MQDecoder
 from service.mq.mqencoder import MQEncoder
 
-from config import config
+from conf.app import config
 
 logger = logging.getLogger('app')
 logger.setLevel(logging.DEBUG)
