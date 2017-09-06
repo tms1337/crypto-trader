@@ -32,6 +32,7 @@ class BittrexTradeProvider(PrivateBittrexProvider,
                     return 0.0
 
                 currency_balance = currency_balance[0]
+                print(currency_balance)
 
                 return float(currency_balance["Balance"])
             else:
