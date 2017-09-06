@@ -101,8 +101,7 @@ daemon = Daemon(blocks=[crypto_block],
                 dt_seconds=daemon_dt)
 
 if daemon is not None:
-    while True:
-        daemon.run()
+    daemon.run()
 
 
 # i bot se mora malo odmoriti
