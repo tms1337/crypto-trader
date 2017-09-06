@@ -20,6 +20,8 @@ from bot.exchange.bitfinex.trade import BitfinexTradeProvider
 from manager.bottype import BotType
 from util.logging import LoggableMixin
 
+from conf.app import config
+
 
 class PercentBotType(BotType, LoggableMixin):
     def __init__(self, parameters):
@@ -38,7 +40,7 @@ class PercentBotType(BotType, LoggableMixin):
         }
         trade_providers = {
             # "poloniex": PoloniexTradeProvider(key_uri=("%s/poloniex" % keys_path), pause_dt=providers_pause_dt),
-            "bittrex": BittrexTradeProvider(key_uri=("/home/ubuntu/production_keys/bittrex"), pause_dt=providers_pause_dt),
+            "bittrex": BittrexTradeProvider(key_uri=(config["bittrex"]["key_path"]), pause_dt=providers_pause_dt),
             # "bitfinex": BitfinexTradeProvider(key_uri=("%s/bitfinex" % keys_path)),
             # "kraken": KrakenTradeProvider(key_uri=("%s/kraken" % keys_path))
         }

@@ -34,20 +34,24 @@ class FixedValueVolumeDecider(VolumeDecider, LoggableMixin):
                 base_currency_balance = balance_matrix.get(exchange, base_currency).value
                 quote_price = self.values[base_currency] * decision.price
 
+                volume = self.values[base_currency] / quote_price
+
                 if decision.transaction_type == OfferType.BUY and \
-                        quote_currency_balance < quote_price:
+                                quote_currency_balance < quote_price:
                     self.logger.warn("Balance of %f%s not sufficient, %f is required" %
                                      (quote_currency_balance, quote_currency, quote_price))
                     self.logger.debug("Clearing transaction %s" % transaction)
                     transaction.decisions = []
+                    break
                 elif decision.transaction_type == OfferType.SELL and \
-                        base_currency_balance < self.values[base_currency]:
+                                base_currency_balance < volume:
                     self.logger.warn("Balance of %f%s not sufficient, %f is required" %
                                      (base_currency_balance, base_currency, self.values[base_currency]))
                     self.logger.debug("Clearing transaction %s" % transaction)
                     transaction.decisions = []
+                    break
 
-                decision.volume = self.values[base_currency]
+                decision.volume = volume
 
         return transactions
 

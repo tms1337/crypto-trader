@@ -24,7 +24,8 @@ class BittrexProvider(CurrencyMixin, Provider, LoggableMixin):
             "ETC": "ETC",
             "LTC": "LTC",
             "NEO": "NEO",
-            "QTUM": "QTUM"
+            "QTUM": "QTUM",
+            "LSK": "LSK"
         }
 
         return mapping
@@ -39,7 +40,8 @@ class BittrexProvider(CurrencyMixin, Provider, LoggableMixin):
             "ETC": "ETC",
             "LTC": "LTC",
             "NEO": "NEO",
-            "QTUM": "QTUM"
+            "QTUM": "QTUM",
+            "LSK": "LSK"
         }
 
         return currency_mapping
