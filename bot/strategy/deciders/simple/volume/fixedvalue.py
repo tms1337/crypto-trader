@@ -34,7 +34,7 @@ class FixedValueVolumeDecider(VolumeDecider, LoggableMixin):
                 base_currency_balance = balance_matrix.get(exchange, base_currency).value
                 quote_price = self.values[base_currency] * decision.price
 
-                volume = self.values[base_currency] / quote_price
+                volume = self.values[base_currency] / decision.price
 
                 if decision.transaction_type == OfferType.BUY and \
                                 quote_currency_balance < quote_price:
