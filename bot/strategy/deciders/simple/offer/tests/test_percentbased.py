@@ -1,4 +1,3 @@
-import pickle
 import unittest
 
 from bot.strategy.deciders.simple.offer.percentbased import PercentBasedOfferDecider
