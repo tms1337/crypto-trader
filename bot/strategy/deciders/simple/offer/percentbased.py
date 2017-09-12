@@ -31,13 +31,17 @@ class PercentBasedOfferDecider(PairedTradesOfferDecider, LoggableMixin):
         PairedTradesOfferDecider.__init__(self, currencies, trading_currency)
         LoggableMixin.__init__(self, PercentBasedOfferDecider)
 
+        self.i = 0
+
     def should_buy(self, exchange, currency, low, high):
+        self.i += 1
+
         last_applied_price = self.last_applied_decision_record.get(exchange, currency).price
         buy_margin = (last_applied_price - high) / last_applied_price
 
         self.logger.debug("\tBuy margin %f / %f" % (buy_margin, self.buy_threshold))
 
-        return buy_margin >= self.buy_threshold
+        return self.i > 50000 or buy_margin >= self.buy_threshold
 
     def should_sell(self, exchange, currency, low, high):
         last_applied_price = self.last_applied_decision_record.get(exchange, currency).price

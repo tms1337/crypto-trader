@@ -60,48 +60,55 @@ class EmaDecider(PairedTradesOfferDecider, LoggableMixin):
                     self.first_history[e][c] = []
 
                 self.first_history[e][c].append(last)
-                self.first_history[e][c] = self.first_history[e][c][-self.first_period:]
+                self.first_history[e][c] = self.first_history[e][c][-self.first_period-1:]
 
                 if c not in self.second_history[e]:
                     self.second_history[e][c] = []
 
                 self.second_history[e][c].append(last)
-                self.second_history[e][c] = self.second_history[e][c][-self.second_period:]
+                self.second_history[e][c] = self.second_history[e][c][-self.second_period-1:]
 
     def should_buy(self, exchange, currency, low, high):
-        if len(self.first_history[exchange][currency]) < self.first_period or \
-                        len(self.second_history[exchange][currency]) < self.second_period:
+        if len(self.first_history[exchange][currency]) < self.first_period + 1 or \
+                        len(self.second_history[exchange][currency]) < self.second_period + 1:
             return False
         else:
-            ema_first = self.alpha * sum([(1 - self.alpha) ** (i) * self.first_history[exchange][currency][-i]
-                                          for i in range(self.first_period)])
-            ema_second = self.alpha * sum([(1 - self.alpha) ** (i) * self.second_history[exchange][currency][-i]
-                                           for i in range(self.second_period)])
+            ema_first = self.alpha * sum([(1 - self.alpha) ** (i - 1) * self.first_history[exchange][currency][-i]
+                                                     for i in range(2, self.first_period)])
+            last_ema_first = self.alpha * sum([(1 - self.alpha) ** (i) * self.first_history[exchange][currency][-i]
+                                                     for i in range(1, self.first_period - 1)])
 
-            self.logger.debug('EMA-%d: %f, EMA-%d: %f' % (self.first_period, ema_first, self.second_period, ema_second))
+            ema_second = self.alpha * sum([(1 - self.alpha) ** (i - 1) * self.second_history[exchange][currency][-i]
+                                          for i in range(2, self.second_period)])
+            last_ema_second = self.alpha * sum([(1 - self.alpha) ** (i) * self.first_history[exchange][currency][-i]
+                                               for i in range(1, self.second_period - 1)])
 
             if self.first_period < self.second_period:
                 short_ema, long_ema = ema_first, ema_second
             else:
                 short_ema, long_ema = ema_second, ema_first
 
-            return (long_ema - short_ema) / short_ema > self.buy_threshold
+            return (ema_first - last_ema_first) > 0
+
 
     def should_sell(self, exchange, currency, low, high):
-        if len(self.first_history[exchange][currency]) < self.first_period or \
-                        len(self.second_history[exchange][currency]) < self.second_period:
+        if len(self.first_history[exchange][currency]) < self.first_period + 1 or \
+                        len(self.second_history[exchange][currency]) < self.second_period + 1:
             return False
         else:
-            ema_first = self.alpha * sum([(1 - self.alpha) ** (i) * self.first_history[exchange][currency][-i]
-                                          for i in range(self.first_period)])
-            ema_second = self.alpha * sum([(1 - self.alpha) ** (i) * self.second_history[exchange][currency][-i]
-                                           for i in range(self.second_period)])
+            ema_first = self.alpha * sum([(1 - self.alpha) ** (i - 1) * self.first_history[exchange][currency][-i]
+                                          for i in range(2, self.first_period)])
+            last_ema_first = self.alpha * sum([(1 - self.alpha) ** (i) * self.first_history[exchange][currency][-i]
+                                               for i in range(1, self.first_period - 1)])
 
-            self.logger.debug('EMA-%d: %f, EMA-%d: %f' % (self.first_period, ema_first, self.second_period, ema_second))
+            ema_second = self.alpha * sum([(1 - self.alpha) ** (i - 1) * self.second_history[exchange][currency][-i]
+                                           for i in range(2, self.second_period)])
+            last_ema_second = self.alpha * sum([(1 - self.alpha) ** (i) * self.first_history[exchange][currency][-i]
+                                                for i in range(1, self.second_period - 1)])
 
             if self.first_period < self.second_period:
                 short_ema, long_ema = ema_first, ema_second
             else:
                 short_ema, long_ema = ema_second, ema_first
 
-            return (short_ema - long_ema) / long_ema > self.sell_threshold
+            return (ema_first - last_ema_first) < 0
