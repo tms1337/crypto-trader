@@ -91,8 +91,10 @@ class InformerHistoricDataMock(Informer):
 
 
 class EmaTests:
-    def __init__(self, table, decider):
+    def __init__(self, table, decider, parms):
         self.decider = decider
+        self.table = table
+        self.parms = parms
 
         cache_file_name = '%s.npy' % table
 
@@ -139,8 +141,6 @@ class EmaTests:
 
             price_history.append(price)
 
-            plt.clf()
-
             for t in transactions:
                 for d in t.decisions:
                     if d.transaction_type == OfferType.BUY:
@@ -155,38 +155,45 @@ class EmaTests:
             if total_balance_history[-1] <= 0:
                 break
 
-            if i > 0 and i % 10000 == 0:
-                print('Balances ', balances, ' price ', price)
-                plt.plot()
-                plt.plot(trading_currency_balance_history)
-                plt.plot(total_balance_history)
-                plt.plot(price_history)
-                plt.pause(0.001)
-
             decider.apply_last()
 
         plt.clf()
         plt.plot(trading_currency_balance_history)
         plt.plot(price_history)
-        # open('/home/faruk/workspace/crypto-trader/bot/strategy/analysis/reports/poloniex_btc_usdt_buyandsell.png', 'w+').close()
-        # plt.savefig('/home/faruk/workspace/crypto-trader/bot/strategy/analysis/reports/poloniex_btc_usdt_buyandsell.png')
+
+        file_name = '%s_%s.png' % (self.table, self.parms)
+        open(file_name, 'w+').close()
+        plt.savefig(file_name)
+
+        return total_balance_history[-1]
 
 
 if __name__ == '__main__':
     trading_currency = 'USDT'
 
-    decider = PercentBasedOfferDecider(currencies=['BTC'],
-                                       trading_currency=trading_currency,
-                                       buy_threshold=0.005,
-                                       sell_threshold=0.03,
-                                       security_loss_threshold=0.1)
-    decider = EmaDecider(currencies=['BTC'],
-                         trading_currency=trading_currency,
-                         buy_threshold=1e-6,
-                         sell_threshold=1e-6,
-                         first_period=50,
-                         second_period=22,
-                         alpha=0.7)
-    tests = EmaTests('poloniex_btc_usdt_5mins_ohlcv', decider)
+    best_parms = None
+    best_final_balance = None
 
-    tests.test_historical_data()
+    for first_period in reversed([50]):
+        for second_period in [150]:
+            if first_period < second_period:
+                parms = (first_period, second_period)
+                print('Checking (%f, %f)' % parms)
+
+                decider = EmaDecider(currencies=['BTC'],
+                                     trading_currency=trading_currency,
+                                     buy_threshold=1e-6,
+                                     sell_threshold=1e-6,
+                                     first_period=first_period,
+                                     second_period=second_period)
+                tests = EmaTests('poloniex_btc_usdt_5mins_ohlcv', decider, parms)
+                final_balance = tests.test_historical_data()
+
+                print('Final balance for %s is %f' % (parms, final_balance))
+
+                if best_final_balance is None or final_balance > best_final_balance:
+                    best_final_balance = final_balance
+                    best_parms = parms
+
+
+    print('Best parms %s' % best_parms)

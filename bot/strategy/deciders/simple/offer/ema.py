@@ -1,31 +1,32 @@
-from bot.strategy.deciders.simple.offer.pairedtrades import PairedTradesOfferDecider
+from bot.strategy.deciders.simple.offer.historydecider import HistoryOfferDecider
 from util.asserting import TypeChecker
 from util.logging import LoggableMixin
 
 
-class EmaDecider(PairedTradesOfferDecider, LoggableMixin):
+class EmaDecider(HistoryOfferDecider, LoggableMixin):
     def __init__(self,
                  currencies,
                  trading_currency,
                  buy_threshold=0.01,
                  sell_threshold=0.01,
                  first_period=12,
-                 second_period=26,
-                 alpha=0.5):
+                 second_period=26):
         TypeChecker.check_type(first_period, int)
         assert first_period > 0, "First period must be greater than 0"
-        self.first_period = first_period
+        self.short_period = first_period
 
         TypeChecker.check_type(second_period, int)
         assert second_period > 0, "Second period must be greater than 0"
-        self.second_period = second_period
+        self.long_period = second_period
 
         assert first_period != second_period, "Periods must be different"
 
-        TypeChecker.check_type(alpha, float)
-        assert alpha > 0, "Alpha must be greater than 0"
-        assert alpha < 1, "Alpha must be less than 1"
-        self.alpha = alpha
+        if self.short_period > self.long_period:
+            self.short_period, self.long_period = self.long_period, self.short_period
+
+        self.alpha_short = 2 / (self.short_period + 1)
+        self.alpha_long = 2 / (self.long_period + 1)
+        self.ema_short, self.ema_long = {}, {}
 
         TypeChecker.check_type(buy_threshold, float)
         assert buy_threshold > 0, "Buy threshold must be greater than 0"
@@ -37,78 +38,42 @@ class EmaDecider(PairedTradesOfferDecider, LoggableMixin):
         assert sell_threshold < 1, "Sell threshold must be less than 1"
         self.sell_threshold = sell_threshold
 
-        self.first_history = {}
-        self.second_history = {}
-
-        PairedTradesOfferDecider.__init__(self, currencies, trading_currency)
+        HistoryOfferDecider.__init__(self, currencies, trading_currency, 2 * self.long_period)
         LoggableMixin.__init__(self, EmaDecider)
 
-    def update_stats(self, stats_matrix):
-        for e in stats_matrix.all_exchanges():
-            if e not in self.first_history:
-                self.first_history[e] = {}
-
-            if e not in self.second_history:
-                self.second_history[e] = {}
-
-            for c in stats_matrix.all_currencies():
-                last = stats_matrix.get(e, c).last
-                if last is None:
-                    continue
-
-                if c not in self.first_history[e]:
-                    self.first_history[e][c] = []
-
-                self.first_history[e][c].append(last)
-                self.first_history[e][c] = self.first_history[e][c][-self.first_period-1:]
-
-                if c not in self.second_history[e]:
-                    self.second_history[e][c] = []
-
-                self.second_history[e][c].append(last)
-                self.second_history[e][c] = self.second_history[e][c][-self.second_period-1:]
-
     def should_buy(self, exchange, currency, low, high):
-        if len(self.first_history[exchange][currency]) < self.first_period + 1 or \
-                        len(self.second_history[exchange][currency]) < self.second_period + 1:
-            return False
+        self._update_emas()
+
+        if self._emas_ready():
+            return self.ema_short[exchange][currency] >  self.history[exchange][currency][-1] #self.ema_long[exchange][currency]
         else:
-            ema_first = self.alpha * sum([(1 - self.alpha) ** (i - 1) * self.first_history[exchange][currency][-i]
-                                                     for i in range(2, self.first_period)])
-            last_ema_first = self.alpha * sum([(1 - self.alpha) ** (i) * self.first_history[exchange][currency][-i]
-                                                     for i in range(1, self.first_period - 1)])
-
-            ema_second = self.alpha * sum([(1 - self.alpha) ** (i - 1) * self.second_history[exchange][currency][-i]
-                                          for i in range(2, self.second_period)])
-            last_ema_second = self.alpha * sum([(1 - self.alpha) ** (i) * self.first_history[exchange][currency][-i]
-                                               for i in range(1, self.second_period - 1)])
-
-            if self.first_period < self.second_period:
-                short_ema, long_ema = ema_first, ema_second
-            else:
-                short_ema, long_ema = ema_second, ema_first
-
-            return (ema_first - last_ema_first) > 0
-
+            return False
 
     def should_sell(self, exchange, currency, low, high):
-        if len(self.first_history[exchange][currency]) < self.first_period + 1 or \
-                        len(self.second_history[exchange][currency]) < self.second_period + 1:
-            return False
+        self._update_emas()
+
+        if self._emas_ready():
+            return self.ema_short[exchange][currency] <  self.history[exchange][currency][-1] # self.ema_long[exchange][currency]
         else:
-            ema_first = self.alpha * sum([(1 - self.alpha) ** (i - 1) * self.first_history[exchange][currency][-i]
-                                          for i in range(2, self.first_period)])
-            last_ema_first = self.alpha * sum([(1 - self.alpha) ** (i) * self.first_history[exchange][currency][-i]
-                                               for i in range(1, self.first_period - 1)])
+            return False
 
-            ema_second = self.alpha * sum([(1 - self.alpha) ** (i - 1) * self.second_history[exchange][currency][-i]
-                                           for i in range(2, self.second_period)])
-            last_ema_second = self.alpha * sum([(1 - self.alpha) ** (i) * self.first_history[exchange][currency][-i]
-                                                for i in range(1, self.second_period - 1)])
+    def _update_emas(self):
+        for e in self.history:
+            for c in self.history[e]:
+                if len(self.history[e][c]) < self.period:
+                    return
 
-            if self.first_period < self.second_period:
-                short_ema, long_ema = ema_first, ema_second
-            else:
-                short_ema, long_ema = ema_second, ema_first
+                if e not in self.ema_short:
+                    self.ema_short[e] = {}
 
-            return (ema_first - last_ema_first) < 0
+                if e not in self.ema_long:
+                    self.ema_long[e] = {}
+
+                self.ema_short[e][c] = self.alpha_short * sum([(1 - self.alpha_short) ** (i - 1) * self.history[e][c][-i]
+                                              for i in range(1, self.period)])
+
+                self.ema_long[e][c] = self.alpha_long * sum([(1 - self.alpha_long) ** (i - 1) * self.history[e][c][-i]
+                                                         for i in range(1, self.period)])
+
+    def _emas_ready(self):
+        return self.ema_short != {} and self.ema_long != {}
