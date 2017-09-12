@@ -45,7 +45,7 @@ class EmaDecider(HistoryOfferDecider, LoggableMixin):
         self._update_emas()
 
         if self._emas_ready():
-            return self.ema_short[exchange][currency] >  self.history[exchange][currency][-1] #self.ema_long[exchange][currency]
+            return self.ema_short[exchange][currency] < 0.98 * self.ema_long[exchange][currency]
         else:
             return False
 
@@ -53,7 +53,7 @@ class EmaDecider(HistoryOfferDecider, LoggableMixin):
         self._update_emas()
 
         if self._emas_ready():
-            return self.ema_short[exchange][currency] <  self.history[exchange][currency][-1] # self.ema_long[exchange][currency]
+            return self.ema_short[exchange][currency] > 1.02 * self.ema_long[exchange][currency]
         else:
             return False
 

@@ -91,12 +91,13 @@ class InformerHistoricDataMock(Informer):
 
 
 class EmaTests:
-    def __init__(self, table, decider, parms):
+    def __init__(self, table, decider, parms, plot_steps=False):
         self.decider = decider
         self.table = table
         self.parms = parms
+        self.plot_steps = plot_steps
 
-        cache_file_name = '%s.npy' % table
+        cache_file_name = 'cache/%s.npy' % table
 
         if os.path.exists(cache_file_name):
             print('Getting data from cached file')
@@ -118,7 +119,7 @@ class EmaTests:
         print('Got %d datapoints' % values.shape[0])
 
         self.step_n = values.shape[0]
-        self.informer = InformerHistoricDataMock(values, exchanges=['poloniex'], currencies=['BTC'])
+        self.informer = InformerHistoricDataMock(values, exchanges=['poloniex'], currencies=self.decider.currencies)
 
     def test_historical_data(self):
         decider = self.decider
@@ -135,65 +136,90 @@ class EmaTests:
         price_history = []
         plt.ion()
 
+        last_offer_type = None
+
         for i in range(self.step_n - 1):
             transactions = decider.decide(self.informer)
-            price = self.informer.get_stats_matrix(increment=False).get('poloniex', 'BTC').last
+            price = self.informer.get_stats_matrix(increment=False).get('poloniex', decider.currencies[0]).last
 
             price_history.append(price)
 
             for t in transactions:
                 for d in t.decisions:
-                    if d.transaction_type == OfferType.BUY:
-                        balances[trading_currency] -= d.price * volumes[d.base_currency]
-                        balances[d.base_currency] += volumes[d.base_currency]
-                    else:
-                        balances[trading_currency] += d.price * volumes[d.base_currency]
-                        balances[d.base_currency] -= volumes[d.base_currency]
+                    volume = volumes[d.base_currency]
 
-            trading_currency_balance_history.append(balances[trading_currency])
-            total_balance_history.append(balances[trading_currency] + price * balances['BTC'])
-            if total_balance_history[-1] <= 0:
-                break
+                    if d.transaction_type == OfferType.BUY:
+                        balances[trading_currency] -= d.price * volume
+                        balances[d.base_currency] += volume
+                        last_offer_type = OfferType.BUY
+                    else:
+                        balances[trading_currency] += d.price * volume
+                        balances[d.base_currency] -= volume
+                        volumes[d.base_currency] = 0.5 * balances[trading_currency] / price
+                        last_offer_type = OfferType.SELL
+
+            if last_offer_type == OfferType.BUY:
+                color = 'r'
+            else:
+                color = 'b'
+
+            balance_in_currencies = balances[trading_currency] + price * balances[decider.currencies[0]]
+            if i % 8640 == 0:
+                trading_currency_balance_history.append((i, balance_in_currencies, color))
+            total_balance_history.append(balance_in_currencies)
+
+            if self.plot_steps and i > 0 and i % (50 * 10**3) == 0:
+                print('Balances ', balances, ' price ', price)
+
+                self.plot_history(price_history, total_balance_history, trading_currency_balance_history)
 
             decider.apply_last()
 
-        plt.clf()
-        plt.plot(trading_currency_balance_history)
-        plt.plot(price_history)
-
-        file_name = '%s_%s.png' % (self.table, self.parms)
+        file_name = 'reports/%s_%s.png' % (self.table, self.parms)
         open(file_name, 'w+').close()
+
+        self.plot_history(price_history, total_balance_history, trading_currency_balance_history)
         plt.savefig(file_name)
 
-        return total_balance_history[-1]
+        return trading_currency_balance_history[-1][1]
+
+    def plot_history(self, price_history, total_balance_history, trading_currency_balance_history):
+        plt.clf()
+        for b in trading_currency_balance_history:
+            plt.scatter([b[0]], [b[1]], color=b[2], marker='^')
+        scaled_price_history = price_history / max(price_history)
+        scaled_price_history *= max([b[1] for b in trading_currency_balance_history]) / 2
+        plt.plot(scaled_price_history, color='g', alpha=0.7)
+        plt.plot(total_balance_history, color='b', alpha=0.4)
+        plt.pause(0.001)
 
 
 if __name__ == '__main__':
-    trading_currency = 'USDT'
+    trading_currency = 'BTC'
 
     best_parms = None
     best_final_balance = None
 
-    for first_period in reversed([50]):
-        for second_period in [150]:
+    for first_period in [25, 50, 100]:
+        for second_period in [50, 75, 150, 200, 300]:
             if first_period < second_period:
                 parms = (first_period, second_period)
                 print('Checking (%f, %f)' % parms)
 
-                decider = EmaDecider(currencies=['BTC'],
+                decider = EmaDecider(currencies=['ETH'],
                                      trading_currency=trading_currency,
                                      buy_threshold=1e-6,
                                      sell_threshold=1e-6,
                                      first_period=first_period,
                                      second_period=second_period)
-                tests = EmaTests('poloniex_btc_usdt_5mins_ohlcv', decider, parms)
+                tests = EmaTests('poloniex_eth_btc_5mins_ohlcv', decider, parms, plot_steps=True)
                 final_balance = tests.test_historical_data()
-
-                print('Final balance for %s is %f' % (parms, final_balance))
 
                 if best_final_balance is None or final_balance > best_final_balance:
                     best_final_balance = final_balance
                     best_parms = parms
 
+                print('Final balance for %s is %f' % (parms, final_balance))
 
-    print('Best parms %s' % best_parms)
+
+    print('Best parms %s' % str(best_parms))
