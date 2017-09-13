@@ -1,22 +1,17 @@
-import os
-import unittest
-
-from pymongo import MongoClient
-
-from bot.strategy.deciders.simple.offer.ema.ema import EmaDecider
-from bot.strategy.deciders.simple.offer.ema.reinforcement import ReinforcementEmaOfferDecider
-from bot.strategy.deciders.simple.offer.percentbased import PercentBasedOfferDecider
-from bot.strategy.decision import OfferType
-from bot.strategy.pipeline import informer
-from bot.strategy.pipeline.data.statsmatrix import StatsMatrix, StatsCell
-from bot.strategy.pipeline.informer import Informer
-
-import pandas as pd
-import numpy as np
 import logging
+import os
 import sys
 
 import matplotlib.pyplot as plt
+import numpy as np
+import pandas as pd
+from pymongo import MongoClient
+
+# from bot.strategy.deciders.simple.offer.ema.reinforcement import ReinforcementEmaOfferDecider
+from bot.strategy.deciders.simple.offer.ema.simple import SimpleEmaOfferDecider
+from bot.strategy.decision import OfferType
+from bot.strategy.pipeline.data.statsmatrix import StatsMatrix, StatsCell
+from bot.strategy.pipeline.informer import Informer
 
 logger = logging.getLogger('app')
 logger.setLevel(logging.DEBUG)
@@ -155,15 +150,13 @@ class EmaTests:
 
                     if d.transaction_type == OfferType.BUY:
                         balances[trading_currency] -= d.price * volume
-                        balances[trading_currency] -= d.price * volume * 0.0025
-                        balances[d.base_currency] += volume
+                        balances[d.base_currency] += volume * 0.9975
                         last_offer_type = OfferType.BUY
-                        print('Buy ', price)
                     else:
                         balances[trading_currency] += d.price * volume * 0.9975
+                        balances[d.base_currency] -= volume
                         volumes[d.base_currency] = self.vol_percent * balances[trading_currency] / price
                         last_offer_type = OfferType.SELL
-                        print('Sell ', price)
 
             if last_offer_type == OfferType.BUY:
                 color = 'r'
@@ -185,12 +178,12 @@ class EmaTests:
                 if reward < 0:
                     reward *= 2
 
-                print('Reward %f' % reward)
+                # print('Reward %f' % reward)
             else:
                 reward = 0
 
             decider.apply_last()
-            decider.apply_reward(reward)
+            # decider.apply_reward(reward)
 
         file_name = 'reports/%s_%s.png' % (self.table, self.parms)
         open(file_name, 'w+').close()
@@ -221,7 +214,7 @@ if __name__ == '__main__':
     best_parms = None
     best_final_balance = None
 
-    percent = 0.03
+    percent = 0.1
 
     for first_period in [100]:
         for second_period in [300]:
@@ -229,20 +222,20 @@ if __name__ == '__main__':
                 parms = (first_period, second_period, percent)
                 print('Checking (%f, %f, %f)' % parms)
 
-                decider = EmaDecider(currencies=[currency],
-                                     trading_currency=trading_currency,
-                                     buy_threshold=1e-6,
-                                     sell_threshold=1e-6,
-                                     first_period=first_period,
-                                     second_period=second_period)
-                decider = ReinforcementEmaOfferDecider(currencies=[currency],
-                                                       trading_currency=trading_currency,
-                                                       buy_threshold=1e-6,
-                                                       sell_threshold=1e-6,
-                                                       first_period=first_period,
-                                                       second_period=second_period,
-                                                       alpha=0.7,
-                                                       gamma=0.4)
+                decider = SimpleEmaOfferDecider(currencies=[currency],
+                                                trading_currency=trading_currency,
+                                                buy_threshold=1e-6,
+                                                sell_threshold=1e-6,
+                                                first_period=first_period,
+                                                second_period=second_period)
+                # decider = ReinforcementEmaOfferDecider(currencies=[currency],
+                #                                        trading_currency=trading_currency,
+                #                                        buy_threshold=1e-6,
+                #                                        sell_threshold=1e-6,
+                #                                        first_period=first_period,
+                #                                        second_period=second_period,
+                #                                        alpha=0.7,
+                #                                        gamma=0.4)
                 tests = EmaTests('poloniex_%s_%s_5mins_ohlcv' % (currency.lower(), trading_currency.lower()), decider,
                                  parms, percent, plot_steps=True)
                 final_balance = tests.test_historical_data()

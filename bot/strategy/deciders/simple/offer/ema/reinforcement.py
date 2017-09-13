@@ -83,6 +83,8 @@ class ReinforcementEmaOfferDecider(EmaDecider, LoggableMixin):
 
             softmax_values = self._softmax([q[1] for q in Q]).flatten()
 
+            print(softmax_values)
+
             chosen_index = np.random.choice(len(Q), 1, p=softmax_values)[0]
 
             chosen_action = Q[chosen_index][0]
@@ -112,6 +114,9 @@ class ReinforcementEmaOfferDecider(EmaDecider, LoggableMixin):
 
             softmax_values = self._softmax([q[1] for q in Q]).flatten()
 
+            print(softmax_values)
+
+
             chosen_index = np.random.choice(len(Q), 1, p=softmax_values)[0]
 
             chosen_action = Q[chosen_index][0]
@@ -138,6 +143,6 @@ class ReinforcementEmaOfferDecider(EmaDecider, LoggableMixin):
 
             y = Q + self.alpha * (reward + self.gamma * max_Q - Q)
 
-            print('Comparison ', Q, y)
+            # print('Comparison ', Q, y)
 
-            self.last_nn.fit(x, y, epochs=1, batch_size=1, verbose=1)
+            self.last_nn.fit(x, y, epochs=1, batch_size=1, verbose=0)
