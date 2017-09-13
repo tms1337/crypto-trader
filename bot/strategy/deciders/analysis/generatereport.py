@@ -3,7 +3,8 @@ import unittest
 
 from pymongo import MongoClient
 
-from bot.strategy.deciders.simple.offer.ema import EmaDecider
+from bot.strategy.deciders.simple.offer.ema.ema import EmaDecider
+from bot.strategy.deciders.simple.offer.ema.reinforcement import ReinforcementEmaOfferDecider
 from bot.strategy.deciders.simple.offer.percentbased import PercentBasedOfferDecider
 from bot.strategy.decision import OfferType
 from bot.strategy.pipeline import informer
@@ -140,6 +141,9 @@ class EmaTests:
         last_offer_type = None
 
         for i in range(self.step_n - 1):
+            if i % 1000 == 0:
+                print(i)
+
             transactions = decider.decide(self.informer)
             price = self.informer.get_stats_matrix(increment=False).get('poloniex', decider.currencies[0]).last
 
@@ -154,10 +158,12 @@ class EmaTests:
                         balances[trading_currency] -= d.price * volume * 0.0025
                         balances[d.base_currency] += volume
                         last_offer_type = OfferType.BUY
+                        print('Buy ', price)
                     else:
                         balances[trading_currency] += d.price * volume * 0.9975
                         volumes[d.base_currency] = self.vol_percent * balances[trading_currency] / price
                         last_offer_type = OfferType.SELL
+                        print('Sell ', price)
 
             if last_offer_type == OfferType.BUY:
                 color = 'r'
@@ -169,12 +175,22 @@ class EmaTests:
                 trading_currency_balance_history.append((i, balance_in_currencies, color))
             total_balance_history.append(balance_in_currencies)
 
-            if self.plot_steps and i > 0 and i % (10 * 10**3) == 0:
+            if self.plot_steps and i > 0 and i % (2 * 10 ** 3) == 0:
                 print('Balances ', balances, ' price ', price)
 
                 self.plot_history(price_history, total_balance_history, trading_currency_balance_history)
 
+            if len(total_balance_history) >= 2:
+                reward = 100 * (total_balance_history[-2] - total_balance_history[-1]) / total_balance_history[-1]
+                if reward < 0:
+                    reward *= 2
+
+                print('Reward %f' % reward)
+            else:
+                reward = 0
+
             decider.apply_last()
+            decider.apply_reward(reward)
 
         file_name = 'reports/%s_%s.png' % (self.table, self.parms)
         open(file_name, 'w+').close()
@@ -199,8 +215,8 @@ class EmaTests:
 
 
 if __name__ == '__main__':
-    trading_currency = 'BTC'
-    currency = 'DOGE'
+    trading_currency = 'USDT'
+    currency = 'ETH'
 
     best_parms = None
     best_final_balance = None
@@ -213,13 +229,22 @@ if __name__ == '__main__':
                 parms = (first_period, second_period, percent)
                 print('Checking (%f, %f, %f)' % parms)
 
-                decider = EmaDecider(currencies=['DOGE'],
+                decider = EmaDecider(currencies=[currency],
                                      trading_currency=trading_currency,
                                      buy_threshold=1e-6,
                                      sell_threshold=1e-6,
                                      first_period=first_period,
                                      second_period=second_period)
-                tests = EmaTests('poloniex_%s_%s_5mins_ohlcv' % (currency.lower(), trading_currency.lower()), decider, parms, percent, plot_steps=True)
+                decider = ReinforcementEmaOfferDecider(currencies=[currency],
+                                                       trading_currency=trading_currency,
+                                                       buy_threshold=1e-6,
+                                                       sell_threshold=1e-6,
+                                                       first_period=first_period,
+                                                       second_period=second_period,
+                                                       alpha=0.7,
+                                                       gamma=0.4)
+                tests = EmaTests('poloniex_%s_%s_5mins_ohlcv' % (currency.lower(), trading_currency.lower()), decider,
+                                 parms, percent, plot_steps=True)
                 final_balance = tests.test_historical_data()
 
                 if best_final_balance is None or final_balance > best_final_balance:
@@ -227,6 +252,5 @@ if __name__ == '__main__':
                     best_parms = parms
 
                 print('Final balance for %s is %f' % (parms, final_balance))
-
 
     print('Best parms %s' % str(best_parms))
