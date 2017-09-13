@@ -91,11 +91,12 @@ class InformerHistoricDataMock(Informer):
 
 
 class EmaTests:
-    def __init__(self, table, decider, parms, plot_steps=False):
+    def __init__(self, table, decider, parms, vol_percent, plot_steps=False):
         self.decider = decider
         self.table = table
         self.parms = parms
         self.plot_steps = plot_steps
+        self.vol_percent = vol_percent
 
         cache_file_name = 'cache/%s.npy' % table
 
@@ -150,12 +151,12 @@ class EmaTests:
 
                     if d.transaction_type == OfferType.BUY:
                         balances[trading_currency] -= d.price * volume
+                        balances[trading_currency] -= d.price * volume * 0.0025
                         balances[d.base_currency] += volume
                         last_offer_type = OfferType.BUY
                     else:
-                        balances[trading_currency] += d.price * volume
-                        balances[d.base_currency] -= volume
-                        volumes[d.base_currency] = 0.5 * balances[trading_currency] / price
+                        balances[trading_currency] += d.price * volume * 0.9975
+                        volumes[d.base_currency] = self.vol_percent * balances[trading_currency] / price
                         last_offer_type = OfferType.SELL
 
             if last_offer_type == OfferType.BUY:
@@ -168,7 +169,7 @@ class EmaTests:
                 trading_currency_balance_history.append((i, balance_in_currencies, color))
             total_balance_history.append(balance_in_currencies)
 
-            if self.plot_steps and i > 0 and i % (50 * 10**3) == 0:
+            if self.plot_steps and i > 0 and i % (10 * 10**3) == 0:
                 print('Balances ', balances, ' price ', price)
 
                 self.plot_history(price_history, total_balance_history, trading_currency_balance_history)
@@ -185,34 +186,40 @@ class EmaTests:
 
     def plot_history(self, price_history, total_balance_history, trading_currency_balance_history):
         plt.clf()
-        for b in trading_currency_balance_history:
-            plt.scatter([b[0]], [b[1]], color=b[2], marker='^')
+
         scaled_price_history = price_history / max(price_history)
         scaled_price_history *= max([b[1] for b in trading_currency_balance_history]) / 2
         plt.plot(scaled_price_history, color='g', alpha=0.7)
+
+        for b in trading_currency_balance_history:
+            plt.scatter([b[0]], [b[1]], color=b[2], marker='^')
+
         plt.plot(total_balance_history, color='b', alpha=0.4)
         plt.pause(0.001)
 
 
 if __name__ == '__main__':
     trading_currency = 'BTC'
+    currency = 'DOGE'
 
     best_parms = None
     best_final_balance = None
 
-    for first_period in [25, 50, 100]:
-        for second_period in [50, 75, 150, 200, 300]:
-            if first_period < second_period:
-                parms = (first_period, second_period)
-                print('Checking (%f, %f)' % parms)
+    percent = 0.03
 
-                decider = EmaDecider(currencies=['ETH'],
+    for first_period in [100]:
+        for second_period in [300]:
+            if first_period < second_period:
+                parms = (first_period, second_period, percent)
+                print('Checking (%f, %f, %f)' % parms)
+
+                decider = EmaDecider(currencies=['DOGE'],
                                      trading_currency=trading_currency,
                                      buy_threshold=1e-6,
                                      sell_threshold=1e-6,
                                      first_period=first_period,
                                      second_period=second_period)
-                tests = EmaTests('poloniex_eth_btc_5mins_ohlcv', decider, parms, plot_steps=True)
+                tests = EmaTests('poloniex_%s_%s_5mins_ohlcv' % (currency.lower(), trading_currency.lower()), decider, parms, percent, plot_steps=True)
                 final_balance = tests.test_historical_data()
 
                 if best_final_balance is None or final_balance > best_final_balance:

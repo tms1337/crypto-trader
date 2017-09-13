@@ -38,24 +38,8 @@ class EmaDecider(HistoryOfferDecider, LoggableMixin):
         assert sell_threshold < 1, "Sell threshold must be less than 1"
         self.sell_threshold = sell_threshold
 
-        HistoryOfferDecider.__init__(self, currencies, trading_currency, 2 * self.long_period)
+        HistoryOfferDecider.__init__(self, currencies, trading_currency, self.long_period)
         LoggableMixin.__init__(self, EmaDecider)
-
-    def should_buy(self, exchange, currency, low, high):
-        self._update_emas()
-
-        if self._emas_ready():
-            return self.ema_short[exchange][currency] < 0.98 * self.ema_long[exchange][currency]
-        else:
-            return False
-
-    def should_sell(self, exchange, currency, low, high):
-        self._update_emas()
-
-        if self._emas_ready():
-            return self.ema_short[exchange][currency] > 1.02 * self.ema_long[exchange][currency]
-        else:
-            return False
 
     def _update_emas(self):
         for e in self.history:
@@ -70,10 +54,10 @@ class EmaDecider(HistoryOfferDecider, LoggableMixin):
                     self.ema_long[e] = {}
 
                 self.ema_short[e][c] = self.alpha_short * sum([(1 - self.alpha_short) ** (i - 1) * self.history[e][c][-i]
-                                              for i in range(1, self.period)])
+                                              for i in range(1, self.short_period)])
 
                 self.ema_long[e][c] = self.alpha_long * sum([(1 - self.alpha_long) ** (i - 1) * self.history[e][c][-i]
-                                                         for i in range(1, self.period)])
+                                                         for i in range(1, self.long_period)])
 
     def _emas_ready(self):
         return self.ema_short != {} and self.ema_long != {}
