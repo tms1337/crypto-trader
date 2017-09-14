@@ -33,5 +33,5 @@ class HistoryOfferDecider(PairedTradesOfferDecider, LoggableMixin):
                 if c not in self.history[e]:
                     self.history[e][c] = []
 
-                self.history[e][c].append(last)
+                self.history[e][c].append(stats_matrix.get(e, c))
                 self.history[e][c] = self.history[e][c][-self.period-1:]

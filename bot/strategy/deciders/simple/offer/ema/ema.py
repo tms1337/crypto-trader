@@ -27,6 +27,8 @@ class EmaDecider(HistoryOfferDecider, LoggableMixin):
         self.alpha_short = 2 / (self.short_period + 1)
         self.alpha_long = 2 / (self.long_period + 1)
         self.ema_short, self.ema_long = {}, {}
+        self.ema_short_history, self.ema_long_history = {}, {}
+
 
         TypeChecker.check_type(buy_threshold, float)
         assert buy_threshold > 0, "Buy threshold must be greater than 0"
@@ -43,6 +45,13 @@ class EmaDecider(HistoryOfferDecider, LoggableMixin):
 
     def _update_emas(self):
         for e in self.history:
+
+            if e not in self.ema_short_history:
+                self.ema_short_history[e] = { c: [] for c in self.history[e] }
+
+            if e not in self.ema_long_history:
+                self.ema_long_history[e] = { c: [] for c in self.history[e] }
+
             for c in self.history[e]:
                 if len(self.history[e][c]) < self.period:
                     return
@@ -53,11 +62,15 @@ class EmaDecider(HistoryOfferDecider, LoggableMixin):
                 if e not in self.ema_long:
                     self.ema_long[e] = {}
 
-                self.ema_short[e][c] = self.alpha_short * sum([(1 - self.alpha_short) ** (i - 1) * self.history[e][c][-i]
+                self.ema_short[e][c] = self.alpha_short * sum([(1 - self.alpha_short) ** (i - 1) * self.history[e][c][-i].close
                                               for i in range(1, self.short_period)])
+                self.ema_short_history[e][c].append(self.ema_short[e][c])
 
-                self.ema_long[e][c] = self.alpha_long * sum([(1 - self.alpha_long) ** (i - 1) * self.history[e][c][-i]
+
+                self.ema_long[e][c] = self.alpha_long * sum([(1 - self.alpha_long) ** (i - 1) * self.history[e][c][-i].close
                                                          for i in range(1, self.long_period)])
+                self.ema_long_history[e][c].append(self.ema_long[e][c])
+
 
     def _emas_ready(self):
         return self.ema_short != {} and self.ema_long != {}
