@@ -79,7 +79,7 @@ class PairedTradesOfferDecider(OfferDecider, LoggableMixin):
 
                     last_applied_decision = self.last_applied_decision_record.get(exchange, currency).offer_type
 
-                    if (last_applied_decision == OfferType.BUY) and \
+                    if (last_applied_decision == OfferType.BUY  or last_applied_decision is None) and \
                             self.should_sell(exchange, currency, low, high):
                         decision = Decision()
                         decision.exchange = exchange
@@ -95,7 +95,7 @@ class PairedTradesOfferDecider(OfferDecider, LoggableMixin):
                         cell.price = low
                         cell.offer_type = OfferType.SELL
                         self.last_decision_record.set(exchange, currency, cell)
-                    elif (last_applied_decision == OfferType.SELL  or last_applied_decision is None) and \
+                    elif (last_applied_decision == OfferType.SELL) and \
                             self.should_buy(exchange, currency, low, high):
                         decision = Decision()
                         decision.exchange = exchange

@@ -29,7 +29,7 @@ class SimpleEmaOfferDecider(EmaDecider, LoggableMixin):
                             second_period)
         LoggableMixin.__init__(self, SimpleEmaOfferDecider)
 
-    def should_buy(self, exchange, currency, low, high):
+    def should_sell(self, exchange, currency, low, high):
         self._update_emas()
 
         if self._emas_ready():
@@ -60,7 +60,7 @@ class SimpleEmaOfferDecider(EmaDecider, LoggableMixin):
         else:
             return False
 
-    def should_sell(self, exchange, currency, low, high):
+    def should_buy(self, exchange, currency, low, high):
         self._update_emas()
 
         if self._emas_ready():

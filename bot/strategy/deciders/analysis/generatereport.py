@@ -183,7 +183,7 @@ class EmaTests:
                     volume = volumes[d.base_currency]
                     # volume = self.vol_percent * 40000 / d.price
 
-                    if d.transaction_type == OfferType.SELL:
+                    if d.transaction_type == OfferType.BUY:
                         volume = abs(balances[d.base_currency])
                         balances[trading_currency] -= d.price * volume
                         balances[d.base_currency] += volume
