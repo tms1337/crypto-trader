@@ -310,7 +310,7 @@ if __name__ == '__main__':
                 #                                    buy_threshold=0.03,
                 #                                    sell_threshold=0.01,
                 #                                    security_loss_threshold=0.02)
-                tests = EmaTests('poloniex_%s_%s_4h_3m_ohlcv' % (currency.lower(), trading_currency.lower()), decider,
+                tests = EmaTests('poloniex_%s_%s_4h_6m_ohlcv' % (currency.lower(), trading_currency.lower()), decider,
                                  parms, percent, plot_steps=True)
                 final_balance = tests.test_historical_data()
 

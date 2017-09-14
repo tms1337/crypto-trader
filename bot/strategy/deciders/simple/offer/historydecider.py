@@ -16,6 +16,7 @@ class HistoryOfferDecider(PairedTradesOfferDecider, LoggableMixin):
         self.period = period
 
         self.history = {}
+        self.first_price = {}
 
         PairedTradesOfferDecider.__init__(self, currencies, trading_currency)
         LoggableMixin.__init__(self, HistoryOfferDecider)
@@ -24,6 +25,9 @@ class HistoryOfferDecider(PairedTradesOfferDecider, LoggableMixin):
         for e in stats_matrix.all_exchanges():
             if e not in self.history:
                 self.history[e] = {}
+
+            if e not in self.first_price:
+                self.first_price[e] = {}
 
             for c in stats_matrix.all_currencies():
                 last = stats_matrix.get(e, c).last
@@ -35,3 +39,6 @@ class HistoryOfferDecider(PairedTradesOfferDecider, LoggableMixin):
 
                 self.history[e][c].append(stats_matrix.get(e, c))
                 self.history[e][c] = self.history[e][c][-self.period-1:]
+
+                if c not in self.first_price[e]:
+                    self.first_price[e][c] = last

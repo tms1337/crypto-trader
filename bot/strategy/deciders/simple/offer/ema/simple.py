@@ -1,5 +1,7 @@
 import copy
 
+import math
+
 from bot.strategy.deciders.simple.offer.ema.ema import EmaDecider
 from util.logging import LoggableMixin
 
@@ -16,6 +18,7 @@ class SimpleEmaOfferDecider(EmaDecider, LoggableMixin):
                  second_period=26):
 
         self.was = False
+        self.percent = 0.05
 
         EmaDecider.__init__(self,
                             currencies,
@@ -26,7 +29,7 @@ class SimpleEmaOfferDecider(EmaDecider, LoggableMixin):
                             second_period)
         LoggableMixin.__init__(self, SimpleEmaOfferDecider)
 
-    def should_sell(self, exchange, currency, low, high):
+    def should_buy(self, exchange, currency, low, high):
         self._update_emas()
 
         if self._emas_ready():
@@ -57,7 +60,7 @@ class SimpleEmaOfferDecider(EmaDecider, LoggableMixin):
         else:
             return False
 
-    def should_buy(self, exchange, currency, low, high):
+    def should_sell(self, exchange, currency, low, high):
         self._update_emas()
 
         if self._emas_ready():
@@ -66,11 +69,15 @@ class SimpleEmaOfferDecider(EmaDecider, LoggableMixin):
 
             margin = (current_price - last_price) / last_price
 
-            if margin > 0.2:
-                self.was = True
-            else:
-                self.was = False
+            # print('Margin', margin, self.percent)
 
-            return margin > 0.02 or margin < -0.02
+            # if margin > self.percent:
+            #     self.was = True
+            #     self.percent *= (1 - self.percent)
+            # elif margin < -self.percent:
+            #     self.was = False
+            #     self.percent *= (1 + self.percent)
+
+            return margin > self.percent or margin < -self.percent
         else:
             return False
