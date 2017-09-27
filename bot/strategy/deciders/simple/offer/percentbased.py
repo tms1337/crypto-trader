@@ -45,7 +45,6 @@ class PercentBasedOfferDecider(PairedTradesOfferDecider, LoggableMixin):
             return buy_margin <= -0.05
         else:
             self.logger.debug("\tBuy margin %f / %f" % (buy_margin, self.buy_threshold))
-            print("\tBuy margin %f / %f" % (buy_margin, self.buy_threshold))
 
             return buy_margin >= self.buy_threshold
 
@@ -57,20 +56,15 @@ class PercentBasedOfferDecider(PairedTradesOfferDecider, LoggableMixin):
 
         self.logger.debug("\t\tCurrent profit for last buy %f" % (sell_margin * last_applied_price))
 
-        print('Sell margin ', sell_margin)
-
         if not self.was and sell_margin >= self.sell_threshold:
-            print('Over thresh')
             self.was = True
             self.was_security = False
             return False
         elif self.was and (sell_margin <= self.sell_threshold or sell_margin > 20 * self.sell_threshold):
-            print('Successfull sell')
             self.was = False
             self.was_security = False
             return True
         elif sell_margin <= -self.security_loss_threshold:
-            print('Failed sell')
             self.was = False
             self.was_security = True
             return True

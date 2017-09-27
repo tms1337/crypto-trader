@@ -76,17 +76,18 @@ class PairedTradesOfferDecider(OfferDecider, LoggableMixin):
 
                     low = stats_matrix.get(exchange, currency).low
                     high = stats_matrix.get(exchange, currency).high
+                    last = stats_matrix.get(exchange, currency).last
 
                     last_applied_decision = self.last_applied_decision_record.get(exchange, currency).offer_type
 
-                    if (last_applied_decision == OfferType.BUY  or last_applied_decision is None) and \
+                    if (last_applied_decision == OfferType.BUY) and \
                             self.should_sell(exchange, currency, low, high):
                         decision = Decision()
                         decision.exchange = exchange
                         decision.base_currency = currency
                         decision.quote_currency = self.trading_currency
                         decision.transaction_type = OfferType.SELL
-                        decision.price = low
+                        decision.price = last
                         decision.decider = self
 
                         transaction.add_decision(decision)
@@ -95,14 +96,14 @@ class PairedTradesOfferDecider(OfferDecider, LoggableMixin):
                         cell.price = low
                         cell.offer_type = OfferType.SELL
                         self.last_decision_record.set(exchange, currency, cell)
-                    elif (last_applied_decision == OfferType.SELL) and \
+                    elif (last_applied_decision == OfferType.SELL  or last_applied_decision is None) and \
                             self.should_buy(exchange, currency, low, high):
                         decision = Decision()
                         decision.exchange = exchange
                         decision.base_currency = currency
                         decision.quote_currency = self.trading_currency
                         decision.transaction_type = OfferType.BUY
-                        decision.price = high
+                        decision.price = last
                         decision.decider = self
 
                         transaction.add_decision(decision)

@@ -62,15 +62,16 @@ class EmaDecider(HistoryOfferDecider, LoggableMixin):
                 if e not in self.ema_long:
                     self.ema_long[e] = {}
 
-                self.ema_short[e][c] = self.alpha_short * sum([(1 - self.alpha_short) ** (i - 1) * self.history[e][c][-i].close
-                                              for i in range(1, self.short_period)])
-                self.ema_short_history[e][c].append(self.ema_short[e][c])
+                # self.ema_short[e][c] = self.alpha_short * sum([(1 - self.alpha_short) ** (i - 1) * self.history[e][c][-i].close
+                #                               for i in range(1, self.short_period)])
+                # self.ema_short_history[e][c].append(self.ema_short[e][c])
 
 
-                self.ema_long[e][c] = self.alpha_long * sum([(1 - self.alpha_long) ** (i - 1) * self.history[e][c][-i].close
-                                                         for i in range(1, self.long_period)])
-                self.ema_long_history[e][c].append(self.ema_long[e][c])
+                # self.ema_long[e][c] = self.alpha_long * sum([(1 - self.alpha_long) ** (i - 1) * self.history[e][c][-i].close
+                #                                          for i in range(1, self.long_period)])
+                # self.ema_long_history[e][c].append(self.ema_long[e][c])
 
 
     def _emas_ready(self):
+        return True
         return self.ema_short != {} and self.ema_long != {}
