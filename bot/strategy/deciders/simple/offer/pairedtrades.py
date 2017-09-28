@@ -116,7 +116,7 @@ class PairedTradesOfferDecider(OfferDecider, LoggableMixin):
                         cell = None
                         self.last_decision_record.set(exchange, currency, cell)
 
-        return [transaction]
+        return [transaction], {}
 
     def update_stats(self, stats_matrix):
         pass

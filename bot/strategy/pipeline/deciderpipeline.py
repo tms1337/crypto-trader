@@ -18,11 +18,14 @@ class DeciderPipeline:
         self.deciders.append(decider)
 
     def decide(self, informer):
+        data = {}
         all_transactions = []
         for d in self.deciders:
-            transactions = d.decide(informer)
+            transactions, decider_data = d.decide(informer)
             assert not transactions is None, \
                 "Decided transaction list should not be None"
+            TypeChecker.check_type(decider_data, dict)
             all_transactions.extend(transactions)
+            data.update(decider_data)
 
-        return all_transactions
+        return all_transactions, data

@@ -125,7 +125,7 @@ class ExchangeDiffOfferDecider(OfferDecider, LoggableMixin):
             transaction.add_decision(low_decision)
             transaction.add_decision(high_decision)
 
-        return [transaction]
+        return [transaction], {}
 
     def apply_last(self):
         pass

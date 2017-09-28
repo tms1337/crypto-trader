@@ -20,10 +20,12 @@ class SimpleCompositeDecider(Decider):
     def decide(self, informer):
         Decider.decide(self, informer)
 
-        transactions = self.offer_decider.decide(informer)
-        transactions = self.volume_decider.decide(transactions, informer)
+        transactions, offer_data = self.offer_decider.decide(informer)
+        transactions, volume_data = self.volume_decider.decide(transactions, informer)
 
-        return transactions
+        data = offer_data.update(volume_data)
+
+        return transactions, data
 
     def apply_last(self):
         assert not self.offer_decider is None, "offer_decider should not be None"

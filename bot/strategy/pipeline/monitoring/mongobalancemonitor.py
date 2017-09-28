@@ -58,7 +58,7 @@ class MongoBalanceMonitor(InfoMonitor, LoggableMixin):
         db = self.mongo_client[self.db_name]
         balance_records = db[self.name]
 
-        informer = self.monitored_data
+        informer = self.monitored_data['informer']
         record = {"time": time.time()}
 
         balance_matrix = informer.get_balances_matrix()

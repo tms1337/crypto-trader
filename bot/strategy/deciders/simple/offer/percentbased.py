@@ -23,9 +23,6 @@ class PercentBasedOfferDecider(PairedTradesOfferDecider, LoggableMixin):
         TypeChecker.check_type(security_loss_threshold, float)
         assert security_loss_threshold > 0, \
             "Security loss threshold must be greater than 0, value of %f given" % security_loss_threshold
-        # assert security_loss_threshold > buy_threshold, \
-        #     "Security loss threshold must be greater than buy threshold, value of %f <= %f given" \
-        #     % (security_loss_threshold, buy_threshold)
         self.security_loss_threshold = security_loss_threshold
 
         PairedTradesOfferDecider.__init__(self, currencies, trading_currency)

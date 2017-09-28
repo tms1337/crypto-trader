@@ -7,17 +7,13 @@ from util.logging import LoggableMixin
 
 class FixedValueVolumeDecider(VolumeDecider, LoggableMixin):
     def __init__(self,
-                 values,
-                 iceberg_n=5):
+                 values):
         TypeChecker.check_type(values, dict)
         for k in values:
             TypeChecker.check_type(k, str)
             TypeChecker.check_type(values[k], float)
 
         self.values = values
-
-        TypeChecker.check_one_of_types(iceberg_n, [float, int])
-        self.iceberg_n = iceberg_n
 
         LoggableMixin.__init__(self, FixedValueVolumeDecider)
 
