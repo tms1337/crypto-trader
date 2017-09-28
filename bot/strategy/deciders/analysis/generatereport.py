@@ -37,7 +37,7 @@ class InformerHistoricDataMock(Informer):
         return self.stats_matrix
 
 class MongoDataMock(Informer):
-    def __init__(self,exchanges=['poloniex'], currencies=['ETH']):
+    def __init__(self,exchanges=['poloniex'], currencies=['BTC']):
         self.stats_matrix = StatsMatrix(exchanges=exchanges, currencies=currencies)
 
         from pymongo import MongoClient
@@ -47,9 +47,10 @@ class MongoDataMock(Informer):
 
         client = MongoClient(mongo_host, mongo_port)
         self.db = client['historicalData']
-        self.collection = self.db['poloniex_eth_btc_5min']
+        self.collection = self.db['bitfinex_btc_tick']
 
         self.cursor = self.collection.find()
+        # self.cursor.skip(6000 * 10**3)
 
         self.last_price = 0
 
@@ -61,7 +62,7 @@ class MongoDataMock(Informer):
                 try:
                     data = self.cursor.next()
 
-                    price = float(data['close'])
+                    price = float(data['price'])
                     volume = float(data['volume'])
 
                     cell = StatsCell()
@@ -71,11 +72,10 @@ class MongoDataMock(Informer):
                     cell.last = price
                     cell.close = price
                     cell.volume = volume
-                    # cell.type = str(data['type']).replace("'", '').replace(' ', '')
+                    cell.type = str(data['type']).replace("'", '').replace(' ', '')
 
                     success = True
                 except Exception as ex:
-                    print(ex)
                     success = False
 
             for e in self.stats_matrix.all_exchanges():
@@ -213,8 +213,8 @@ class EmaTests:
 
 
 if __name__ == '__main__':
-    trading_currency = 'BTC'
-    currency = 'ETH'
+    trading_currency = 'USDT'
+    currency = 'BTC'
     percent = 0.8
 
     best_parms = None

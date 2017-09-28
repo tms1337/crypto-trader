@@ -21,29 +21,13 @@ class SimpleEmaOfferDecider(EmaDecider, LoggableMixin):
                  first_period=12,
                  second_period=26):
 
-        self.was = False
-        self.percent = 1
-        self.first_time = True
-
-        self.last_high = None
-        self.last_low = None
-
-        self.conseq = 1
-        self.last_s = None
-        self.last_sigma = None
-        self.Q = np.random.rand(1000, 100)
+        self.Q = np.zeros(100)
+        self.Q_sell = np.zeros(100, 100)
 
         self.avg1 = None
         self.avg2 = None
 
-
-        self.last_delta = None
-        self.last_checkpoint = DecisionMatrix(['poloniex'],
-                                              ['BTC'])
-
-        self.volume_ind = 0
-        self.volume_ind_long = 0
-        self.alpha = 0.8
+        self.alpha = 0.1
 
         EmaDecider.__init__(self,
                             currencies,
@@ -55,201 +39,62 @@ class SimpleEmaOfferDecider(EmaDecider, LoggableMixin):
         LoggableMixin.__init__(self, SimpleEmaOfferDecider)
 
     def should_sell(self, exchange, currency, low, high):
-        self._update_emas()
+        self._update_emas(exchange, currency)
 
         history = self.history[exchange][currency]
         if len(history) >= 2:
             curr = history[-1].close
-
-            if random.random() < 0.001:
-                if self.avg1 is None:
-                    self.avg1 = curr
-                else:
-                    self.avg1 = 0.4 * self.avg1 + 0.6 * curr
-
-                if self.avg2 is None:
-                    self.avg2 = curr
-                else:
-                    self.avg2 = 0.01 * self.avg1 + 0.99 * curr
-
-            return self.avg1 is not None and self.avg2 < 0.995 * self.avg1
-
-            position = self.last_applied_decision_record .get(exchange, currency).price
-
+            position = self.last_applied_decision_record.get(exchange, currency).price
             margin = (curr - position) / position
 
-            volume = history[-1].volume
-            gamma = 0.8
-            if history[-1].type == 'BUY':
-                self.volume_ind *= gamma
-                self.volume_ind += volume * (1 - gamma)
-            else:
-                self.volume_ind *= gamma
-                self.volume_ind -= volume  * (1 - gamma)
-
-            thresh = 0.02
-            if margin > thresh:
-                return True
-
-                self.conseq *= 1.2
-                if self.conseq > 2:
-                    self.conseq = 2
-
-                cell = DecisionCell()
-                cell.offer_type = self.last_applied_decision_record.get(exchange, currency).offer_type
-                cell.price = curr
-
-                self.last_applied_decision_record.set(exchange, currency, cell)
-
-                return False
-            elif margin < -thresh:
-                self.conseq *= 0.3
+            if margin < -thresh:
+                self._reward(self.avg1 / self.avg2, -2)
 
                 return True
 
             return False
-
-            if random.random() < 0.001:
-                print('sell', self.volume_ind, '/', 0.5 * curr * math.e ** (-self.conseq))
-
-            should = self.volume_ind < - 0.5 * curr * math.e ** (-self.conseq)
-            return should
-
-            gamma = 0.8
-            if should and margin > 0.01:
-                self.conseq *= gamma
-                self.conseq += 1 * (1 - gamma)
-
-                print('Market state %f' % self.conseq)
-            elif should and margin <= 0.01:
-                self.conseq *= gamma
-                self.conseq -= 1 - gamma
-
-                print('Market state %f' % self.conseq)
-
-            return should
         else:
             return False
 
     def should_buy(self, exchange, currency, low, high):
-        self._update_emas()
+        self._update_emas(exchange, currency)
 
         history = self.history[exchange][currency]
-        if len(history) >= 2:
-            curr = history[-1].close
+        if len(history) >= 2 and self.avg1 is not None:
+            ratio = self.avg1 / self.avg2
+            self.decision_s = ratio
 
-            if random.random() < 0.001:
-                if self.avg1 is None:
-                    self.avg1 = curr
-                else:
-                    self.avg1 = 0.4 * self.avg1 + 0.6 * curr
+            ind = int((ratio - 0.5) / 0.01)
 
-                if self.avg2 is None:
-                    self.avg2 = curr
-                else:
-                    self.avg2 = 0.01 * self.avg2 + 0.99 * curr
-
-            if random.random() < 0.001:
-                print(self.avg1, self.avg2)
-
-            return self.avg1 is not None and self.avg2 > 1.005 * self.avg1
-
-            position = self.last_applied_decision_record.get(exchange, currency).price
-
-            margin = (curr - position) / position
-
-            if self.conseq < 0.1:
-                self.conseq *= 1.00001
-
-            thresh = 0.05
-            if margin < -thresh:
-                self.conseq *= 0.3
-
-                print('Under')
-                cell = DecisionCell()
-                cell.offer_type = self.last_applied_decision_record.get(exchange, currency).offer_type
-                cell.price = curr
-
-                self.last_applied_decision_record.set(exchange, currency, cell)
-
-                return False
-            elif margin > thresh:
-                self.conseq *= 1.2
-                if self.conseq > 2:
-                    self.conseq = 2
-
-                return self.conseq >= 1
-
-            return False
-
-            gamma = 0.8
-            if history[-1].type == 'BUY':
-                self.volume_ind *= gamma
-                self.volume_ind += volume * (1 - gamma)
-            else:
-                self.volume_ind *= gamma
-                self.volume_ind -= volume * (1 - gamma)
-
-            if random.random() < 0.001:
-                print('Proba %f' % (math.e ** ( (0.5 * self.conseq) - 1 )))
-                print(self.volume_ind, 100 * 1 / self.conseq)
-
-            if random.random() < math.e ** ( (0.5 * self.conseq) - 1 ):
-                return curr > self.last_applied_decision_record.get(exchange, currency).price# self.volume_ind > 100 * 1 / self.conseq
-            else:
-                return False
-
-            if random.random() < 0.001:
-                print(self.volume_ind, '/', curr * math.e ** (-self.conseq))
-
-            return self.volume_ind > curr * math.e ** (-self.conseq)
-
-            rnd = random.random()
-
-            if random.random() < 0.001:
-                print(self.volume_ind)
-
-            if rnd < 2 ** (0.5 * (self.conseq + 1)) - 0.9:
-                return self.volume_ind >= 50
-            else:
-                return False
-
-            should = self.volume_ind >= 10
-            if should:
-                pass
-                # self.volume_ind = 0
-
-            return should
-
-            if self.first_time:
-                cell = DecisionCell()
-                cell.price = curr
-
-                self.last_checkpoint.set(exchange, currency, cell)
-
-                self.first_time = False
-                return True
-
-            position = self.last_checkpoint.get(exchange, currency).price
-
-            margin = (curr - position) / position
-            thresh = 0.03
-
-            if margin > thresh:
-                self.last_delta = 1
-
-                cell = DecisionCell()
-                cell.price = curr
-
-                self.last_checkpoint.set(exchange, currency, cell)
-            elif margin <= -thresh:
-                self.last_delta = -1
-
-                cell = DecisionCell()
-                cell.price = curr
-
-                self.last_checkpoint.set(exchange, currency, cell)
-
-            return (self.last_delta == 1)
+            return  random.random() < math.exp(self.Q[ind])
         else:
             return False
+
+    def _update_emas(self, exchange, currency):
+        history = self.history[exchange][currency]
+        curr = history[-1].close
+
+        if random.random() < 0.001:
+            if self.avg1 is None:
+                self.avg1 = curr
+            else:
+                self.avg1 = 0.4 * self.avg1 + 0.6 * curr
+
+            if self.avg2 is None:
+                self.avg2 = curr
+            else:
+                self.avg2 = 0.01 * self.avg1 + 0.99 * curr
+
+    def _reward(self, ratio, r):
+        ind = int((self.decision_s - 0.5) / 0.01)
+        ind_2 = int((ratio - 0.5) / 0.01)
+
+        gamma = 0.7
+
+        self.Q[ind] += self.alpha * (r + gamma*self.Q[ind_2] - self.Q[ind])
+
+
+        print('Rewarding', self.alpha)
+        print(self.Q)
+        print(self.Q_sell)
+
