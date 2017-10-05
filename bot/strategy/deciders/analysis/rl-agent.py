@@ -30,10 +30,7 @@ class MarketEnv(Environment):
 
     def reset(self):
         if not self.testing:
-            # meet me
-            half_way = int(0.4 * self.steps)
-
-            self.cursor = random.randint(0, half_way)
+            self.cursor = random.randint(0, self.data.shape[1] - self.window - 2)
         else:
             self.cursor = 0
 
@@ -46,7 +43,7 @@ class MarketEnv(Environment):
         action = np.array([k[1] for k in action])
 
         action = np.exp(action)
-        action /= sum(action)
+        action /= np.sum(action)
 
         current_state = self._current_state()
         next_state = self._next_state()
@@ -55,9 +52,15 @@ class MarketEnv(Environment):
 
         reward = np.log(np.dot(action[1:].T, y))
 
+        if random.random() < 0.001:
+            print('Action after', action[1:])
+            print('y', y)
+            print('log(y)', np.log(y))
+            print('reward', reward)
+
         return self._preprocess_state(self._current_state()), \
                reward, \
-               self.cursor + self.window + 10 == self.data.shape[1]
+               self.cursor + self.window + 1 == self.data.shape[1]
 
     def close(self):
         pass
@@ -69,7 +72,8 @@ class MarketEnv(Environment):
 
     @property
     def actions(self):
-        return {str(i): dict(continuous=True, min_value=-10, max_value=10) for i in range(self.crypto_n + 1)}
+        return {str(i): dict(continuous=True, min_value=-10, max_value=10)
+                for i in range(self.crypto_n + 1)}
 
     @staticmethod
     def _preprocess_state(state, copy=False):
@@ -128,16 +132,18 @@ mongo_port = 27017
 client = MongoClient(mongo_host, mongo_port)
 db = client['historicalData']
 
-btc_db = db['poloniex_btc_usdt_30min'].find()
-eth_db = db['poloniex_eth_usdt_30min'].find()
+period = '30min'
+
+btc_db = db['poloniex_btc_usdt_%s' % period].find()
+eth_db = db['poloniex_eth_usdt_%s' % period].find()
 # etc_db = db['poloniex_etc_usdt_30min'].find()
-dash_db = db['poloniex_dash_usdt_30min'].find()
-ltc_db = db['poloniex_ltc_usdt_30min'].find()
-xmr_db = db['poloniex_xmr_usdt_30min'].find()
-xrp_db = db['poloniex_xrp_usdt_30min'].find()
+dash_db = db['poloniex_dash_usdt_%s' % period].find()
+ltc_db = db['poloniex_ltc_usdt_%s' % period].find()
+xmr_db = db['poloniex_xmr_usdt_%s' % period].find()
+xrp_db = db['poloniex_xrp_usdt_%s' % period].find()
 
 dbs = [btc_db, eth_db, xrp_db, dash_db, ltc_db, xmr_db]
-train_steps = 15000
+train_steps = 20 * 10**3
 
 for db in dbs:
     db.batch_size(train_steps)
@@ -147,7 +153,7 @@ if mode == 'testing':
         db.skip(train_steps)
 
 window = 50
-test_steps = 10000
+test_steps = 15000
 
 if mode == 'testing':
     env = MarketEnv(dbs=dbs, steps=test_steps, window=window, testing=True)
@@ -165,18 +171,15 @@ agent = VPGAgent(
         gae_lambda=0.97,
         sample_actions=True,
 
-        # max_kl_divergence=0.1,
-        # cg_iterations=20,
-        # cg_damping=0.001,
-        # ls_max_backtracks=10,
-        # ls_accept_ratio=0.9,
-        # ls_override=False,
-
         learning_rate=3e-5,
-        epochs=20,
+        epochs=10,
         optimizer_batch_size=100,
         normalize_advantage=False,
-        exploration=dict(type='epsilondecay', epsilon=0, epsilon_final=0.1, epsilon_timesteps=1e4, start_after=0),
+        exploration=dict(type='epsilondecay',
+                         epsilon=0,
+                         epsilon_final=0.1,
+                         epsilon_timesteps=1e4,
+                         start_after=0),
         states=env.states,
         actions=env.actions,
         network=layered_network_builder([
@@ -188,20 +191,21 @@ agent = VPGAgent(
     ))
 
 if mode == 'testing':
-    agent.load_model('/models/agent.model-500000')
+    agent.load_model('/models/agent.model-1449189')
 
 runner = Runner(agent=agent, environment=env)
 
 
 def episode_finished(r):
-    print("Finished episode {ep} after {ts} timesteps (reward: {reward})".format(ep=r.episode, ts=r.timestep,
+    print("Finished episode {ep} after {ts} timesteps (reward: {reward})".format(ep=r.episode,
+                                                                                 ts=r.timestep,
                                                                                  reward=r.episode_rewards[-1]))
     return True
 
 
 if mode == 'training':
-    runner.run(episodes=100, max_timesteps=test_steps - window - 2, episode_finished=episode_finished)
+    runner.run(episodes=500, max_timesteps=5000, episode_finished=episode_finished)
 
     agent.save_model('/output/agent.model')
 elif mode == 'testing':
-    runner.run(episodes=1, max_timesteps=test_steps - window - 2, episode_finished=episode_finished)
+    runner.run(episodes=1, max_timesteps=test_steps, episode_finished=episode_finished)

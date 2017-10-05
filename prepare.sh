@@ -33,8 +33,10 @@ pip3 install pandas==0.20.3
 pip3 install matplotlib==2.0.2
 pip3 install sklearn==0.18.2
 pip3 install kafka-python==1.3.4
+pip3 install pymongo
 
 pip3 install git+https://github.com/tms1337/python3-krakenex.git
 pip3 install git+https://github.com/s4w3d0ff/python-poloniex
 pip3 install git+https://github.com/ericsomdahl/python-bittrex.git
 pip3 install git+https://github.com/tms1337/bitfinex.git
+pip3 install git+https://github.com/tms1337/tensorforce.git@layerdnnbuilder-conv2d-nonsquare-window
