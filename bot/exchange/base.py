@@ -49,8 +49,7 @@ class CurrencyMixin(ABC, LoggableMixin):
     def check_currency(currency):
         TypeChecker.check_type(currency, str)
 
-        currency_list = ["BTC", "ETH", "XRP", "DASH",
-                         "LTC", "USD", "EUR", "XRP"]
+        currency_list = ["BTC", "ETH", "XRP", "DASH", "LTC", "USD", "EUR", "XRP", "XMR"]
 
         return currency in currency_list
 

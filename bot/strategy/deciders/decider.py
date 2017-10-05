@@ -13,7 +13,7 @@ class Decider(ABC):
         self.trade_providers = trade_providers
 
     @abstractmethod
-    def decide(self, informer):
+    def decide(self, informer, historic_data=None):
         TypeChecker.check_type(informer, Informer)
 
     @abstractmethod

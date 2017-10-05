@@ -29,7 +29,8 @@ class PoloniexProvider(CurrencyMixin,
             "XRP": "XRP",
             "USD": "USDT",
             "ETC": "ETC",
-            "LTC": "LTC"
+            "LTC": "LTC",
+            "XMR": "XMR"
         }
 
         return mapping
@@ -42,7 +43,8 @@ class PoloniexProvider(CurrencyMixin,
             "XRP": "XRP",
             "USD": "USDT",
             "ETC": "ETC",
-            "LTC": "LTC"
+            "LTC": "LTC",
+            "XMR": "XMR"
         }
 
         return mapping

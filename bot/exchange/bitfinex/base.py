@@ -23,7 +23,8 @@ class BitfinexProvider(CurrencyMixin, Provider, LoggableMixin):
             "DASH": "dsh",
             "XRP": "xrp",
             "USD": "usd",
-            "LTC": "ltc"
+            "LTC": "ltc",
+            "XMR": "xmr"
         }
 
         return mapping
@@ -35,7 +36,8 @@ class BitfinexProvider(CurrencyMixin, Provider, LoggableMixin):
             "DASH": "dsh",
             "XRP": "xrp",
             "USD": "usd",
-            "LTC": "ltc"
+            "LTC": "ltc",
+            "XMR": "xmr"
         }
 
         return mapping

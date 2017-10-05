@@ -1,3 +1,5 @@
+import time
+
 from util.asserting import TypeChecker
 from retrying import retry
 
@@ -7,6 +9,7 @@ from bot.exchange.base import StatsProvider, TradeProvider
 from bot.strategy.pipeline.data.balancematrix import BalanceMatrix, BalanceCell
 from bot.strategy.pipeline.data.statsmatrix import StatsMatrix, StatsCell
 from util.logging import LoggableMixin
+import numpy as np
 
 transactionexecutor_max_retry_attempts = None
 
@@ -20,6 +23,8 @@ class Informer(LoggableMixin):
                  trade_providers,
                  currencies,
                  base_currency,
+                 historic_n=0,
+                 interval=1800,
                  retry_attempts=3):
 
         TypeChecker.check_type(stats_providers, dict)
@@ -48,12 +53,21 @@ class Informer(LoggableMixin):
         self.balances_matrix = BalanceMatrix([e for e in trade_providers],
                                              currencies)
 
+        TypeChecker.check_type(historic_n, int)
+        assert historic_n >= 0
+        self.historic_n = historic_n
+
+        TypeChecker.check_type(interval, int)
+        self.interval = interval
+
+        self.historic_data = np.ndarray((len(currencies), historic_n, 3), dtype=float)
+
         global transactionexecutor_max_retry_attempts
         transactionexecutor_max_retry_attempts = retry_attempts
 
         LoggableMixin.__init__(self, Informer)
 
-        self.set_stats_matrix()
+        self.set_all()
 
     def set_stats_matrix(self):
         self.logger.debug("Getting stats matrix")
@@ -80,12 +94,52 @@ class Informer(LoggableMixin):
                 cell = self._generate_balance_cell(exchange, currency)
                 self.balances_matrix.set(exchange, currency, cell)
 
+    @staticmethod
+    def _get_ohlcv(record):
+        o = float(record['open'])
+        h = float(record['high'])
+        l = float(record['low'])
+        c = float(record['close'])
+        v = float(record['volume'])
+
+        return o, h, l, c, v
+
+    def set_historic_data(self):
+        if self.historic_n != 0:
+            for e in self.stats_providers:
+                i = 0
+                for c in self.currencies:
+                    print(c)
+                    if c == self.base_currency:
+                        continue
+
+                    since = int(time.time()) - (self.historic_n + 1) * self.interval
+
+                    self.stats_providers[e].set_currencies(c, self.base_currency)
+                    response = self.stats_providers[e].ohlc_history(interval=self.interval,
+                                                                    since=since)
+                    print('over')
+                    response = list(reversed(response))
+
+                    for j in range(self.historic_data.shape[1]):
+                        r = response[j]
+
+                        o, h, l, c, v = self._get_ohlcv(r)
+                        self.historic_data[i, j, 0] = c
+                        self.historic_data[i, j, 1] = h
+                        self.historic_data[i, j, 2] = l
+
+                    i += 1
+
+        print(self.historic_data)
+
     def get_balances_matrix(self):
         return self.balances_matrix
 
     def set_all(self):
         self.set_stats_matrix()
         self.set_balances_matrix()
+        self.set_historic_data()
 
     def _generate_stats_cell(self, exchange, currency):
         assert exchange in self.stats_providers, \
@@ -163,4 +217,3 @@ class Informer(LoggableMixin):
         cell.last = 1.0
 
         return cell
-

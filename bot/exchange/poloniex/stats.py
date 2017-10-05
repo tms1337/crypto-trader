@@ -27,7 +27,9 @@ class PoloniexStatsProvider(StatsProvider,
 
 
     def ohlc_history(self, interval=1, since=None):
-        raise NotImplementedError()
+        pair = self.form_pair()
+
+        return self.api.returnChartData(pair, interval, since)
 
     def ticker_high(self):
         ticker_response = self._ticker_price()
