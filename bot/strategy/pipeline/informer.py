@@ -60,14 +60,12 @@ class Informer(LoggableMixin):
         TypeChecker.check_type(interval, int)
         self.interval = interval
 
-        self.historic_data = np.ndarray((len(currencies), historic_n, 3), dtype=float)
+        self.historic_data = np.ndarray((len(currencies) - 1, historic_n, 3), dtype=float)
 
         global transactionexecutor_max_retry_attempts
         transactionexecutor_max_retry_attempts = retry_attempts
 
         LoggableMixin.__init__(self, Informer)
-
-        self.set_all()
 
     def set_stats_matrix(self):
         self.logger.debug("Getting stats matrix")
@@ -80,6 +78,9 @@ class Informer(LoggableMixin):
                 else:
                     cell = self._generate_stats_cell(exchange, currency)
                 self.stats_matrix.set(exchange, currency, cell)
+
+    def get_historic_data(self):
+        return self.historic_data
 
     def get_stats_matrix(self):
         return self.stats_matrix
@@ -130,8 +131,6 @@ class Informer(LoggableMixin):
                         self.historic_data[i, j, 2] = l
 
                     i += 1
-
-        print(self.historic_data)
 
     def get_balances_matrix(self):
         return self.balances_matrix

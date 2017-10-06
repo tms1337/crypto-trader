@@ -101,7 +101,8 @@ agent = VPGAgent(
 print(agent_uri)
 agent.load_model(agent_uri)
 
-decider = RLJianh17Decide(agent=agent)
+decider = RLJianh17Decide(agent=agent,
+                          trade_providers=trade_providers)
 
 crypto_informer = Informer(base_currency=trading_currency_for_crypto,
                            stats_providers=stats_providers,
