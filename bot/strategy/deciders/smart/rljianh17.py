@@ -76,10 +76,10 @@ class RLJianh17Decide(Decider, LoggableMixin):
 
             if next_p < curr_p:
                 decision.transaction_type = OfferType.SELL
-                decision.price = price_cell.low
+                decision.price = price_cell.low * 0.998
             else:
                 decision.transaction_type = OfferType.BUY
-                decision.price = price_cell.high
+                decision.price = price_cell.high * 1.002
 
             self.logger.debug('Curr: %s, decision %s' % (c, decision))
             transaction.add_decision(decision)

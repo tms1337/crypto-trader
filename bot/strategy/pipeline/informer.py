@@ -114,7 +114,7 @@ class Informer(LoggableMixin):
                     if c == self.base_currency:
                         continue
 
-                    since = int(time.time()) - (self.historic_n + 1) * self.interval
+                    since = int(time.time()) - (self.historic_n + 10) * self.interval
 
                     self.stats_providers[e].set_currencies(c, self.base_currency)
                     response = self.stats_providers[e].ohlc_history(interval=self.interval,
