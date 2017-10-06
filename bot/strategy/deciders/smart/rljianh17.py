@@ -46,7 +46,7 @@ class RLJianh17Decide(Decider, LoggableMixin):
             total += balance * price
             self.logger.debug('currency %s, balance %f, price %f', c, balance, price)
 
-        total *= 0.9 # because of floating point errors and not able to buy
+        total *= 0.5 # because of floating point errors and not able to buy
 
         self.logger.debug('Total %f', total)
 
