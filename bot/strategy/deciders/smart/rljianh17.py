@@ -58,8 +58,8 @@ class RLJianh17Decide(Decider, LoggableMixin):
 
             balance = informer.get_balances_matrix().get(e, c).value
 
-            price = informer.get_stats_matrix().get(e, c)
-            price = 0.5 * (price.low + price.high)
+            price_cell = informer.get_stats_matrix().get(e, c)
+            price = 0.5 * (price_cell.low + price_cell.high)
 
             curr_p = price * balance / total
             next_p = action[i]
@@ -78,8 +78,10 @@ class RLJianh17Decide(Decider, LoggableMixin):
 
             if next_p < curr_p:
                 decision.transaction_type = OfferType.SELL
+                decision.price = price_cell.low
             else:
                 decision.transaction_type = OfferType.BUY
+                decision.price = price_cell.high
 
             self.logger.debug('Curr: %s, decision %s' % (c, decision))
             transaction.add_decision(decision)
