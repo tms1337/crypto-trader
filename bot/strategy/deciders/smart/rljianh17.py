@@ -74,6 +74,7 @@ class RLJianh17Decide(Decider, LoggableMixin):
             decision.quote_currency = currencies[-1]
             decision.price = price
             decision.volume = delta / price
+            decision.decider = self
 
             if next_p < curr_p:
                 decision.transaction_type = OfferType.SELL
