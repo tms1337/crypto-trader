@@ -19,6 +19,7 @@ class Daemon(LoggableMixin):
 
         TypeChecker.check_one_of_types(dt_seconds, [float, int])
         self.dt_seconds = dt_seconds
+        self.first = True
 
         LoggableMixin.__init__(self, Daemon)
 
@@ -32,4 +33,10 @@ class Daemon(LoggableMixin):
 
         self.logger.debug("Waiting %f seconds" % self.dt_seconds)
         self.logger.debug("")
-        time.sleep(self.dt_seconds)
+
+        if self.first:
+            time.sleep(10) # hack
+        else:
+            time.sleep(self.dt_seconds)
+
+        self.first = False
