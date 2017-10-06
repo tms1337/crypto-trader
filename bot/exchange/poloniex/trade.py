@@ -32,7 +32,7 @@ class PoloniexTradeProvider(PrivatePoloniexProvider,
                 currency = self.map_currency_balance(currency)
                 return float(balance[currency]["available"]) + float(balance[currency]["onOrders"])
             else:
-                return {b:float(balance[b]["available"]) + float(balance[b]["onOrders"]) for b in balance}
+                return {b: float(balance[b]["available"]) + float(balance[b]["onOrders"]) for b in balance}
 
     def create_buy_offer(self, volume, price=None):
         try:
@@ -41,7 +41,8 @@ class PoloniexTradeProvider(PrivatePoloniexProvider,
             else:
                 buy_response = self.api.buy(self.form_pair(),
                                             price,
-                                            volume)
+                                            volume,
+                                            orderType='immediateOrCancel')
         except Exception as error:
             self._handle_error(error)
         else:
@@ -56,7 +57,8 @@ class PoloniexTradeProvider(PrivatePoloniexProvider,
         try:
             sell_response = self.api.sell(self.form_pair(),
                                           price,
-                                          volume)
+                                          volume,
+                                          orderType='immediateOrCancel')
         except Exception as error:
             self._handle_error(error)
         else:
