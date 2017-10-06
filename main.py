@@ -45,7 +45,7 @@ logger.addHandler(fh)
 logger.addHandler(ch)
 
 daemon_dt = float(sys.argv[2])
-providers_pause_dt = 0.75
+providers_pause_dt = 0.25
 
 keys_path = sys.argv[1]
 

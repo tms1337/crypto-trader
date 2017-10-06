@@ -36,9 +36,12 @@ class PoloniexTradeProvider(PrivatePoloniexProvider,
 
     def create_buy_offer(self, volume, price=None):
         try:
-            buy_response = self.api.buy(self.form_pair(),
-                                        price,
-                                        volume)
+            if price is None:
+                buy_response = self.api.buy()
+            else:
+                buy_response = self.api.buy(self.form_pair(),
+                                            price,
+                                            volume)
         except Exception as error:
             self._handle_error(error)
         else:

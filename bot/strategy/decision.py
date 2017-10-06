@@ -5,8 +5,14 @@ from util.logging import LoggableMixin
 
 @unique
 class OfferType(Enum):
+    SELL = 0
     BUY = 1
-    SELL = 2
+
+def offer_to_int(offer):
+    if offer == OfferType.SELL:
+        return 0
+    else:
+        return 1
 
 
 class Decision(LoggableMixin):

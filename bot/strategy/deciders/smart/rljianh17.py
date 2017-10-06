@@ -1,7 +1,7 @@
 from tensorforce.agents import Agent
 
 from bot.strategy.deciders.decider import Decider
-from bot.strategy.decision import Decision, OfferType
+from bot.strategy.decision import Decision, OfferType, offer_to_int
 from bot.strategy.transaction import Transaction
 from util.asserting import TypeChecker
 
@@ -31,8 +31,6 @@ class RLJianh17Decide(Decider, LoggableMixin):
         action = action[1:]
         action = [a[1] for a in action]
 
-        print(action)
-
         action = np.exp(action)
         action /= sum(action)
 
@@ -48,7 +46,7 @@ class RLJianh17Decide(Decider, LoggableMixin):
             total += balance * price
             self.logger.debug('currency %s, balance %f, price %f', c, balance, price)
 
-        total *= 0.98 # because of floating point errors
+        total *= 0.9 # because of floating point errors and not able to buy
 
         self.logger.debug('Total %f', total)
 
@@ -78,17 +76,19 @@ class RLJianh17Decide(Decider, LoggableMixin):
 
             if next_p < curr_p:
                 decision.transaction_type = OfferType.SELL
-                decision.price = price_cell.low * 0.998
+                decision.price = price_cell.low
             else:
                 decision.transaction_type = OfferType.BUY
-                decision.price = price_cell.high * 1.002
+                decision.price = price_cell.high
 
             self.logger.debug('Curr: %s, decision %s' % (c, decision))
             transaction.add_decision(decision)
 
+        transaction.decisions.sort(key=lambda x: offer_to_int(x.transaction_type))
+
         self.logger.debug(transaction)
 
-        return [transaction], {}
+        return [], {}
 
     def _normalize_historic_data(self, historic_data):
         for i in range(historic_data.shape[0]):
