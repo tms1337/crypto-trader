@@ -88,7 +88,7 @@ class RLJianh17Decide(Decider, LoggableMixin):
 
         self.logger.debug(transaction)
 
-        return [], {}
+        return [transaction], {}
 
     def _normalize_historic_data(self, historic_data):
         for i in range(historic_data.shape[0]):
