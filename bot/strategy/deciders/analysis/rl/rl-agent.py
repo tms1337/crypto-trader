@@ -58,7 +58,10 @@ class MarketEnv(Environment):
         current_state = self._current_state()
         next_state = self._next_state()
 
+        fee = 0.2 / 100
+
         y = next_state[:, -1, 0] / current_state[:, -1, 0]
+        y *= (1 - fee)**2
 
         reward = np.log(np.dot(action[1:].T, y))
 
