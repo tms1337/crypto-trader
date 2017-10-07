@@ -1,11 +1,18 @@
 import random
 
 import sys
+from collections import Counter
+
+from keras import layers
+from tensorforce.core.networks import layers as tensorforce_layers
 from pymongo import MongoClient
 from tensorforce import Configuration
+from tensorforce import TensorForceError
+from tensorforce import util
 from tensorforce.agents import PPOAgent
 from tensorforce.agents import VPGAgent
 from tensorforce.core.networks import layered_network_builder
+from tensorforce.core.networks.layers import conv2d, flatten, dense, nonlinearity
 from tensorforce.environments.environment import Environment
 import numpy as np
 from tensorforce.execution import Runner
@@ -28,6 +35,9 @@ class MarketEnv(Environment):
 
         self.cursor = 0
 
+        self.last_action = np.zeros((self.crypto_n + 1,))
+        # self.last_action[0, 0] = 1
+
     def reset(self):
         if not self.testing:
             self.cursor = random.randint(0, self.data.shape[1] - self.window - 2)
@@ -36,7 +46,7 @@ class MarketEnv(Environment):
 
         initial_state = self._preprocess_state(self._next_state())
 
-        return initial_state
+        return {'prices': initial_state, 'last_action': self.last_action}
 
     def execute(self, action):
         action = sorted(action.items(), key=lambda x: x[0])
@@ -58,17 +68,29 @@ class MarketEnv(Environment):
             print('log(y)', np.log(y))
             print('reward', reward)
 
-        return self._preprocess_state(self._current_state()), \
+        if self.last_action is None:
+            self.last_action = action
+
+        last_action = self.last_action
+        state = np.array(self._preprocess_state(self._current_state()))
+        is_terminal = self.cursor + self.window + 1 == self.data.shape[1]
+
+        self.last_action = action
+
+        return {'prices': state, 'last_action': last_action}, \
                reward, \
-               self.cursor + self.window + 1 == self.data.shape[1]
+               is_terminal
 
     def close(self):
         pass
 
     @property
     def states(self):
-        return dict(shape=(self.crypto_n, self.window, self.feature_n),
-                    type='float')
+        return dict(
+            prices=dict(shape=(self.crypto_n, self.window, self.feature_n),
+                 type='float'),
+            last_action=dict(shape=(self.crypto_n + 1,), type='float')
+        )
 
     @property
     def actions(self):
@@ -143,7 +165,7 @@ xmr_db = db['poloniex_xmr_usdt_%s' % period].find()
 xrp_db = db['poloniex_xrp_usdt_%s' % period].find()
 
 dbs = [btc_db, eth_db, xrp_db, dash_db, ltc_db, xmr_db]
-train_steps = 20 * 10**3
+train_steps = 20 * 10 ** 3
 
 for db in dbs:
     db.batch_size(train_steps)
@@ -160,13 +182,53 @@ if mode == 'testing':
 elif mode == 'training':
     env = MarketEnv(dbs=dbs, steps=train_steps, window=window)
 
+
+def network(layers_config):
+    def network_builder(inputs, summary_level=0):
+        print(inputs)
+
+        x = inputs['prices']
+        last_w = inputs['last_action']
+
+        internal_inputs = []
+        internal_outputs = []
+        internal_inits = []
+
+        layer_counter = Counter()
+        for layer_config in layers_config:
+            if callable(layer_config['type']):
+                scope = layer_config['type'].__name__ + str(layer_counter[layer_config['type']])
+            else:
+                scope = layer_config['type'] + str(layer_counter[layer_config['type']])
+
+            x = util.get_object(
+                obj=layer_config,
+                predefined=tensorforce_layers,
+                kwargs=dict(x=x, scope=scope, summary_level=summary_level)
+            )
+            layer_counter[layer_config['type']] += 1
+            if isinstance(x, list) or isinstance(x, tuple):
+                assert len(x) == 4
+                internal_inputs.extend(x[1])
+                internal_outputs.extend(x[2])
+                internal_inits.extend(x[3])
+                x = x[0]
+
+        if internal_inputs:
+            return x, internal_inputs, internal_outputs, internal_inits
+        else:
+            return x
+
+    return network_builder
+
+
 agent = VPGAgent(
     Configuration(
         log_level='debug',
         batch_size=50,
         optimizer='adam',
         discount=0,
-        tf_summary='/output/logs',
+        # tf_summary='/output/logs',
         gae_reward=True,
         gae_lambda=0.97,
         sample_actions=True,
@@ -182,7 +244,7 @@ agent = VPGAgent(
                          start_after=0),
         states=env.states,
         actions=env.actions,
-        network=layered_network_builder([
+        network=network([
             dict(type='conv2d', size=2, window=(1, 3)),
             dict(type='conv2d', size=20, window=(1, window - 2)),
             dict(type='conv2d', size=1, window=(1, 1)),
