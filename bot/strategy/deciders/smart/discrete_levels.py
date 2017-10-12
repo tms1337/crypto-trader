@@ -108,7 +108,7 @@ class DiscreteLevelsDecider(Decider):
 
                 elif not self.currency_infos[e][c].position and self._should_buy(e, c):
                     decision.transaction_type = OfferType.BUY
-                    decision.volume = balances.get(e, informer.base_currency).value * c__security / (2 * currency_n)
+                    decision.volume = balances.get(e, informer.base_currency).value * c__security / (2 * currency_n * curr_price)
 
                     transaction.decisions.append(decision)
 
