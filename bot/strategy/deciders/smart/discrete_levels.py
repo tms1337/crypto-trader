@@ -60,7 +60,6 @@ class DiscreteLevelsDecider(Decider):
 
         transaction = Transaction()
 
-
         for e in stats.all_exchanges():
             for c in stats.all_currencies():
                 curr_price = stats.get(e, c).last
@@ -112,11 +111,14 @@ class DiscreteLevelsDecider(Decider):
         if self.first:
             return False
 
-        return self.currency_infos[e][c].position and self.currency_infos[e][c].trends[-2:] == [-1, -1]
+        trends = self.currency_infos[e][c].trends
+        return self.currency_infos[e][c].position and \
+               len(trends) >= 2 and trends[-2:] == [-1, -1]
 
     def _should_buy(self, e, c):
         if self.first:
             return True
 
         trends = self.currency_infos[e][c].trends
-        return self.currency_infos[e][c].position and len([_ for _ in trends if _ == 1]) > len(trends) / 2
+        return not self.currency_infos[e][c].position and \
+               len([_ for _ in trends if _ == 1]) > len(trends) / 2
