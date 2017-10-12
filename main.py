@@ -50,7 +50,7 @@ trade_providers = {
 }
 
 currencies_for_crypto = ["ETH", "LTC", "DASH", "XRP", "BTC", "XMR"]
-trading_currency_for_crypto = "USDT"
+trading_currency_for_crypto = "USD"
 
 crypto_informer = Informer(base_currency=trading_currency_for_crypto,
                            stats_providers=stats_providers,

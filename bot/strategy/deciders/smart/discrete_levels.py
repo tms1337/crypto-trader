@@ -83,8 +83,8 @@ class DiscreteLevelsDecider(Decider):
                 diff = curr_price - referent_price
 
                 decision = Decision()
-                decision.base_currency = informer.base_currency
-                decision.quote_currency = c
+                decision.base_currency = c
+                decision.quote_currency = informer.base_currency
                 decision.exchange = e
                 decision.price = curr_price
                 decision.decider = self
