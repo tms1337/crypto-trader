@@ -1,6 +1,7 @@
 import sys
 
 from pymongo import MongoClient
+from tensorforce.core.distributions import Distribution
 from tensorforce.execution import Runner
 
 mode = sys.argv[1]
@@ -9,8 +10,11 @@ from utils.agnt import get_agent
 from utils.market_env import MarketEnv
 from utils.mcdb import get_montecarlo_db
 
+import tensorflow as tf
+
 mode = sys.argv[1]
 data_source = sys.argv[2]
+
 
 if data_source == 'mc':
     mongo_host = 'ec2-52-56-38-131.eu-west-2.compute.amazonaws.com'
@@ -28,12 +32,12 @@ if data_source == 'mc':
     xmr_db = db['poloniex_xmr_usdt_%s' % period].find()
     xrp_db = db['poloniex_xrp_usdt_%s' % period].find()
 
-    btc_db = get_montecarlo_db(btc_db, 45000, init_price=1000)
-    eth_db = get_montecarlo_db(eth_db, 30000, init_price=1000)
-    dash_db = get_montecarlo_db(dash_db, 46000, init_price=1000)
-    xmr_db = get_montecarlo_db(xmr_db, 46000, init_price=1000)
-    xrp_db = get_montecarlo_db(xrp_db, 45900, init_price=1000)
-    ltc_db = get_montecarlo_db(ltc_db, 45000, init_price=1000)
+    btc_db = get_montecarlo_db(btc_db, 45000, init_price=1e4)
+    eth_db = get_montecarlo_db(eth_db, 30000, init_price=1e4)
+    dash_db = get_montecarlo_db(dash_db, 46000, init_price=1e4)
+    xmr_db = get_montecarlo_db(xmr_db, 46000, init_price=1e4)
+    xrp_db = get_montecarlo_db(xrp_db, 45900, init_price=1e4)
+    ltc_db = get_montecarlo_db(ltc_db, 45000, init_price=1e4)
 else:
     mongo_host = 'ec2-52-56-38-131.eu-west-2.compute.amazonaws.com'
     mongo_port = 27017
@@ -73,7 +77,7 @@ agent, env = get_agent(mode, window, dbs, train_steps, test_steps)
 if mode == 'testing':
     agent.load_model('/models/agent.model-1370695')
 
-runner = Runner(agent=agent, environment=env)
+runner = Runner(agent=agent, environment=env, deterministic=True)
 
 def episode_finished(r):
     print("Finished episode {ep} after {ts} timesteps (reward: {reward})".format(ep=r.episode,
@@ -86,11 +90,11 @@ def episode_finished(r):
     return True
 
 if mode == 'training':
-    runner.run(episodes=2e6, max_timesteps=200, episode_finished=episode_finished)
+    runner.run(episodes=2e6, max_timesteps=50, episode_finished=episode_finished)
 
     agent.save_model('/output/agent.model')
 elif mode == 'testing':
-    runner.run(episodes=1, max_timesteps=test_steps, episode_finished=episode_finished)
+    runner.run(episodes=1, max_timesteps=train_steps-window, episode_finished=episode_finished)
 
     with open('/output/rewards', mode='w+') as f:
         print(env.rewards, file=f)

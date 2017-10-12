@@ -1,10 +1,44 @@
 import random
 
 import numpy as np
+from tensorforce.core.distributions import Distribution
 from tensorforce.environments.environment import Environment
 
+import tensorflow as tf
+
+class SoftmaxDistro(Distribution):
+    def sample(self):
+        return self.x
+
+    def create_tf_operations(self, x, deterministic):
+        self.x = x
+
+    def log_probability(self, action):
+        return tf.log(action)
+
+    def __iter__(self):
+        return super().__iter__()
+
+    def entropy(self):
+        pass
+
+    @classmethod
+    def from_tensors(cls, tensors, deterministic):
+        pass
+
+    def get_tensors(self):
+        pass
+
+    @staticmethod
+    def from_config(config, kwargs=None):
+        return super().from_config(config, kwargs)
+
+    def kl_divergence(self, other):
+        pass
+
+
 class MarketEnv(Environment):
-    def __init__(self, dbs, steps, window=50, testing=False):
+    def __init__(self, dbs, steps, window=50, testing=False, steps_per_cursor=100, episode_len=50):
         self.dbs = dbs
         self.crypto_n = len(dbs)
         self.steps = steps
@@ -14,7 +48,11 @@ class MarketEnv(Environment):
         self.feature_n = 3
         self.data = self._generate_data()
 
-        self.cursor = 0
+        self.episode_len = episode_len
+
+        self.cursor = window + 1
+        self.in_cursor = 0
+        self.steps_per_cursor = steps_per_cursor
 
         self.last_action = np.zeros((self.crypto_n + 1,))
         self.last_action[0] = 1
@@ -22,19 +60,19 @@ class MarketEnv(Environment):
         self.all_rewards = []
 
     def reset(self):
-        if not self.testing:
-            self.cursor = random.randint(0, self.data.shape[1] - self.window - 10)
-        else:
-            self.cursor = 0
+        self.cursor += 1
+        self.in_cursor = 0
 
-        initial_state = self._preprocess_state(self._next_state())
+        state = self._preprocess_state(self._current_state())
 
         last_action = self.last_action[1:].reshape((self.crypto_n, 1, 1))
-        return {'prices': initial_state, 'last_action': last_action}
+        return {'prices': state, 'last_action': last_action}
 
     def execute(self, action):
-        action = sorted(action.items(), key=lambda x: x[0])
-        action = np.array([k[1] for k in action])
+        action = np.array(action)
+
+        if random.random() < 0.001:
+            print('Action before', action)
 
         action = np.exp(action)
         action /= np.sum(action)
@@ -60,14 +98,12 @@ class MarketEnv(Environment):
             print('fee factor', fee_factor)
             print('reward', reward)
 
-        if self.last_action is None:
-            self.last_action = action
+        self.last_action = action
 
         last_action = self.last_action[1:].reshape((self.crypto_n, 1, 1))
         state = np.array(self._preprocess_state(self._current_state()))
-        is_terminal = self.cursor + self.window + 10 == self.data.shape[1]
-
-        self.last_action = action
+        is_terminal = self.in_cursor == self.episode_len or \
+                      (self.in_cursor + self.window + 1) == self.steps
 
         return {'prices': state, 'last_action': last_action}, \
                reward, \
@@ -90,8 +126,9 @@ class MarketEnv(Environment):
 
     @property
     def actions(self):
-        return {str(i): dict(continuous=True, min_value=-10, max_value=10)
-                for i in range(self.crypto_n + 1)}
+        return dict(continuous=True,
+                    shape=(self.crypto_n + 1,),
+                    distribution=SoftmaxDistro())
 
     @staticmethod
     def _preprocess_state(state, copy=False):
@@ -104,12 +141,14 @@ class MarketEnv(Environment):
         return state
 
     def _current_state(self):
-        state = np.copy(self.data[:, self.cursor:self.cursor + self.window, :])
+        position = self.cursor + self.in_cursor
+
+        state = np.copy(self.data[:, position-self.window:position, :])
 
         return state
 
     def _next_state(self):
-        self.cursor += 1
+        self.in_cursor += 1
 
         return self._current_state()
 

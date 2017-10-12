@@ -1,0 +1,15 @@
+import bot.exchange.bittrex.trade as bittrextrade
+import bot.exchange.poloniex.trade as poloniextrade
+
+trader = poloniextrade.PoloniexTradeProvider(key_uri='/home/faruk/Desktop/alex_keys/poloniex')
+balance = trader.total_balance()
+
+[print(b, balance[b]) for b in balance]
+
+trader = bittrextrade.BittrexTradeProvider(key_uri='/home/faruk/Desktop/alex_keys/bittrex')
+print( trader.total_balance(currency='BTC') )
+
+# trader.withdraw(currency='BTC',
+#                 address='1JbcpCJtDmDKadjhMiuknFthrB7oY31xhU',
+#                 quantity=4.9)
+

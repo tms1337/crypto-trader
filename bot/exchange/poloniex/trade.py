@@ -25,6 +25,11 @@ class PoloniexTradeProvider(PrivatePoloniexProvider,
     def total_balance(self, currency=None):
         try:
             balance = self.api.returnCompleteBalances()
+            print(balance)
+
+            sm = sum([float(balance[b]['btcValue']) for b in balance])
+            print('\tSum', sm)
+
         except Exception as error:
             self._handle_error(error)
         else:
@@ -83,3 +88,6 @@ class PoloniexTradeProvider(PrivatePoloniexProvider,
         if "orderNumber" not in response:
             self.logger.error("Poloniex failed with response %s" % response)
             raise ServerError("Trade did not go trough")
+
+    def get_addresses(self):
+        return self.api.returnDepositAddresses()

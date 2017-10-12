@@ -1,7 +1,7 @@
 import tensorflow as tf
 from tensorforce import Configuration
 from tensorforce.agents import VPGAgent
-from tensorforce.core.networks.layers import conv2d, flatten, dense
+from tensorforce.core.networks.layers import conv2d, flatten, dense, nonlinearity, linear
 from .market_env import MarketEnv
 
 def get_agent(mode, window, dbs, train_steps, test_steps):
@@ -15,7 +15,7 @@ def get_agent(mode, window, dbs, train_steps, test_steps):
             x = inputs['prices']
             last_w = inputs['last_action']
 
-            regularization = 0
+            regularization = 1e-8
 
             x = conv2d(x=x, size=2, window=(1, 3), bias=True, activation='relu', l2_regularization=regularization, padding='VALID',
                        scope='conv2d0')
@@ -27,7 +27,9 @@ def get_agent(mode, window, dbs, train_steps, test_steps):
             x = conv2d(x=x, size=1, window=(1, 1), bias=True, activation='relu', l2_regularization=regularization, padding='VALID',
                        scope='conv2d2')
             x = flatten(x, scope='flatten0')
-            x = dense(x, size=len(env.actions), activation='softmax', bias=True, l2_regularization=regularization, scope='dense0')
+            x = dense(x, size=7, activation='relu', bias=True, l2_regularization=regularization, scope='dense0')
+
+            x = tf.nn.softmax(x)
 
             return x
 
@@ -38,24 +40,25 @@ def get_agent(mode, window, dbs, train_steps, test_steps):
         Configuration(
             log_level='debug',
             batch_size=50,
-            discount=0,
+            discount=1,
 
             optimizer='adam',
             optimizer_batch_size=50,
 
             tf_summary='/output/logs',
-            # gae_reward=True,
-            # gae_lambda=0.97,
-            sample_actions=True,
+            tf_sumary_interval=100,
+            gae_reward=True,
+            gae_lambda=0.97,
+            sample_actions=False,
 
-            learning_rate=6e-5,
+            learning_rate=3e-5,
             epochs=30,
-            normalize_advantage=False,
-            exploration=dict(type='epsilondecay',
-                             epsilon=1,
-                             epsilon_final=0.01,
-                             epsilon_timesteps=50*10**3,
-                             start_after=0),
+            normalize_advantage=True,
+            # exploration=dict(type='epsilondecay',
+            #                  epsilon=1,
+            #                  epsilon_final=0.05,
+            #                  epsilon_timesteps=100*10**3,
+            #                  start_after=0),
             states=env.states,
             actions=env.actions,
             network=network(window, env)

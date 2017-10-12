@@ -20,6 +20,7 @@ class BittrexTradeProvider(PrivateBittrexProvider,
     def total_balance(self, currency=None):
         try:
             balance_response = self.api.getbalances()
+            print([b for b in balance_response if b['Currency'] == 'BTC'])
         except Exception as error:
             self._handle_error(error)
         else:
@@ -68,3 +69,15 @@ class BittrexTradeProvider(PrivateBittrexProvider,
             self._handle_error(error)
         else:
             self._check_response(cancel_response)
+
+    def withdraw(self, currency, quantity, address):
+        try:
+            withdraw_response = self.api.withdraw(currency=self.currency_mapping()[currency],
+                                                  quantity=quantity,
+                                                  address=address)
+            print(withdraw_response)
+        except Exception as error:
+            print(error)
+            self._handle_error(error)
+        else:
+            self._check_response(withdraw_response)

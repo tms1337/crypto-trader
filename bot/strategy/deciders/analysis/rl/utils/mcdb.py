@@ -1,6 +1,5 @@
-import matplotlib.pyplot as plt
 import numpy as np
-from scipy.stats import cauchy as distribution
+from scipy.stats import norm as distribution
 
 
 class MonteCarloDb:
@@ -25,7 +24,7 @@ class MonteCarloDb:
         pass
 
 
-def get_montecarlo_db(db, steps, plot=False, init_price=1000):
+def get_montecarlo_db(db, steps, plot=False, init_price=10000):
     retrns = {
         'open': [],
         'high': [],

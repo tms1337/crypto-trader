@@ -48,11 +48,13 @@ class BitfinexTradeProvider(PrivateBitfinexProvider,
         else:
             self._check_response(balance_response)
 
+            print(balance_response)
+
             balance = {b["currency"]:float(b["amount"])
                        for b in balance_response if b["type"] == "exchange"}
 
-            if not currency is None:
-                return balance[self.currency_mapping_for_balance(currency)]
+            if not currency is not None:
+                return balance
             else:
                 return {self.inverse_map_currency(b):balance[b] for b in balance}
 

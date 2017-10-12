@@ -1,2 +1,2 @@
 pymongo
-git+https://github.com/tms1337/tensorforce.git@layerdnnbuilder-conv2d-nonsquare-window
+git+https://github.com/tms1337/tensorforce.git@cryptotrader
