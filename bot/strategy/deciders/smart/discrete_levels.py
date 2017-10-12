@@ -11,7 +11,7 @@ CurrencyInfo = namedtuple('CurrencyInfo', ['trends', 'referent_price', 'position
 class DiscreteLevelsDecider(Decider):
     def __init__(self,
                  threshold=0.02,
-                 trends_len=100,
+                 trends_len=10,
                  *args,
                  **kwargs):
         Decider.__init__(self, *args, **kwargs)
@@ -26,6 +26,8 @@ class DiscreteLevelsDecider(Decider):
 
         self.threshold = threshold
 
+        self.first = True
+
     def decide(self, informer):
         Decider.decide(informer)
 
@@ -39,7 +41,8 @@ class DiscreteLevelsDecider(Decider):
                     self.currency_infos[e][c] = CurrencyInfo(trends=[],
                                                              referent_price=curr_price,
                                                              position=False,
-                                                             confidence=0)
+                                                             confidence=1,
+                                                             last_price=None)
 
                 referent_price = self.currency_infos[e][c].referent_price
 
@@ -51,7 +54,8 @@ class DiscreteLevelsDecider(Decider):
 
                 if trend_val is not None:
                     self.currency_infos[e][c].trends.append(trend_val)
-                    self.currency_infos[e][c].trends = self.currency_infos[e][c].trends[-self.trends_len:]
+                    if len(self.currency_infos[e][c].trends) >= self.trends_len:
+                        self.currency_infos[e][c].trends = self.currency_infos[e][c].trends[-self.trends_len:]
                     self.currency_infos[e][c].referent_price = curr_price
 
         transaction = Transaction()
@@ -71,16 +75,33 @@ class DiscreteLevelsDecider(Decider):
                 decision.price = curr_price
                 decision.decider = self
 
+                c_balance = balances.get(e, c).value
+                c__security = self.currency_infos[e][c].security
+                currency_n = len(self.currency_infos)
+
                 if self.currency_infos[e][c].position and self._should_sell(e, c):
                     decision.transaction_type = OfferType.SELL
-                    decision.volume = balances.get(e, c).value
+                    decision.volume = c_balance * c__security / (2 * currency_n)
 
                     transaction.decisions.append(decision)
+
+                    self.currency_infos[e][c].position = False
+
+                    if curr_price > self.currency_infos[e][c].last_price:
+                        self.currency_infos[e][c].confidence *= 1.2
+                    else:
+                        self.currency_infos[e][c].confidence /= 1.2
+
                 elif not self.currency_infos[e][c].positions and self._should_buy(e, c):
                     decision.transaction_type = OfferType.BUY
-                    decision.volume = balances.get(e, c).value
+                    decision.volume = c_balance * c__security / (2 * currency_n)
 
                     transaction.decisions.append(decision)
+
+                    self.currency_infos[e][c].position = True
+                    self.currency_infos[e][c].last_price = curr_price
+
+        self.first = False
 
         return [transaction], {}
 
@@ -88,7 +109,14 @@ class DiscreteLevelsDecider(Decider):
         super().apply_last()
 
     def _should_sell(self, e, c):
-        return self.currency_infos[e][c].trends[-2:] == [-1, -1]
+        if self.first:
+            return False
+
+        return self.currency_infos[e][c].position and self.currency_infos[e][c].trends[-2:] == [-1, -1]
 
     def _should_buy(self, e, c):
-        return self.currency_infos[e][c].trends[-2:] == [1, 1]
+        if self.first:
+            return True
+
+        trends = self.currency_infos[e][c].trends
+        return self.currency_infos[e][c].position and len([_ for _ in trends if _ == 1]) > len(trends) / 2
