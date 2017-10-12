@@ -5,7 +5,7 @@ from util.asserting import TypeChecker
 
 from collections import namedtuple
 
-CurrencyInfo = namedtuple('CurrencyInfo', ['trends', 'referent_price', 'position', 'last_price', 'security'])
+CurrencyInfo = namedtuple('CurrencyInfo', ['trends', 'referent_price', 'position', 'last_price', 'confidence'])
 
 
 class DiscreteLevelsDecider(Decider):
@@ -79,7 +79,7 @@ class DiscreteLevelsDecider(Decider):
                 decision.decider = self
 
                 c_balance = balances.get(e, c).value
-                c__security = self.currency_infos[e][c].security
+                c__security = self.currency_infos[e][c].confidence
                 currency_n = len(self.currency_infos)
 
                 if self.currency_infos[e][c].position and self._should_sell(e, c):
