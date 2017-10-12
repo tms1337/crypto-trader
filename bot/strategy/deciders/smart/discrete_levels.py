@@ -95,7 +95,7 @@ class DiscreteLevelsDecider(Decider):
                     else:
                         self.currency_infos[e][c].confidence /= 1.2
 
-                elif not self.currency_infos[e][c].positions and self._should_buy(e, c):
+                elif not self.currency_infos[e][c].position and self._should_buy(e, c):
                     decision.transaction_type = OfferType.BUY
                     decision.volume = balances.get(e, base_currency) * c__security / (2 * currency_n)
 
