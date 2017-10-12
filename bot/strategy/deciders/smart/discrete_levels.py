@@ -5,7 +5,19 @@ from util.asserting import TypeChecker
 
 from collections import namedtuple
 
-CurrencyInfo = namedtuple('CurrencyInfo', ['trends', 'referent_price', 'position', 'last_price', 'confidence'])
+
+class CurrencyInfo:
+    def __init__(self,
+                 trends,
+                 referent_price,
+                 position,
+                 confidence,
+                 last_price):
+        self.trends = trends
+        self.referent_price = referent_price
+        self.position = position
+        self.confidence = confidence
+        self.last_price = last_price
 
 
 class DiscreteLevelsDecider(Decider):
@@ -62,7 +74,6 @@ class DiscreteLevelsDecider(Decider):
                     self.currency_infos[e][c].referent_price = curr_price
 
         transaction = Transaction()
-
 
         for e in stats.all_exchanges():
             for c in stats.all_currencies()[:-1]:
