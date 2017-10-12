@@ -5,7 +5,7 @@ from util.asserting import TypeChecker
 
 from collections import namedtuple
 
-CurrencyInfo = namedtuple('CurrencyInfo', ['trends', 'referent_price', 'position', 'confidence', 'last_price'])
+CurrencyInfo = namedtuple('CurrencyInfo', ['trends', 'referent_price', 'position', 'last_price', 'security'])
 
 
 class DiscreteLevelsDecider(Decider):
