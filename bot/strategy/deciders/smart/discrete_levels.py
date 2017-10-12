@@ -29,7 +29,7 @@ class DiscreteLevelsDecider(Decider):
         self.first = True
 
     def decide(self, informer):
-        Decider.decide(informer)
+        Decider.decide(self, informer)
 
         stats = informer.get_stats_matrix()
         balances = informer.get_balances_matrix()

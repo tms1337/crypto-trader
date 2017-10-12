@@ -52,10 +52,6 @@ trade_providers = {
 currencies_for_crypto = ["ETH", "LTC", "DASH", "XRP", "BTC", "XMR"]
 trading_currency_for_crypto = "USD"
 
-decider = DiscreteLevelsDecider(trade_providers=trade_providers,
-                                threshold=0.02,
-                                trends_len=4)
-
 crypto_informer = Informer(base_currency=trading_currency_for_crypto,
                            stats_providers=stats_providers,
                            trade_providers=trade_providers,
@@ -63,6 +59,10 @@ crypto_informer = Informer(base_currency=trading_currency_for_crypto,
                            historic_n=50,
                            interval=1800)
 
+
+decider = DiscreteLevelsDecider(trade_providers=trade_providers,
+                                threshold=0.02,
+                                trends_len=4)
 
 executor = TransactionExecutor(trade_providers=trade_providers)
 
