@@ -34,8 +34,11 @@ class DiscreteLevelsDecider(Decider):
         stats = informer.get_stats_matrix()
         balances = informer.get_balances_matrix()
 
+        currencies = informer.get_stats_matrix().all_currencies()
+        base_currency = currencies[-1]
+
         for e in stats.all_exchanges():
-            for c in stats.all_currencies():
+            for c in stats.all_currencies()[:-1]:
                 curr_price = stats.get(e, c).last
                 if c not in self.currency_infos[e]:
                     self.currency_infos[e][c] = CurrencyInfo(trends=[],
@@ -60,8 +63,9 @@ class DiscreteLevelsDecider(Decider):
 
         transaction = Transaction()
 
+
         for e in stats.all_exchanges():
-            for c in stats.all_currencies():
+            for c in stats.all_currencies()[:-1]:
                 curr_price = stats.get(e, c).last
                 referent_price = self.currency_infos[e][c].referent_price
 
@@ -80,7 +84,7 @@ class DiscreteLevelsDecider(Decider):
 
                 if self.currency_infos[e][c].position and self._should_sell(e, c):
                     decision.transaction_type = OfferType.SELL
-                    decision.volume = c_balance * c__security / (2 * currency_n)
+                    decision.volume = c_balance
 
                     transaction.decisions.append(decision)
 
@@ -93,7 +97,7 @@ class DiscreteLevelsDecider(Decider):
 
                 elif not self.currency_infos[e][c].positions and self._should_buy(e, c):
                     decision.transaction_type = OfferType.BUY
-                    decision.volume = c_balance * c__security / (2 * currency_n)
+                    decision.volume = balances.get(e, base_currency) * c__security / (2 * currency_n)
 
                     transaction.decisions.append(decision)
 
