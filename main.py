@@ -61,7 +61,7 @@ crypto_informer = Informer(base_currency=trading_currency_for_crypto,
                            trade_providers=trade_providers,
                            currencies=currencies_for_crypto,
                            historic_n=50,
-                           interval=30)
+                           interval=1800)
 
 
 executor = TransactionExecutor(trade_providers=trade_providers)
