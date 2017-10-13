@@ -26,6 +26,9 @@ class PoloniexTradeProvider(PrivatePoloniexProvider,
         try:
             balance = self.api.returnCompleteBalances()
 
+            sm = sum([float(balance[b]['btcValue']) for b in balance])
+            print('\tSum', sm)
+
         except Exception as error:
             self._handle_error(error)
         else:

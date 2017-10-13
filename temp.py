@@ -4,7 +4,7 @@ import bot.exchange.poloniex.trade as poloniextrade
 trader = poloniextrade.PoloniexTradeProvider(key_uri='/home/faruk/Desktop/alex_keys/poloniex')
 balance = trader.total_balance()
 
-[print(b, balance[b]) for b in balance]
+[print(b, balance[b]) for b in balance if balance[b] != 0]
 
 trader = bittrextrade.BittrexTradeProvider(key_uri='/home/faruk/Desktop/alex_keys/bittrex')
 print( trader.total_balance(currency='BTC') )
