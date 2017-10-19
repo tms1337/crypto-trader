@@ -112,8 +112,11 @@ class DiscreteLevelsDecider(Decider, LoggableMixin):
                         self.currency_infos[e][c].confidence /= 1.2
 
                 elif not self.currency_infos[e][c].position and self._should_buy(e, c):
+                    balance = balances.get(e, informer.base_currency).value
+                    self.logger.debug('Deciding buy volume volume, total balance base curr %f', balance)
+
                     decision.transaction_type = OfferType.BUY
-                    decision.volume = balances.get(e, informer.base_currency).value * c__security / (2 * currency_n * curr_price)
+                    decision.volume = balance * c__security / (2 * currency_n * curr_price)
 
                     if not decision.volume == 0:
                         transaction.decisions.append(decision)
