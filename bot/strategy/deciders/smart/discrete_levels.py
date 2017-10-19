@@ -36,6 +36,7 @@ class DiscreteLevelsDecider(Decider, LoggableMixin):
     def __init__(self,
                  threshold=0.02,
                  trends_len=10,
+                 default_position=False,
                  *args,
                  **kwargs):
         Decider.__init__(self, *args, **kwargs)
@@ -51,6 +52,8 @@ class DiscreteLevelsDecider(Decider, LoggableMixin):
         self.threshold = threshold
 
         self.first = True
+
+        self.default_position = default_position
 
         LoggableMixin.__init__(self, DiscreteLevelsDecider)
 
@@ -69,7 +72,7 @@ class DiscreteLevelsDecider(Decider, LoggableMixin):
                 if c not in self.currency_infos[e]:
                     self.currency_infos[e][c] = CurrencyInfo(trends=[],
                                                              referent_price=curr_price,
-                                                             position=False,
+                                                             position=self.default_position,
                                                              confidence=1,
                                                              last_price=None)
 
