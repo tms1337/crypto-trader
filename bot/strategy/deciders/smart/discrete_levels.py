@@ -139,7 +139,7 @@ class DiscreteLevelsDecider(Decider, LoggableMixin):
 
         trends = self.currency_infos[e][c].trends
         return self.currency_infos[e][c].position and \
-               trends[1] == -1
+               len(trends) >= 1 and trends[-1] == -1
 
     def _should_buy(self, e, c):
         if self.first:
