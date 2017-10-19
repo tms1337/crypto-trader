@@ -81,9 +81,10 @@ class DiscreteLevelsDecider(Decider, LoggableMixin):
                 referent_price = self.currency_infos[e][c].referent_price
 
                 trend_val = None
-                if curr_price - referent_price > self.threshold:
+                factor = (curr_price - referent_price) / referent_price
+                if factor > self.threshold:
                     trend_val = 1
-                elif curr_price - referent_price < -self.threshold:
+                elif factor < -self.threshold:
                     trend_val = -1
 
                 if trend_val is not None:
