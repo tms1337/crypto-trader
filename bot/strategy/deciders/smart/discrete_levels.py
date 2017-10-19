@@ -14,7 +14,8 @@ class CurrencyInfo:
                  referent_price,
                  position,
                  confidence,
-                 last_price):
+                 last_price,
+                 prices=None):
         self.trends = trends
         self.referent_price = referent_price
         self.position = position
@@ -28,15 +29,16 @@ class CurrencyInfo:
                         confidence=str(self.confidence),
                         last_price=self.last_price))
 
-
     def __repr__(self):
         return self.__str__()
+
 
 class DiscreteLevelsDecider(Decider, LoggableMixin):
     def __init__(self,
                  threshold=0.02,
                  trends_len=10,
                  default_position=False,
+                 prices=None,
                  *args,
                  **kwargs):
         Decider.__init__(self, *args, **kwargs)
@@ -55,6 +57,11 @@ class DiscreteLevelsDecider(Decider, LoggableMixin):
 
         self.default_position = default_position
 
+        if prices is None:
+            prices = {}
+        TypeChecker.check_type(prices, dict)
+        self.prices = prices
+
         LoggableMixin.__init__(self, DiscreteLevelsDecider)
 
     def decide(self, informer):
@@ -69,14 +76,20 @@ class DiscreteLevelsDecider(Decider, LoggableMixin):
         for e in stats.all_exchanges():
             for c in stats.all_currencies()[:-1]:
                 curr_price = stats.get(e, c).last
+
+                if c in self.prices:
+                    price = self.prices[c]
+                else:
+                    price = curr_price
+
                 if c not in self.currency_infos[e]:
                     self.currency_infos[e][c] = CurrencyInfo(trends=[],
-                                                             referent_price=curr_price,
+                                                             referent_price=price,
                                                              position=self.default_position,
                                                              confidence=1,
                                                              last_price=None)
                     if self.default_position:
-                        self.currency_infos[e][c].last_price = curr_price
+                        self.currency_infos[e][c].last_price = price
 
                 referent_price = self.currency_infos[e][c].referent_price
 
