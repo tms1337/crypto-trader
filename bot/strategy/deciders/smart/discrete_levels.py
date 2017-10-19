@@ -5,6 +5,8 @@ from util.asserting import TypeChecker
 
 from collections import namedtuple
 
+from util.logging import LoggableMixin
+
 
 class CurrencyInfo:
     def __init__(self,
@@ -20,7 +22,7 @@ class CurrencyInfo:
         self.last_price = last_price
 
 
-class DiscreteLevelsDecider(Decider):
+class DiscreteLevelsDecider(Decider, LoggableMixin):
     def __init__(self,
                  threshold=0.02,
                  trends_len=10,
@@ -39,6 +41,8 @@ class DiscreteLevelsDecider(Decider):
         self.threshold = threshold
 
         self.first = True
+
+        LoggableMixin.__init__(self, DiscreteLevelsDecider)
 
     def decide(self, informer):
         Decider.decide(self, informer)
@@ -109,7 +113,7 @@ class DiscreteLevelsDecider(Decider):
 
                 elif not self.currency_infos[e][c].position and self._should_buy(e, c):
                     decision.transaction_type = OfferType.BUY
-                    decision.volume = balances.get(e, informer.base_currency).value * c__security / (1.5 * currency_n * curr_price)
+                    decision.volume = balances.get(e, informer.base_currency).value * c__security / (2 * currency_n * curr_price)
 
                     if not decision.volume == 0:
                         transaction.decisions.append(decision)
@@ -118,6 +122,8 @@ class DiscreteLevelsDecider(Decider):
                     self.currency_infos[e][c].last_price = curr_price
 
         self.first = False
+
+        self.logger.debug('Current state', self.currency_infos)
 
         return [transaction], {}
 
