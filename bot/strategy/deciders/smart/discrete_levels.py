@@ -126,7 +126,8 @@ class DiscreteLevelsDecider(Decider, LoggableMixin):
 
         self.first = False
 
-        self.logger.debug('Current state', self.currency_infos)
+        self.logger.debug('Current state')
+        self.logger.debug(self.currency_infos)
 
         return [transaction], {}
 
