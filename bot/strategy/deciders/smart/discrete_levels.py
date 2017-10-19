@@ -21,131 +21,142 @@ class CurrencyInfo:
         self.confidence = confidence
         self.last_price = last_price
 
+    def __str__(self) -> str:
+        return str(dict(trends=str(self.trends),
+                        referent_price=str(self.referent_price),
+                        position=str(self.position),
+                        confidence=str(self.confidence),
+                        last_price=self.last_price))
 
-class DiscreteLevelsDecider(Decider, LoggableMixin):
-    def __init__(self,
-                 threshold=0.02,
-                 trends_len=10,
-                 *args,
-                 **kwargs):
-        Decider.__init__(self, *args, **kwargs)
-        self.currency_infos = {e: {} for e in self.trade_providers}
 
-        TypeChecker.check_type(threshold, float)
-        assert 0 < threshold < 1
+    def __repr__(self) -> str:
+        return self.__str__()
 
-        TypeChecker.check_type(trends_len, int)
-        assert trends_len > 0
-        self.trends_len = trends_len
+    class DiscreteLevelsDecider(Decider, LoggableMixin):
+        def __init__(self,
+                     threshold=0.02,
+                     trends_len=10,
+                     *args,
+                     **kwargs):
+            Decider.__init__(self, *args, **kwargs)
+            self.currency_infos = {e: {} for e in self.trade_providers}
 
-        self.threshold = threshold
+            TypeChecker.check_type(threshold, float)
+            assert 0 < threshold < 1
 
-        self.first = True
+            TypeChecker.check_type(trends_len, int)
+            assert trends_len > 0
+            self.trends_len = trends_len
 
-        LoggableMixin.__init__(self, DiscreteLevelsDecider)
+            self.threshold = threshold
 
-    def decide(self, informer):
-        Decider.decide(self, informer)
+            self.first = True
 
-        stats = informer.get_stats_matrix()
-        balances = informer.get_balances_matrix()
+            LoggableMixin.__init__(self, DiscreteLevelsDecider)
 
-        currencies = informer.get_stats_matrix().all_currencies()
-        base_currency = currencies[-1]
+        def decide(self, informer):
+            Decider.decide(self, informer)
 
-        for e in stats.all_exchanges():
-            for c in stats.all_currencies()[:-1]:
-                curr_price = stats.get(e, c).last
-                if c not in self.currency_infos[e]:
-                    self.currency_infos[e][c] = CurrencyInfo(trends=[],
-                                                             referent_price=curr_price,
-                                                             position=False,
-                                                             confidence=1,
-                                                             last_price=None)
+            stats = informer.get_stats_matrix()
+            balances = informer.get_balances_matrix()
 
-                referent_price = self.currency_infos[e][c].referent_price
+            currencies = informer.get_stats_matrix().all_currencies()
+            base_currency = currencies[-1]
 
-                trend_val = None
-                if curr_price - referent_price > self.threshold:
-                    trend_val = 1
-                elif curr_price - referent_price < -self.threshold:
-                    trend_val = -1
+            for e in stats.all_exchanges():
+                for c in stats.all_currencies()[:-1]:
+                    curr_price = stats.get(e, c).last
+                    if c not in self.currency_infos[e]:
+                        self.currency_infos[e][c] = CurrencyInfo(trends=[],
+                                                                 referent_price=curr_price,
+                                                                 position=False,
+                                                                 confidence=1,
+                                                                 last_price=None)
 
-                if trend_val is not None:
-                    self.currency_infos[e][c].trends.append(trend_val)
-                    if len(self.currency_infos[e][c].trends) >= self.trends_len:
-                        self.currency_infos[e][c].trends = self.currency_infos[e][c].trends[-self.trends_len:]
-                    self.currency_infos[e][c].referent_price = curr_price
+                    referent_price = self.currency_infos[e][c].referent_price
 
-        transaction = Transaction()
+                    trend_val = None
+                    if curr_price - referent_price > self.threshold:
+                        trend_val = 1
+                    elif curr_price - referent_price < -self.threshold:
+                        trend_val = -1
 
-        for e in stats.all_exchanges():
-            for c in stats.all_currencies()[:-1]:
-                curr_price = stats.get(e, c).last
-                referent_price = self.currency_infos[e][c].referent_price
+                    if trend_val is not None:
+                        self.currency_infos[e][c].trends.append(trend_val)
+                        if len(self.currency_infos[e][c].trends) >= self.trends_len:
+                            self.currency_infos[e][c].trends = self.currency_infos[e][c].trends[-self.trends_len:]
+                        self.currency_infos[e][c].referent_price = curr_price
 
-                diff = curr_price - referent_price
+            transaction = Transaction()
 
-                decision = Decision()
-                decision.base_currency = c
-                decision.quote_currency = informer.base_currency
-                decision.exchange = e
-                decision.price = curr_price
-                decision.decider = self
+            for e in stats.all_exchanges():
+                for c in stats.all_currencies()[:-1]:
+                    curr_price = stats.get(e, c).last
+                    referent_price = self.currency_infos[e][c].referent_price
 
-                c_balance = balances.get(e, c).value
-                c__security = self.currency_infos[e][c].confidence
-                currency_n = len(self.currency_infos)
+                    diff = curr_price - referent_price
 
-                if self.currency_infos[e][c].position and self._should_sell(e, c):
-                    decision.transaction_type = OfferType.SELL
-                    decision.volume = c_balance
+                    decision = Decision()
+                    decision.base_currency = c
+                    decision.quote_currency = informer.base_currency
+                    decision.exchange = e
+                    decision.price = curr_price
+                    decision.decider = self
 
-                    if not decision.volume == 0:
-                        transaction.decisions.append(decision)
+                    c_balance = balances.get(e, c).value
+                    c__security = self.currency_infos[e][c].confidence
+                    currency_n = len(self.currency_infos)
 
-                    self.currency_infos[e][c].position = False
+                    if self.currency_infos[e][c].position and self._should_sell(e, c):
+                        decision.transaction_type = OfferType.SELL
+                        decision.volume = c_balance
 
-                    if curr_price > self.currency_infos[e][c].last_price:
-                        self.currency_infos[e][c].confidence *= 1.2
-                    else:
-                        self.currency_infos[e][c].confidence /= 1.2
+                        if not decision.volume == 0:
+                            transaction.decisions.append(decision)
 
-                elif not self.currency_infos[e][c].position and self._should_buy(e, c):
-                    balance = balances.get(e, informer.base_currency).value
-                    self.logger.debug('Deciding buy volume volume, total balance base curr %f', balance)
+                        self.currency_infos[e][c].position = False
 
-                    decision.transaction_type = OfferType.BUY
-                    decision.volume = balance * c__security / (2 * currency_n * curr_price)
+                        if curr_price > self.currency_infos[e][c].last_price:
+                            self.currency_infos[e][c].confidence *= 1.2
+                        else:
+                            self.currency_infos[e][c].confidence /= 1.2
 
-                    if not decision.volume == 0:
-                        transaction.decisions.append(decision)
+                    elif not self.currency_infos[e][c].position and self._should_buy(e, c):
+                        balance = balances.get(e, informer.base_currency).value
+                        self.logger.debug('Deciding buy volume volume, total balance base curr %f', balance)
 
-                    self.currency_infos[e][c].position = True
-                    self.currency_infos[e][c].last_price = curr_price
+                        decision.transaction_type = OfferType.BUY
+                        decision.volume = balance * c__security / (2 * currency_n * curr_price)
 
-        self.first = False
+                        if not decision.volume == 0:
+                            transaction.decisions.append(decision)
 
-        self.logger.debug('Current state')
-        self.logger.debug(self.currency_infos)
+                        self.currency_infos[e][c].position = True
+                        self.currency_infos[e][c].last_price = curr_price
 
-        return [transaction], {}
+            self.first = False
 
-    def apply_last(self):
-        super().apply_last()
+            self.logger.debug('Current state')
+            self.logger.debug(self.currency_infos)
 
-    def _should_sell(self, e, c):
-        if self.first:
-            return False
+            return [transaction], {}
 
-        trends = self.currency_infos[e][c].trends
-        return self.currency_infos[e][c].position and \
-               len(trends) >= 1 and trends[-1] == -1
+        def apply_last(self):
+            super().apply_last()
 
-    def _should_buy(self, e, c):
-        if self.first:
-            return False
+        def _should_sell(self, e, c):
+            if self.first:
+                return False
 
-        trends = self.currency_infos[e][c].trends
-        return not self.currency_infos[e][c].position and \
-               len([_ for _ in trends if _ == 1]) > len(trends) / 2
+            trends = self.currency_infos[e][c].trends
+            return self.currency_infos[e][c].position and \
+                   len(trends) >= 1 and trends[-1] == -1
+
+        def _should_buy(self, e, c):
+            if self.first:
+                return False
+
+            trends = self.currency_infos[e][c].trends
+            return not self.currency_infos[e][c].position and \
+                   len(trends) > 0 and \
+                   len([_ for _ in trends if _ == 1]) > len(trends) / 2
