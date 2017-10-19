@@ -75,6 +75,8 @@ class DiscreteLevelsDecider(Decider, LoggableMixin):
                                                              position=self.default_position,
                                                              confidence=1,
                                                              last_price=None)
+                    if self.default_position:
+                        self.currency_infos[e][c].last_price = curr_price
 
                 referent_price = self.currency_infos[e][c].referent_price
 
@@ -161,5 +163,5 @@ class DiscreteLevelsDecider(Decider, LoggableMixin):
 
         trends = self.currency_infos[e][c].trends
         return not self.currency_infos[e][c].position and \
-               len(trends) > 0 and \
+               len(trends) > 1 and \
                len([_ for _ in trends if _ == 1]) > len(trends) / 2
