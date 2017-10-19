@@ -61,7 +61,7 @@ crypto_informer = Informer(base_currency=trading_currency_for_crypto,
 
 
 decider = DiscreteLevelsDecider(trade_providers=trade_providers,
-                                threshold=0.02,
+                                threshold=0.05,
                                 trends_len=4)
 
 executor = TransactionExecutor(trade_providers=trade_providers)
