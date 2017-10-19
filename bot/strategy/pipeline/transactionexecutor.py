@@ -63,8 +63,8 @@ class TransactionExecutor(LoggableMixin):
                 self._revert(executed_decisions)
                 raise TransactionNotExecutedError()
 
-    @retry(retry_on_exception=is_provider_error,
-           stop_max_attempt_number=transactionexecutor_max_retry_attempts)
+    # @retry(retry_on_exception=is_provider_error,
+    #        stop_max_attempt_number=transactionexecutor_max_retry_attempts)
     def _execute_single_decision(self, decision):
         self.logger.debug("Executing decision %s" % decision)
         exchange = decision.exchange
