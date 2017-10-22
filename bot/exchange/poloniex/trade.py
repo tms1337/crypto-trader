@@ -47,6 +47,8 @@ class PoloniexTradeProvider(PrivatePoloniexProvider,
                                             price,
                                             volume,
                                             orderType='immediateOrCancel')
+
+            print(buy_response)
         except Exception as error:
             self._handle_error(error)
         else:
