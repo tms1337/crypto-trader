@@ -1,3 +1,5 @@
+import time
+
 import bot.exchange.bittrex.trade as bittrextrade
 import bot.exchange.poloniex.trade as poloniextrade
 import bot.exchange.poloniex.stats as poloniexstats
@@ -12,25 +14,27 @@ stats = poloniexstats.PoloniexStatsProvider()
 # trader.set_currencies('BTC', 'USD')
 # trader.create_buy_offer(volume=1, price=6000)
 
+unused = ['BTC', 'BCN', 'HUC', 'NOTE']
+
 for c in balance:
-    if balance[c] != 0 and c != 'USDT' and c not in ['HUC', 'NOTE']:
-        stats.set_currencies(c, 'USD')
+    if balance[c] != 0 and c != 'USDT' and c not in unused:
+        stats.set_currencies(c, 'BTC')
         prices[c] = stats.ticker_low()
 
-prices['USDT'] = 1
+prices['BTC'] = 1
 
-totals = [(b, balance[b]) for b in balance if balance[b] != 0 and b not in ['HUC', 'NOTE']]
+totals = [(b, balance[b]) for b in balance if balance[b] != 0 and b not in unused]
 
 print(totals)
 print(sum([t[1] for t in totals]))
 
-# trader.set_currencies('BTC', 'USD')
-# trader.create_buy_offer(volume=1.5, price=5705)
+print(trader.api.getMarginPosition('BTC_ETH'))
 
-# trader = bittrextrade.BittrexTradeProvider(key_uri='/home/faruk/Desktop/alex_keys/bittrex')
-# print( trader.total_balance(currency='BTC') )
+while True:
+    print(trader.api.getMarginPosition('BTC_ETH')['pl'])
+    time.sleep(10)
 
-# trader.withdraw(currency='BTC',
-#                 address='1JbcpCJtDmDKadjhMiuknFthrB7oY31xhU',
-#                 quantity=4.9)
-
+# while True:
+#     pos = trader.api.getMarginPosition('BTC_ETH')
+#     print(pos['pl'])
+#     time.sleep(10)
