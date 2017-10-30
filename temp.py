@@ -4,35 +4,52 @@ import bot.exchange.bittrex.trade as bittrextrade
 import bot.exchange.poloniex.trade as poloniextrade
 import bot.exchange.poloniex.stats as poloniexstats
 
-trader = poloniextrade.PoloniexTradeProvider(key_uri='/Users/farukmustafic/Desktop/alex_keys/poloniex')
-balance = trader.total_balance()
+trader = bittrextrade.BittrexTradeProvider(key_uri='/Users/farukmustafic/Desktop/alex_keys/bittrex')
+balances = trader.api.getbalances()
+[print(b) for b in balances if b['Balance'] != 0]
+exit(0)
 
-prices = {}
+# print(trader.api.returnTradableBalances())
+#
+while True:
+    balances = trader.api.returnMarginAccountSummary()
+    print(balances)
+    time.sleep(2)
+# [print(b, balances[b]) for b in balances if balances[b] != 0]
+# print(balances['BTC_XRP'])
+# [print(k, balance[k]) for k in balance if float(balance[k]) > 0]
 
-stats = poloniexstats.PoloniexStatsProvider()
+# print(trader.api.marginSell('BTC_XMR', rate=0.0145, amount=250, lendingRate=0.04))
 
-# trader.set_currencies('BTC', 'USD')
-# trader.create_buy_offer(volume=1, price=6000)
+# print(trader.api.getMarginPosition('BTC_ETH'))
 
-unused = ['BTC', 'BCN', 'HUC', 'NOTE']
+# print(trader.api.closeMarginPosition('BTC_LTC'))
 
-for c in balance:
-    if balance[c] != 0 and c != 'USDT' and c not in unused:
-        stats.set_currencies(c, 'BTC')
-        prices[c] = stats.ticker_low()
+# print(trader.api.returnOpenOrders('BTC_XMR'))
 
-prices['BTC'] = 1
+# print(trader.api.cancelOrder('212009036856'))
 
-totals = [(b, balance[b]) for b in balance if balance[b] != 0 and b not in unused]
+# trader.api.closeMarginPosition('BTC_ETH')
+# trader.api.closeMarginPosition('BTC_XMR')
+# trader.api.closeMarginPosition('BTC_XRP')
+# trader.api.closeMarginPosition('BTC_DASH')
 
-print(totals)
-print(sum([t[1] for t in totals]))
-
-print(trader.api.getMarginPosition('BTC_ETH'))
+def get_position_pl(market):
+    position = trader.api.getMarginPosition(market)
+    print(market, position)
+    return float(position['pl'])
 
 while True:
-    print(trader.api.getMarginPosition('BTC_ETH')['pl'])
-    time.sleep(10)
+    total = 0
+    for market in ['BTC_XMR', 'BTC_ETH', 'BTC_DASH', 'BTC_XRP']:
+        total += get_position_pl(market)
+        time.sleep(2)
+
+    print(total)
+
+    time.sleep(3)
+
+# trader.api.closeMarginPosition('BTC_ETH')
 
 # while True:
 #     pos = trader.api.getMarginPosition('BTC_ETH')

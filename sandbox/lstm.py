@@ -1,14 +1,10 @@
 import matplotlib
-from keras.layers import LSTM, Dense
-from keras.models import Sequential
-from keras.optimizers import Adam
 
 matplotlib.use('TkAgg')
 import matplotlib.pyplot as plt
 import numpy as np
-from sklearn import ensemble
 
-tick_n = 100000
+tick_n = 10**6
 
 prices = []
 with open('/Users/farukmustafic/workspace/crypto-data') as f:
@@ -25,73 +21,89 @@ with open('/Users/farukmustafic/workspace/crypto-data') as f:
 
 prices = np.array(prices, dtype=float)
 
-x, y = [], []
-
 past_window = 10000
-future_window = 5000
-for i in range(prices.shape[0] - 1 - past_window - future_window):
-    x.append(prices[i:i + past_window])
 
-    future = prices[i + past_window:i + past_window + future_window].astype(float)
-    print('Future shape', future.shape)
-    max_val = np.max(future)
-    min_val = np.min(future)
+initial_balance = 1000
 
-    mu = (max_val + min_val) / 2
-    sigma = (max_val - min_val) / 2
+balance = {'usd': initial_balance, 'btc':0}
+total_balances = [initial_balance for _ in range(past_window)]
+last_price = None
+vol = 0.1
 
-    y.append([mu, sigma])
+williams_rs = [0 for _ in range(past_window)]
+for i in range(past_window+1, prices.shape[0] - 1):
+    past = prices[i-past_window:i].astype(float)
 
-x = np.array(x)
-y = np.array(y)
+    highest_high = np.max(past)
+    lowest_low = np.min(past)
 
-should_plot = False
+    price = prices[i]
 
-if should_plot:
-    f, (ax1, ax2) = plt.subplots(1, 2, sharey=False)
-    ax1.plot(y[:, 0], color='b', alpha=0.5)
-    ax2.plot(y[:, 1], color='r', alpha=0.5)
+    williams_r = 100*(highest_high - price) / (highest_high - lowest_low)
+    williams_rs.append(williams_r)
 
-    plt.show()
+    if williams_r > 80:
+        #buy
+        balance['usd'] -= vol * price
+        balance['btc'] += vol
+    elif williams_r < 20:
+        #sell
+        balance['usd'] += vol * price
+        balance['btc'] -= vol
 
-params = {'n_estimators': 500, 'max_depth': 4, 'min_samples_split': 2,
-          'learning_rate': 0.01, 'loss': 'ls'}
-clf = ensemble.GradientBoostingRegressor(**params)
+    last_price = price
 
+    total_balances.append(balance['usd'] + balance['btc']*price)
 
-def monitor(i, self, local):
-  y_score_gen = self.staged_predict_proba(x)
-  y_score = []
-  for y in y_score_gen:
-    y_score = y[:,0]
-    break
-  #y_score is the same each iteration
-  print(y_score)
-
-clf.fit(x, y, monitor=monitor)
+plt.plot(prices)
+plt.plot(williams_rs)
+plt.plot(total_balances)
+plt.show()
 
 exit(0)
 
-regressor = Sequential()
-regressor.add(LSTM(units=10,
-                   input_shape=x.shape[1:],
-                   return_sequences=False,
-                   stateful=False))
-regressor.add(Dense(50, activation='relu'))
-regressor.add(Dense(2, activation='relu'))
-
-regressor.compile(optimizer=Adam(lr=0.0006),
-                  loss='mse')
-regressor.fit(x, y,
-              epochs=50,
-              shuffle=True,
-              batch_size=100,
-              validation_split=0.1)
-
-for i in range(x.shape[0]):
-    prediction = regressor.predict_on_batch([x[i:i + 1]])[0]
-
-    print(prediction, y[i])
-
-    plt.plot(x[i][0])
-    plt.show()
+# x, y = [], []
+#
+# past_window = 10000
+# future_window = 5000
+# for i in range(prices.shape[0] - 1 - past_window - future_window):
+#     x.append(prices[i:i + past_window])
+#
+#     future = prices[i + past_window:i + past_window + future_window].astype(float)
+#     print('Future shape', future.shape)
+#     max_val = np.max(future)
+#     min_val = np.min(future)
+#
+#     mu = (max_val + min_val) / 2
+#     sigma = (max_val - min_val) / 2
+#
+#     y.append([mu, sigma])
+#
+# x = np.array(x)
+# y = np.array(y)
+#
+# should_plot = False
+#
+# if should_plot:
+#     f, (ax1, ax2) = plt.subplots(1, 2, sharey=False)
+#     ax1.plot(y[:, 0], color='b', alpha=0.5)
+#     ax2.plot(y[:, 1], color='r', alpha=0.5)
+#
+#     plt.show()
+#
+# params = {'n_estimators': 500, 'max_depth': 4, 'min_samples_split': 2,
+#           'learning_rate': 0.01, 'loss': 'ls'}
+# clf = ensemble.GradientBoostingRegressor(**params)
+#
+#
+# def monitor(i, self, local):
+#   y_score_gen = self.staged_predict_proba(x)
+#   y_score = []
+#   for y in y_score_gen:
+#     y_score = y[:,0]
+#     break
+#   #y_score is the same each iteration
+#   print(y_score)
+#
+# clf.fit(x, y, monitor=monitor)
+#
