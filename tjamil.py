@@ -1,55 +1,20 @@
 import time
 
-import bot.exchange.bitfinex.trade as bitfinex
+import bot.exchange.poloniex.trade as bitfinex
 
-trader = bitfinex.BitfinexTradeProvider(key_uri='/Users/farukmustafic/Desktop/our_keys/bitfinex')
+trader = bitfinex.PoloniexTradeProvider(key_uri='/Users/farukmustafic/Desktop/alex_keys/poloniex')
 
-
-class PositionType:
-    IN = 0
-    OUT = 1
-
-
-position = PositionType.IN
-
-thresh = 14000
-step = 4000
-
+pair = 'BTC_LTC'
+print(trader.api.getMarginPosition(pair))
 while True:
-    ticker = trader.api.ticker('btcusd')
-    ask = float(ticker['ask'])
-    bid = float(ticker['bid'])
+    pl = float(trader.api.getMarginPosition(pair)['pl'])
 
-    balances = trader.api.balances()
-    balancesBtc = [b for b in balances if b['currency'] == 'btc']
-    balanceBtc = float([b for b in balancesBtc if b['type'] == 'trading'][0]['available'])
+    print('PL: %f' % pl)
+    if pl < -0.3:
+        trader.api.closeMarginPosition(pair)
+        break
+    elif pl > 0.3:
+        trader.api.closeMarginPosition(pair)
+        break
 
-    balancesUsd = [b for b in balances if b['currency'] == 'usd']
-    balanceUsd = float([b for b in balancesUsd if b['type'] == 'trading'][0]['available'])
-
-    print(ask, bid, balanceBtc, balanceUsd)
-
-    if position == PositionType.IN and bid < thresh:
-        print('Selling')
-
-        print(trader.api.place_order(amount=str(balanceBtc),
-                                     price=str(bid),
-                                     ord_type="market",
-                                     symbol='btcusd',
-                                     side="sell"))
-        position = PositionType.OUT
-
-        time.sleep(2 * 60)
-    elif position == PositionType.OUT and ask > thresh:
-        print('Buying')
-
-        print(trader.api.close_position(trader.api.active_positions()[0]['id']))
-
-        time.sleep(2 * 60)
-
-        position = PositionType.IN
-    elif position == PositionType.IN and (ask + bid) / 2 > thresh + step:
-        thresh += step
-        print('Increasing threshold to %f' % thresh)
-
-    time.sleep(60)
+    time.sleep(45)
